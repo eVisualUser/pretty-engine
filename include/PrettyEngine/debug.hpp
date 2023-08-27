@@ -1,0 +1,66 @@
+#pragma once
+
+#include <boxer/boxer.h>
+
+#include <iostream>
+#include <string>
+#include <sstream>
+
+static std::string GetFileName(const char* name) {
+    std::string filePath(name); 
+    size_t lastSlash = filePath.find_last_of("/\\"); 
+    std::string fileName = (lastSlash != std::string::npos) ? filePath.substr(lastSlash + 1) : filePath; 
+    return fileName;
+}
+
+#define LOG_ERROR "ERROR" 
+#define LOG_DEBUG "DEBUG" 
+#define LOG_WARNING "WARNING" 
+
+static void ShowMessageBox(std::string type, std::string message) {
+	auto style = boxer::Style::Info;
+	if (type == LOG_ERROR) {
+		style = boxer::Style::Error;
+	} else if (type == LOG_WARNING) {
+		style = boxer::Style::Warning;
+	}
+
+	boxer::show(message.c_str(), type.c_str(), style, boxer::Buttons::OK);
+}
+
+#define WaitCout() std::cout.flush();
+
+#if _DEBUG
+#define DebugLog(type, msg, msgBox) \
+    if (msgBox) { \
+    	std::stringstream text; \
+    	text << "Time: " << __TIME__ << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl;	\
+		text << msg << std::endl; \
+    	ShowMessageBox(type, text.str()); \
+    }  \
+	std::cout << '[' << type << " Time: " << __TIME__ << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl;
+#else
+#define DebugLog(type, msg, msgBox)
+#endif
+
+namespace PrettyEngine {
+	namespace Debug {
+		static size_t number = 0;
+
+		static void PrintDebugNumber() {
+			number++;
+			std::cout << "[DEBUG] Number: " << number << std::endl;
+		}
+
+		static void ResetDebugNumber() {
+			number = 0;
+		}
+
+		static void CheckNumber(size_t otherNumber) {
+			if (number == otherNumber)
+				std::cout << "[DEBUG] Number: Success" << std::endl;
+			else
+				std::cout << "[DEBUG] Number: Failed" << std::endl;
+		}
+	}
+}

@@ -1,0 +1,7 @@
+**/build
+**/cache
+**/binaries
+
+**/.vscode
+**/.idea
+**/.cache
