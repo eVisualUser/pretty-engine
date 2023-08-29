@@ -5,15 +5,13 @@
 ## Dependencies
 
 - [CMake](https://cmake.org/download/)
-
-## Add to your [CMake](https://cmake.org/download/) project
-
-Download the source and add it as a subdirectory.
-And link the DLL/LIB named ```pretty_engine```.
+- [LLVM]()
+- [CLang]()
+- [Ninja]()
 
 ## Getting Started
 
-It's recommended to take a look at the examples.
+[Notion documentation](https://www.notion.so/sylvain-game/838cc5c42a664f69bc1e613edfa048da?v=65b5878ae46043cba14ad64914a2eb6c&pvs=4)
 
 ## Tools
 
@@ -25,10 +23,6 @@ It's recommended to take a look at the examples.
 
 - Sublime Text
 
-## Features
+### Data Base Editing
 
-- [X] 3D Rendering
-- [X] 2D Rendering
-- [X] 3D Physics (Bullet3)
-- [X] Dear ImGUI Integration
-- [ ] 3D Audio
+- SQLite Studio
