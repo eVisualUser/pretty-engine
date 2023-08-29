@@ -493,10 +493,18 @@ namespace PrettyEngine {
 		std::pair<std::vector<Texture>, std::vector<Mesh>> LoadModel(std::string filePath, std::string id) {
 			Assimp::Importer importer;
 
-			const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+			unsigned int flags = aiProcess_Triangulate         // Triangulate faces if not already done
+                       | aiProcess_JoinIdenticalVertices // Join identical vertices
+                       | aiProcess_GenSmoothNormals     // Generate smooth normals if no normals are present
+                       | aiProcess_FixInfacingNormals   // Fix normals facing inward
+                       | aiProcess_FindInvalidData      // Find and remove invalid data
+                       | aiProcess_ValidateDataStructure; // Validate the imported data structure
+
+			const aiScene* scene = importer.ReadFile(filePath, flags);
 			
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         		DebugLog(LOG_ERROR, "Error loading model: " << importer.GetErrorString(), true);
+        		std::exit(-1);
         	}
 
         	std::pair<std::vector<Texture>, std::vector<Mesh>> buffer;
@@ -567,20 +575,24 @@ namespace PrettyEngine {
 		std::pair<Texture, Mesh> AIProcessMesh(aiMesh* mesh, const aiScene* scene) {
 			std::pair<Texture, Mesh> out;
 
-			for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-				aiFace face = mesh->mFaces[i];
-			    for (unsigned int j = 0; j < face.mNumIndices; j++) {
-			        out.second.indices.push_back(face.mIndices[j]);
-			    }
+		    if (mesh->HasFaces()) {
+				for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+					aiFace face = mesh->mFaces[i];
+			    	for (unsigned int j = 0; j < face.mNumIndices; j++) {
+			        	out.second.indices.push_back(face.mIndices[j]);
+			    	}
+				}
 			}
-
+			
 		    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		        Vertex vertex;
 		        
 		        // Process position
-		        vertex.position.x = mesh->mVertices[i].x;
-		        vertex.position.y = mesh->mVertices[i].y;
-		        vertex.position.z = mesh->mVertices[i].z;
+		        if (mesh->HasPositions()) {
+		        	vertex.position.x = mesh->mVertices[i].x;
+		        	vertex.position.y = mesh->mVertices[i].y;
+		        	vertex.position.z = mesh->mVertices[i].z;
+		    	}
 
 		        if (mesh->HasVertexColors(i)) {
 		        	vertex.color.r = mesh->mColors[i]->r;

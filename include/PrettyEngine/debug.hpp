@@ -4,7 +4,13 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <sstream>
+
+namespace PrettyEngine {
+	static std::vector<std::string> logs;
+	static bool printDebugMessage = true;
+} 
 
 static std::string GetFileName(const char* name) {
     std::string filePath(name); 
@@ -28,20 +34,23 @@ static void ShowMessageBox(std::string type, std::string message) {
 	boxer::show(message.c_str(), type.c_str(), style, boxer::Buttons::OK);
 }
 
+static void AddLog(std::string newLog) {
+	PrettyEngine::logs.push_back(newLog);
+}
+
 #define WaitCout() std::cout.flush();
 
-#if _DEBUG
 #define DebugLog(type, msg, msgBox) \
+	if (true) { \
+	std::stringstream text; \
+	text << "Time: " << __TIME__ << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl; \
+	text << msg << std::endl; \
+	AddLog(text.str()); \
     if (msgBox) { \
-    	std::stringstream text; \
-    	text << "Time: " << __TIME__ << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl;	\
-		text << msg << std::endl; \
     	ShowMessageBox(type, text.str()); \
     }  \
+	} \
 	std::cout << '[' << type << " Time: " << __TIME__ << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl;
-#else
-#define DebugLog(type, msg, msgBox)
-#endif
 
 namespace PrettyEngine {
 	namespace Debug {

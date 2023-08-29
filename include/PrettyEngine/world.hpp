@@ -1,5 +1,14 @@
 #pragma once
 
+#include "BulletCollision/CollisionShapes/btBoxShape.h"
+#include "BulletCollision/CollisionShapes/btCapsuleShape.h"
+#include "BulletCollision/CollisionShapes/btCollisionShape.h"
+#include "BulletCollision/CollisionShapes/btSphereShape.h"
+#include "Guid.hpp"
+#include "LinearMath/btVector3.h"
+#include "PrettyEngine/localization.hpp"
+#include "PrettyEngine/transform.hpp"
+#include "PrettyEngine/visualObject.hpp"
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/entity.hpp>
@@ -8,7 +17,9 @@
 #include <PrettyEngine/data.hpp>
 
 #include <sstream>
+#include <fstream>
 #include <unordered_map>
+#include <utility>
 
 namespace PrettyEngine {
 	class World;
@@ -128,6 +139,13 @@ namespace PrettyEngine {
 				entity.second->audioEngine = this->audioEngine;
 				entity.second->renderer = this->renderer;
 				entity.second->engine = this->engine;
+
+				for(auto & component: entity.second->components) {
+					component.audioEngine = this->audioEngine;
+					component.physicalEngine = this->physicalEngine;
+					component.renderer = this->renderer;
+					component.engine = this->engine;
+				}
 			}
 		}
 
@@ -199,28 +217,16 @@ namespace PrettyEngine {
 			}
 		}
 
-		void Clear() {
-			this->entities.clear();
-		}
-
-		void SetupDataBase(std::string dataBase) {
-			if (this->data == nullptr) {
-				this->data = new DataBase(dataBase);
-
-				std::stringstream createTable;
-				createTable << "CREATE TABLE IF NOT EXISTS " << this->worldName;
-				createTable << " (ObjectType TEXT, Unique TEXT, Info TEXT);";
-
-				this->data->ExecuteSQL(createTable.str());
+		void CallRenderFunctions() {
+			for (auto & entity: this->entities) {
+				if (entity.second != nullptr) {
+					entity.second->OnRender(); 
+				}
 			}
 		}
 
-		void LoadWorld() {
-
-		}
-
-		void SaveWorld() {
-
+		void Clear() {
+			this->entities.clear();
 		}
 		
 	public:
@@ -229,7 +235,6 @@ namespace PrettyEngine {
 		bool updateMTThreadAlive = true;
 
 		std::unordered_map<std::string, Entity*> entities;
-		std::unordered_map<std::string, VisualObject*> visualObjects;
 
 		PhysicalEngine* physicalEngine = nullptr;
 		AudioEngine* audioEngine = nullptr;

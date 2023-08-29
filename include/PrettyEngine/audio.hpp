@@ -4,16 +4,14 @@
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/physics.hpp>
 
-#include "AL/al.h"
-#include "AL/alc.h"
+#include <AL/al.h>
+#include <AL/alc.h>
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
 #include <AL/efx-creative.h>
 
 #define DR_WAV_IMPLEMENTATION
 #include <dr_wav.h>
-#define DR_MP3_IMPLEMENTATION
-#include <dr_mp3.h>
 
 #include <string>
 #include <vector>
@@ -95,8 +93,10 @@ namespace PrettyEngine {
 		Stereo16 = AL_FORMAT_STEREO16,
 	};
 
+	/// Control the audio listener
 	class AudioListener: virtual public Transform {
 	public:
+		/// Sync the threaded listener with the current values
 		void UpdateAudioListener() {
 
 			if (relatedPhysicalObject != nullptr) {
@@ -119,6 +119,7 @@ namespace PrettyEngine {
 			alListenerfv(AL_ORIENTATION, orientation);
 		}
 
+		/// Link a physical object(velocity), to apply some related audio effects
 		void LinkPhysicalObjectToListener(PhysicalObject* object) {
 			this->relatedPhysicalObject = object;
 		}
@@ -131,6 +132,7 @@ namespace PrettyEngine {
 		PhysicalObject* relatedPhysicalObject = nullptr;
 	};
 
+	/// 3D Audio Source
 	class AudioSource: virtual public Transform {
 	public:
 		AudioSource() {
@@ -143,6 +145,7 @@ namespace PrettyEngine {
 			this->Clear();
 		}
 
+		/// Stop and unload the audio
 		void Clear() {
 			this->Stop();
 			if (this->openALSource != 0) {
@@ -153,10 +156,12 @@ namespace PrettyEngine {
 			}
 		}
 
+		/// Link a physical object to apply physics related effects
 		void LinkPhysicalObjectToAudioSource(PhysicalObject* object) {
 			this->relatedPhysicalObject = object;
 		}
 
+		/// Update the threaded part of the audio source properties
 		void UpdateAudioSourceProperties() {
 			alSource3f(this->openALSource, AL_POSITION, this->position.x, this->position.y, this->position.z);
 			
@@ -170,18 +175,22 @@ namespace PrettyEngine {
 		    alSourcef(this->openALSource, AL_REFERENCE_DISTANCE, this->radius);
 		}
 
+		/// Play the audio
 		void Play() {
 			alSourcePlay(this->openALSource);
 		}
 
+		/// Pause the audio
 		void Pause() {
 			alSourcePause(this->openALSource);
 		}
 
+		/// Stop the audio
 		void Stop() {
 			alSourceStop(this->openALSource);
 		}
 
+		/// Update the audio state and check for error
 		void UpdateAudioSource() {
 			this->UpdateAudioSourceProperties();
 

@@ -187,3 +187,26 @@ string(REPLACE "\n" " " extend ${extend})
 endif()
 
 target_link_libraries(game pretty ${extend})
+
+# Editor
+
+project(editor C CXX)
+
+include(editor/custom.cmake)
+
+file(READ "editor/extend.txt" extend)
+file(READ "editor/source.txt" game_source)
+
+if(NOT ${game_source} STREQUAL "")
+string(REPLACE "\n" " " game_source ${game_source})
+endif()
+
+add_executable(editor
+	${game_source}
+)
+
+if(NOT ${extend} STREQUAL "")
+string(REPLACE "\n" " " extend ${extend})
+endif()
+
+target_link_libraries(editor pretty ${extend})

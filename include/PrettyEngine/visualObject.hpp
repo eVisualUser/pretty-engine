@@ -87,7 +87,7 @@ namespace PrettyEngine {
 		bool render = true;
 		bool active = true;
 		bool d3 = false;
-
+		
 		glm::vec3 baseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		unsigned int renderLayer = 0;

@@ -10,6 +10,7 @@
 #include <PrettyEngine/texture.hpp>
 
 #include <memory>
+#include <sstream>
 #include <toml++/toml.h>
 
 #include <imgui.h>
@@ -70,7 +71,7 @@ namespace PrettyEngine {
 			delete this->_renderer;
 			delete this->engineDatabase;
 		}
-
+		
 		void Exit() {
 			this->exit = true;
 		}
@@ -95,6 +96,14 @@ namespace PrettyEngine {
 			}
 
 			if (this->showDebugUI) {
+				if(ImGui::Begin("Console")) {
+					int index = 0;
+					for (auto & line: logs) {
+						ImGui::Text("%i - %s", index, line.c_str());
+					}
+				}
+				ImGui::End();
+				
 				if (ImGui::Begin(this->debugLocalization.Get("Debug Tools", this->debugLanguage).c_str(),
 					NULL,
 					ImGuiWindowFlags_MenuBar |
@@ -130,8 +139,8 @@ namespace PrettyEngine {
 							    ImPlot::EndPlot();
 							}
 						}
-					ImGui::End();
 				}
+				ImGui::End();
 			}
 		}
 
@@ -155,6 +164,9 @@ namespace PrettyEngine {
 
 				this->_renderer->StartUIRendering();
 				this->UpdateDebugUI();
+				if (this->_currentWorld != nullptr) {
+					this->_currentWorld->CallRenderFunctions();
+				}
 
 				double currentTime = this->_renderer->GetTime();
 				if (lastRenderClearTime + renderClearCoolDown < currentTime) {
@@ -191,6 +203,10 @@ namespace PrettyEngine {
 		}
 
 		void SetCurrentWorld(World* newWorld) {
+			if (this->_currentWorld != nullptr) {
+				this->RemoveCurrentWorld();
+			}
+
 			newWorld->physicalEngine = this->_physicalEngine;
 			newWorld->audioEngine = this->_audioEngine;
 			newWorld->renderer = this->_renderer; 
@@ -204,10 +220,10 @@ namespace PrettyEngine {
 		void RemoveCurrentWorld() {
 			this->_currentWorld = nullptr;
 		}
-
+		
 		Texture* GetTexture(std::string name) {	
-			auto dbImages = this->engineDatabase->QuerySQLBlob("SELECT * FROM Images;");
-			auto dbImageName = this->engineDatabase->QuerySQLText("SELECT * FROM Images;");
+			auto dbImages = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
+			auto dbImageName = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
 
 			PrettyEngine::Texture* texture = nullptr;
 
@@ -300,4 +316,12 @@ namespace PrettyEngine {
 
 		ImPlotContext* _imPlotContext;
 	};
+	
+	static Engine* GetEngine(DynamicObject* object) {
+		return static_cast<Engine*>(object->engine);
+	}
+
+	static Renderer* GetRenderer(DynamicObject* object) {
+		return static_cast<Renderer*>(object->engine);
+	}
 };

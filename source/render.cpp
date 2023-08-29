@@ -557,7 +557,7 @@ namespace PrettyEngine {
                 &flattenedLightsDeferredFactor,
                 &flattenedLightsOpacityFactorEffect
             );
-
+            
             for (const auto& light : lightsBuffer) {
                 flattenedLightsDirection.push_back(light->spotDirection.x);
                 flattenedLightsDirection.push_back(light->spotDirection.y);

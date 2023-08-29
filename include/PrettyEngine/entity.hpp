@@ -14,20 +14,17 @@ namespace PrettyEngine {
 
 	#define DefaultEntityName "AnyEntity"
 
-	class Entity: virtual public Tagged, virtual public Transform {
+	class DynamicObject: virtual public Tagged {
 	public:
-		Entity() {
+		DynamicObject() {
+			this->uniqueGUID = xg::newGuid();
 			this->OnCreate();
 		}
 
-		~Entity() {
+		~DynamicObject() {
 			this->OnDestroy();
 		}
 
-		std::string GetGUID() {
-			return this->_entityGUID;
-		}
-		
 	public:
 		/// Called in the constructor to avoid custructor override errors
 		virtual void OnCreate() {}
@@ -45,6 +42,32 @@ namespace PrettyEngine {
 		virtual void OnAlwaysEndUpdate() {}
 		/// Called when object destroyed
 		virtual void OnDestroy() {}
+		/// Called just before rendering, when the UI is working.
+		virtual void OnRender() {}
+
+	public:
+		Renderer* renderer;
+		AudioEngine* audioEngine;
+		PhysicalEngine* physicalEngine;
+		void* engine;
+
+	public:
+		std::string uniqueGUID;
+		std::string objectGUID;
+	};
+
+	class Component: virtual public DynamicObject {
+	public:
+		virtual void OnStart();
+		virtual void OnUpdate();
+		virtual void OnDestroy();
+	};
+
+	class Entity: virtual public DynamicObject, virtual public Transform {
+	public:
+		std::string GetGUID() {
+			return this->_entityGUID;
+		}
 		
 	public:
 		Renderer* renderer;
@@ -56,8 +79,26 @@ namespace PrettyEngine {
 		bool worldFirst = true;
 
 		std::string entityName = DefaultEntityName;
+
+	public:
+		template<typename T>
+		Component* AddComponent() {
+			T component;
+			this->components.push_back(component);
+		}
+
+		void RemoveComponent(Component* component) {
+			for(int i = 0; i < this->components.size(); i++) {
+				if (this->components[i].uniqueGUID == component->uniqueGUID) {
+					this->components.erase(this->components.begin() + i);
+					break;
+				}
+			}
+		}
+
+		std::vector<Component> components;
 		
 	private:
 		std::string _entityGUID = xg::newGuid();
 	};
-}
+};

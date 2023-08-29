@@ -146,22 +146,24 @@ void Main() {
 	PrettyEngine::Engine* engine = new PrettyEngine::Engine(ASSET_BUILTIN_CONFIG);
 
 	auto world = PrettyEngine::World();
-	// world.SetupDataBase("public/data/levels.db");
 
 	engine->SetCurrentWorld(&world);
 
+	auto defaultVertexShader = xg::newGuid();
+	auto defaultFragmentShader = xg::newGuid();
+
 	// Load and Complile shaders
-	engine->GetRenderer()->AddShader("DefaultVertexShader", PrettyEngine::ShaderType::Vertex, SHADER_VERTEX);
-	engine->GetRenderer()->AddShader("DefaultFragmentShader", PrettyEngine::ShaderType::Fragment, SHADER_FRAGMENT);
+	engine->GetRenderer()->AddShader(defaultVertexShader, PrettyEngine::ShaderType::Vertex, SHADER_VERTEX);
+	engine->GetRenderer()->AddShader(defaultFragmentShader, PrettyEngine::ShaderType::Fragment, SHADER_FRAGMENT);
 
 	auto rect = engine->GetRenderer()->AddMesh(xg::newGuid(), PrettyEngine::CreateRectMesh());
 	
-	auto teaPot = engine->GetRenderer()->LoadModel("public/cube.obj", xg::newGuid());
+	auto teaPot = engine->GetRenderer()->LoadModel("public/demo_object.fbx", xg::newGuid());
 
 	auto other = engine->GetRenderer()->AddMesh(xg::newGuid(), teaPot.second[0]);
-
+	
 	// Create a shader program based on two main shaders
-	auto defaultShaderProgram = engine->GetRenderer()->AddShaderProgram("Default", "DefaultVertexShader", "DefaultFragmentShader");
+	auto defaultShaderProgram = engine->GetRenderer()->AddShaderProgram("Default", defaultVertexShader, defaultFragmentShader);
 	
 	PrettyEngine::RenderModel modelA;
 
@@ -222,7 +224,7 @@ void Main() {
 
 	engine->GetRenderer()->RegisterVisualObject(myObjectGUID, &myObject);
 	engine->GetRenderer()->RegisterVisualObject(groundObjectGUID, &groundObject);
-	engine->GetRenderer()->RegisterVisualObject(myOtherObjectGUID, &myOtherObject);
+	//engine->GetRenderer()->RegisterVisualObject(myOtherObjectGUID, &myOtherObject);
 
 	engine->GetRenderer()->RegisterInputHandler(myObjectGUID, &myObject);
 
