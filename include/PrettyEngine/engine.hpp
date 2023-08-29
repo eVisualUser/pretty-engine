@@ -242,7 +242,7 @@ namespace PrettyEngine {
 					DebugLog(LOG_ERROR, "Missing texture: " << name, true);
 					continue;
 				}
-
+				
 				auto rawData = PrettyEngine::DecodeImage(&imgData, imgBytes, &imgHeight, &imgWidth, &imgChannels);
 
 				if (rawData.empty()) {

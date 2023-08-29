@@ -26,7 +26,7 @@ database = "public/data/engine.db"
 )";
 
 static const char* ASSET_BUILTIN_EDITOR_CONFIG = R"([engine.render]
-window_title = "Default Window Name"
+window_title = "Game Editor"
 antiAliasing = 16
 
 [engine.render.camera]

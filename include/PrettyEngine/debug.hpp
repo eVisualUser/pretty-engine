@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <chrono>
 
 namespace PrettyEngine {
 	static std::vector<std::string> logs;
@@ -38,19 +39,28 @@ static void AddLog(std::string newLog) {
 	PrettyEngine::logs.push_back(newLog);
 }
 
+static std::string GetTimeAsString() {
+	std::string out;
+
+	auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+    out = std::format("{:%Y-%m-%d %X}", time);
+
+	return out;
+}
+
 #define WaitCout() std::cout.flush();
 
 #define DebugLog(type, msg, msgBox) \
 	if (true) { \
 	std::stringstream text; \
-	text << "Time: " << __TIME__ << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl; \
+	text << "Time: " << GetTimeAsString() << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl; \
 	text << msg << std::endl; \
 	AddLog(text.str()); \
     if (msgBox) { \
     	ShowMessageBox(type, text.str()); \
     }  \
 	} \
-	std::cout << '[' << type << " Time: " << __TIME__ << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl;
+	std::cout << '[' << type << " Time: " << GetTimeAsString() << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl;
 
 namespace PrettyEngine {
 	namespace Debug {
