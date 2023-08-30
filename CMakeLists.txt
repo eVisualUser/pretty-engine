@@ -9,7 +9,7 @@ file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "./public/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -Wc++20-attribute-extensions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
 
 project(import)
