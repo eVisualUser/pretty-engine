@@ -14,8 +14,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
 
 project(import)
 
-find_package(OpenCL REQUIRED)
-
 # Rendering
 
 message("-- GLFW")
