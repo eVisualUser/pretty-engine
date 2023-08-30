@@ -74,7 +74,7 @@ namespace PrettyEngine {
 		static void ResetDebugNumber() {
 			number = 0;
 		}
-
+		
 		static void CheckNumber(size_t otherNumber) {
 			if (number == otherNumber)
 				std::cout << "[DEBUG] Number: Success" << std::endl;
