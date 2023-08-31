@@ -16,8 +16,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-function-declaration -Wno-micr
 
 project(import)
 
-find_package(REQUIRED OpenCL)
-
 # Rendering
 
 message("-- GLFW")
@@ -150,7 +148,6 @@ target_link_libraries(pretty PUBLIC
  	assimp
  	imgui
  	OpenAL
- 	${OpenCL_LIBRARY}
  	sqlite3
  	implot
 )
