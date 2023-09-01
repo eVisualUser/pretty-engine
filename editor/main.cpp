@@ -5,12 +5,15 @@
 #include <PrettyEngine/render.hpp>
 
 #include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/gen/worldGen.hpp>
 
 #include <imgui.h>
 
+#include <memory>
+
 using namespace PrettyEngine;
 
-class Editor: public PrettyEngine::Entity {
+class Editor: public virtual PrettyEngine::Entity {
 public:
 	void OnUpdate() override {
 		if (this->renderer->GetKeyPress(KeyCode::LeftControl) && this->renderer->GetKeyDown(KeyCode::S)) {
@@ -25,22 +28,31 @@ public:
 			ImGui::Text("Some utility keys: ");
 			ImGui::BulletText("Press F3 to show debug informations.");
 			ImGui::BulletText("Press F11 to toggle fullscreen.");
+			ImGui::BulletText("Press Ctr + S to save.");
 		}
 		ImGui::End();
+	}
+
+	void OnDestroy() override {
+		
 	}
 
 private:
 	std::string file = "public/game.toml";
 };
 
+void CreateEntity(PrettyEngine::World* world) {
+	world->RegisterEntity(std::make_shared<Editor>());
+}
+
 int main() {
 	auto engine = PrettyEngine::Engine(ASSET_BUILTIN_EDITOR_CONFIG);
 
 	auto mainWorld = PrettyEngine::World();
 
-	auto editor = Editor();
+	std::shared_ptr<Editor> editor = std::make_shared<Editor>();
 
-	mainWorld.RegisterEntity(&editor);
+	CreateEntity(&mainWorld);
 
 	engine.SetCurrentWorld(&mainWorld);
 
