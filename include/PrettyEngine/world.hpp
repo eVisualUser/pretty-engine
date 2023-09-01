@@ -228,6 +228,7 @@ namespace PrettyEngine {
 		void Clear() {
 			for(auto & entity: this->entities) {
 				entity.second->OnDestroy();
+				entity.second.reset();
 			}
 
 			this->entities.clear();
