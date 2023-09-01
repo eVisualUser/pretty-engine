@@ -571,7 +571,25 @@ namespace PrettyEngine {
 			return this->antialiasing;
 		}
 
+		void ResetWindowIcon() {
+			glfwSetWindowIcon(this->_window, 0, NULL);
+		}
+		
+		void SetWindowIcon(unsigned char* data, int width, int height) {
+			this->_glfwIcons.clear();
+			GLFWimage image;
+			image.pixels = data;
+			image.width = width;
+			image.height = height;
+
+			this->_glfwIcons.push_back(image);
+
+			glfwSetWindowIcon(this->_window, this->_glfwIcons.size(), this->_glfwIcons.data());
+		}
+
 	private:
+		std::vector<GLFWimage> _glfwIcons;
+
 		std::pair<Texture, Mesh> AIProcessMesh(aiMesh* mesh, const aiScene* scene) {
 			std::pair<Texture, Mesh> out;
 

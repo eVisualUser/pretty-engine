@@ -61,6 +61,8 @@ namespace PrettyEngine {
 			this->debugLanguage = this->debugLocalization.GetLangIndex("English");
 
 			this->_imPlotContext = ImPlot::CreateContext();
+
+			this->SetWindowIcon("WindowIcon");
 		}
 
 		~Engine() {
@@ -281,6 +283,28 @@ namespace PrettyEngine {
 
 		bool PhysicsEnabled() {
 			return this->_physicsEnabled;
+		}
+
+		void SetWindowIcon(std::string textureName) {
+			auto rawTextures = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
+			auto names = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
+			
+			int iter = 0;
+			for (auto & name: names) {
+				if (name == textureName) {
+					auto img = rawTextures[iter];
+					int imgHeight = 0;
+					int imgWidth = 0;
+					int imgChannels = 0;
+
+					auto decoded = DecodeImage(&img.data, img.bytes, &imgHeight, &imgWidth, &imgChannels);
+
+					this->_renderer->SetWindowIcon(decoded.data(), imgWidth, imgHeight);
+
+					return;
+				}
+				iter++;
+			}
 		}
 		
 	private:
