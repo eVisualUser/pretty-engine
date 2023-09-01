@@ -3,9 +3,7 @@
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/render.hpp>
-
 #include <PrettyEngine/debug.hpp>
-#include <PrettyEngine/gen/worldGen.hpp>
 
 #include <imgui.h>
 
