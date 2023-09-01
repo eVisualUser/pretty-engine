@@ -1,15 +1,12 @@
 #pragma once
 
-#include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h"
-#include "BulletCollision/CollisionDispatch/btGhostObject.h"
-#include "glm/gtc/constants.hpp"
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-#include <LinearMath/btScalar.h>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/tags.hpp>
 
+// GLM
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/matrix.hpp>
 #include <glm/geometric.hpp>
@@ -17,6 +14,10 @@
 #include <glm/mat4x4.hpp>
 
 // Bullet
+#include <LinearMath/btScalar.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
@@ -30,9 +31,7 @@
 #include <LinearMath/btVector3.h>
 
 #include <iostream>
-#include <stddef.h>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace PrettyEngine {
