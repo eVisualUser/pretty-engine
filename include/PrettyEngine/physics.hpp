@@ -449,6 +449,16 @@ namespace PrettyEngine {
 			this->simulationSpacePosition = position;
 		}
 
+		void Clear() {
+			for(auto & constraint: this->_constraints) {
+				this->RemoveConstraint(constraint.first);
+			}
+
+			for(auto & physicalObject: this->_objects) {
+				this->UnLinkObject(physicalObject.first);
+			}
+		}
+		
 	private:
 		std::unordered_map<std::string, PhysicalObject*> _objects;
 

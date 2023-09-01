@@ -1,14 +1,9 @@
 #pragma once
 
-#include "BulletCollision/CollisionShapes/btBoxShape.h"
-#include "BulletCollision/CollisionShapes/btCapsuleShape.h"
-#include "BulletCollision/CollisionShapes/btCollisionShape.h"
-#include "BulletCollision/CollisionShapes/btSphereShape.h"
-#include "Guid.hpp"
-#include "LinearMath/btVector3.h"
-#include "PrettyEngine/localization.hpp"
-#include "PrettyEngine/transform.hpp"
-#include "PrettyEngine/visualObject.hpp"
+
+#include <PrettyEngine/localization.hpp>
+#include <PrettyEngine/transform.hpp>
+#include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/entity.hpp>
@@ -16,17 +11,20 @@
 #include <PrettyEngine/reflect.hpp>
 #include <PrettyEngine/data.hpp>
 
+#include <Guid.hpp>
+
 #include <sstream>
 #include <fstream>
 #include <unordered_map>
 #include <utility>
+#include <memory>
 
 namespace PrettyEngine {
 	class World;
 
 	typedef void (*ProcessFunction)(World*);
 
-	static void MTUpdate(bool* alive, bool* update, std::unordered_map<std::string, Entity*>* entities) {
+	static void MTUpdate(bool* alive, bool* update, std::unordered_map<std::string, std::shared_ptr<Entity>>* entities) {
 		while(*alive) {
 			if (*update) {
 				for (auto & entity: *entities) {
@@ -43,7 +41,7 @@ namespace PrettyEngine {
 	public:
 		World() {
 			this->updateMTThreadAlive = true;
-			this->updateMT = std::thread(MTUpdate, &this->updateMTThreadAlive, &this->update, &this->entities);
+			this->updateMT = new std::thread(MTUpdate, &this->updateMTThreadAlive, &this->update, &this->entities);
 
 			this->simulationCollider.colliderModel = ColliderModel::AABB;
 			this->simulationCollider.scale = glm::vec3(100, 100, 100);
@@ -53,12 +51,13 @@ namespace PrettyEngine {
 			this->update = false;
 			this->updateMTThreadAlive = false;
 			this->StopMT();
-			this->entities.clear();
+			this->Clear();
 		}
 
 		void StopMT() {
 			this->updateMTThreadAlive = false;
-			this->updateMT.join();
+			this->updateMT->join();
+			delete this->updateMT;
 		}
 
 		void Start() {
@@ -120,12 +119,13 @@ namespace PrettyEngine {
 			}
 		}
 
-		void RegisterEntity(Entity* entity) {
+		void RegisterEntity(std::shared_ptr<Entity> entity) {
 			this->UpdateLinks();
 			this->entities.insert(std::make_pair(entity->GetGUID(), entity));
 		}
 
-		void UnRegisterEntity(Entity* entity) {
+		void UnRegisterEntity(std::shared_ptr<Entity> entity) {
+			this->entities[entity->GetGUID()]->OnDestroy();
 			this->entities.erase(entity->GetGUID());
 		}
 
@@ -149,8 +149,8 @@ namespace PrettyEngine {
 			}
 		}
 
-		std::vector<Entity*> GetEntitiesByTag(std::string tag) {
-			std::vector<Entity*> out;
+		std::vector<std::shared_ptr<Entity>> GetEntitiesByTag(std::string tag) {
+			std::vector<std::shared_ptr<Entity>> out;
 			for (auto & entity: this->entities) {
 				if (entity.second->HaveTag(tag)) {
 					out.push_back(entity.second);
@@ -159,8 +159,8 @@ namespace PrettyEngine {
 			return out;
 		}
 
-		std::vector<Entity*> GetEntitiesByTags(std::vector<std::string> tags) {
-			std::vector<Entity*> out;
+		std::vector<std::shared_ptr<Entity>> GetEntitiesByTags(std::vector<std::string> tags) {
+			std::vector<std::shared_ptr<Entity>> out;
 			for (auto & entity: this->entities) {
 				for (auto & tag: tags) {
 					if (entity.second->HaveTag(tag)) {
@@ -171,7 +171,7 @@ namespace PrettyEngine {
 			return out;
 		}
 
-		Entity* GetEntityByTag(std::string tag) {
+		std::shared_ptr<Entity> GetEntityByTag(std::string tag) {
 			for (auto & entity: this->entities) {
 				if (entity.second->HaveTag(tag)) {
 					return entity.second;
@@ -180,7 +180,7 @@ namespace PrettyEngine {
 			return nullptr;
 		}
 
-		Entity* GetEntityByTags(std::vector<std::string> tags) {
+		std::shared_ptr<Entity> GetEntityByTags(std::vector<std::string> tags) {
 			for (auto & entity: this->entities) {
 				for (auto & tag: tags) {
 					if (entity.second->HaveTag(tag)) {
@@ -226,15 +226,26 @@ namespace PrettyEngine {
 		}
 
 		void Clear() {
+			for(auto & entity: this->entities) {
+				entity.second->OnDestroy();
+			}
+
 			this->entities.clear();
+
+			return this->ThirdPartyClear();
+		}
+
+		void ThirdPartyClear() {
+			this->renderer->Clear();
+			this->physicalEngine->Clear();
 		}
 		
 	public:
-		std::thread updateMT;
+		std::thread* updateMT = nullptr;
 		bool update = false;
 		bool updateMTThreadAlive = true;
 
-		std::unordered_map<std::string, Entity*> entities;
+		std::unordered_map<std::string, std::shared_ptr<Entity>> entities;
 
 		PhysicalEngine* physicalEngine = nullptr;
 		AudioEngine* audioEngine = nullptr;

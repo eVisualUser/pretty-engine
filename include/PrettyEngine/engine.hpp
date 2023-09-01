@@ -150,7 +150,6 @@ namespace PrettyEngine {
 					this->_currentWorld->CallFunctionProcesses();
 				
 					this->_currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
-					this->_currentWorld->StartUpdateMT();
 					this->_currentWorld->Update();
 					this->_currentWorld->AlwayUpdate();
 				}
@@ -183,8 +182,6 @@ namespace PrettyEngine {
 
 
 				if (this->_currentWorld != nullptr) {
-					this->_currentWorld->WaitUpdateMT();
-					this->_currentWorld->EndUpdate();
 					this->_currentWorld->AlwayUpdate();
 				}
 			}
@@ -218,6 +215,7 @@ namespace PrettyEngine {
 
 		/// Proper way to remove the current world
 		void RemoveCurrentWorld() {
+			this->_currentWorld->Clear();
 			this->_currentWorld = nullptr;
 		}
 		

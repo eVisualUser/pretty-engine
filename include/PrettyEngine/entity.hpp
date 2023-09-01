@@ -16,18 +16,6 @@ namespace PrettyEngine {
 
 	class DynamicObject: virtual public Tagged {
 	public:
-		DynamicObject() {
-			this->uniqueGUID = xg::newGuid();
-			this->OnCreate();
-		}
-
-		~DynamicObject() {
-			this->OnDestroy();
-		}
-
-	public:
-		/// Called in the constructor to avoid custructor override errors
-		virtual void OnCreate() {}
 		/// Called before the first frame
 		virtual void OnStart() {}
 		/// Called each frame
@@ -63,7 +51,7 @@ namespace PrettyEngine {
 		virtual void OnDestroy();
 	};
 
-	class Entity: virtual public DynamicObject, virtual public Transform {
+	class Entity: public virtual DynamicObject, public virtual Transform {
 	public:
 		std::string GetGUID() {
 			return this->_entityGUID;
