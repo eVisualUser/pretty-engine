@@ -9,6 +9,7 @@
 #include <PrettyEngine/tags.hpp>
 
 #include <Guid.hpp>
+#include <memory>
 
 namespace PrettyEngine {
 
@@ -34,9 +35,9 @@ namespace PrettyEngine {
 		virtual void OnRender() {}
 
 	public:
-		Renderer* renderer;
-		AudioEngine* audioEngine;
-		PhysicalEngine* physicalEngine;
+		std::shared_ptr<Renderer> renderer;
+		std::shared_ptr<AudioEngine> audioEngine;
+		std::shared_ptr<PhysicalEngine> physicalEngine;
 		void* engine;
 
 	public:
@@ -58,9 +59,9 @@ namespace PrettyEngine {
 		}
 		
 	public:
-		Renderer* renderer;
-		AudioEngine* audioEngine;
-		PhysicalEngine* physicalEngine;
+		std::shared_ptr<Renderer> renderer;
+		std::shared_ptr<AudioEngine> audioEngine;
+		std::shared_ptr<PhysicalEngine> physicalEngine;
 
 		void* engine;
 

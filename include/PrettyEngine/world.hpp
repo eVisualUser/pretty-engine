@@ -248,9 +248,9 @@ namespace PrettyEngine {
 
 		std::unordered_map<std::string, std::shared_ptr<Entity>> entities;
 
-		PhysicalEngine* physicalEngine = nullptr;
-		AudioEngine* audioEngine = nullptr;
-		Renderer* renderer = nullptr;
+		std::shared_ptr<PhysicalEngine> physicalEngine = nullptr;
+		std::shared_ptr<AudioEngine> audioEngine = nullptr;
+		std::shared_ptr<Renderer> renderer = nullptr;
 
 		std::unordered_map<std::string, void*> sharedData;
 

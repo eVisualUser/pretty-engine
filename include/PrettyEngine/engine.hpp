@@ -68,9 +68,9 @@ namespace PrettyEngine {
 		~Engine() {
 			ImPlot::DestroyContext(this->_imPlotContext);
 
-			delete this->_physicalEngine;
-			delete this->_audioEngine;
-			delete this->_renderer;
+			this->_physicalEngine.reset();
+			this->_audioEngine.reset();
+			this->_renderer.reset();
 			delete this->engineDatabase;
 		}
 		
@@ -189,15 +189,15 @@ namespace PrettyEngine {
 			}
 		}
 		
-		AudioEngine* GetAudioEngine() {
+		std::shared_ptr<AudioEngine> GetAudioEngine() {
 			return this->_audioEngine;
 		}
 
-		PhysicalEngine* GetPhysicalEngine() {
+		std::shared_ptr<PhysicalEngine> GetPhysicalEngine() {
 			return this->_physicalEngine;
 		}
 
-		Renderer* GetRenderer() {
+		std::shared_ptr<Renderer> GetRenderer() {
 			return this->_renderer;
 		}
 
@@ -321,9 +321,9 @@ namespace PrettyEngine {
 		bool _physicsEnabled = true;
 
 	private:
-		AudioEngine* _audioEngine = new AudioEngine();
-		PhysicalEngine* _physicalEngine = new PhysicalEngine();
-		Renderer *_renderer = new Renderer();
+		std::shared_ptr<AudioEngine> _audioEngine = std::make_shared<AudioEngine>();
+		std::shared_ptr<PhysicalEngine> _physicalEngine = std::make_shared<PhysicalEngine>();
+		std::shared_ptr<Renderer> _renderer = std::make_shared<Renderer>();
 
 		toml::parse_result customConfig;
 
