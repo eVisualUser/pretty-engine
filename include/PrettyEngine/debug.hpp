@@ -22,6 +22,7 @@ static std::string GetFileName(const char* name) {
 
 #define LOG_ERROR "ERROR" 
 #define LOG_DEBUG "DEBUG" 
+#define LOG_INFO "INFO" 
 #define LOG_WARNING "WARNING" 
 
 static void ShowMessageBox(std::string type, std::string message) {
