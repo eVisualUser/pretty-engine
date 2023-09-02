@@ -58,7 +58,6 @@ namespace PrettyEngine {
 			this->_renderer->SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 		
 			this->debugLocalization.LoadFile("public/debug_localization.csv");
-			this->debugLanguage = this->debugLocalization.GetLangIndex("English");
 
 			this->_imPlotContext = ImPlot::CreateContext();
 
@@ -106,7 +105,7 @@ namespace PrettyEngine {
 				}
 				ImGui::End();
 				
-				if (ImGui::Begin(this->debugLocalization.Get("Debug Tools", this->debugLanguage).c_str(),
+				if (ImGui::Begin(this->debugLocalization.Get("Debug Tools").c_str(),
 					NULL,
 					ImGuiWindowFlags_MenuBar |
 					ImGuiWindowFlags_NoSavedSettings
@@ -114,27 +113,27 @@ namespace PrettyEngine {
 						ImGui::BeginMenuBar();
 							for (std::string language: *this->debugLocalization.GetAllLanguages()) {
 								if (ImGui::Button(language.c_str())) {
-									this->debugLanguage = this->debugLocalization.GetLangIndex(language.c_str());
+									this->debugLocalization.GetLangIndex(language.c_str());
 								}
 							}
 						ImGui::EndMenuBar();
 						
-						auto visualObjects = this->debugLocalization.Get("Visual Objects: ", this->debugLanguage);
+						auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
 						ImGui::Text("%s%i", visualObjects.c_str(), this->_renderer->GetVisualObjectsCount());
-						auto lights = this->debugLocalization.Get("Lights: ", this->debugLanguage);
+						auto lights = this->debugLocalization.Get("Lights: ");
 						ImGui::Text("%s%i", lights.c_str(), this->_renderer->GetLightCount());
-						auto frameRate = this->debugLocalization.Get("Frame rate: ", this->debugLanguage);
+						auto frameRate = this->debugLocalization.Get("Frame rate: ");
 						ImGui::Text("%s%i", frameRate.c_str(), (int)glm::floor(1.0f / this->_renderer->GetDeltaTime()));
 
-						if (ImGui::Button(this->debugLocalization.Get("Frame Rate Graph", this->debugLanguage).c_str())) {
+						if (ImGui::Button(this->debugLocalization.Get("Frame Rate Graph").c_str())) {
 							this->showFrameRateGraph = !this->showFrameRateGraph;
 						}
 
 						if (this->showFrameRateGraph) {
-							auto graphName = this->debugLocalization.Get("Frame Rate Graph", this->debugLanguage);
-							auto x = this->debugLocalization.Get("Time", this->debugLanguage);
-							auto y = this->debugLocalization.Get("Frame Rate", this->debugLanguage);
-							auto data = this->debugLocalization.Get("Frame per second", this->debugLanguage);
+							auto graphName = this->debugLocalization.Get("Frame Rate Graph");
+							auto x = this->debugLocalization.Get("Time");
+							auto y = this->debugLocalization.Get("Frame Rate");
+							auto data = this->debugLocalization.Get("Frame per second");
 
 						    if (ImPlot::BeginPlot(graphName.c_str(), x.c_str(), y.c_str())) {
 							    ImPlot::PlotBars(data.c_str(), this->frameRateLogs.data(), this->frameRateLogs.size());
@@ -316,7 +315,6 @@ namespace PrettyEngine {
 
 		Localization debugLocalization;
 		bool showDebugUI = false;
-		int debugLanguage;
 
 		bool _physicsEnabled = true;
 

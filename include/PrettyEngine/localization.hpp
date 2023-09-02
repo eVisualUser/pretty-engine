@@ -59,7 +59,11 @@ namespace PrettyEngine {
 			}
 		}
 
-		std::string Get(std::string first, unsigned int langIndex) {
+		std::string Get(std::string first, int langIndex = -1) {
+			if (langIndex < 0) {
+				langIndex = this->lastLangIndex;
+			}			
+
 			for (auto & line: this->content) {
 				if (line.front() == first) {
 					if (langIndex > line.size()) {
@@ -91,6 +95,7 @@ namespace PrettyEngine {
 				return 0;
 			}
 
+			this->lastLangIndex = column;
  			return column;
 		}
 
@@ -99,6 +104,7 @@ namespace PrettyEngine {
 		}
 
 	private:
+		int lastLangIndex = 0;
 		std::vector<std::vector<std::string>> content;
 	};
 };
