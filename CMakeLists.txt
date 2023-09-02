@@ -42,7 +42,7 @@ project(demo C CXX)
 add_executable(demo
 	"debug/main.cpp"
 )
-target_link_libraries(demo pretty custom)
+target_link_libraries(demo pretty custom components)
 
 # Game
 
@@ -65,7 +65,7 @@ if(NOT ${extend} STREQUAL "")
 string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(game pretty custom ${extend})
+target_link_libraries(game pretty custom components ${extend})
 
 # Editor
 
@@ -88,4 +88,4 @@ if(NOT ${extend} STREQUAL "")
 string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(editor pretty custom ${extend})
+target_link_libraries(editor pretty custom components ${extend})

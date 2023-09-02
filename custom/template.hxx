@@ -1,4 +1,3 @@
-#pragma once
 
 #include <PrettyEngine/world.hpp>
 
@@ -11,4 +10,4 @@
  * REGENERATED AUTOMATICALLY UPON THE NEXT BUILD.    *
  ******************************************************/
 
-void LoadObject(std::string name, PrettyEngine::World* world) {
+static void AddCustomEntity(std::string name, PrettyEngine::World* world) {

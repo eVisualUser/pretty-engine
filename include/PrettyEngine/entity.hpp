@@ -47,9 +47,9 @@ namespace PrettyEngine {
 
 	class Component: virtual public DynamicObject {
 	public:
-		virtual void OnStart();
-		virtual void OnUpdate();
-		virtual void OnDestroy();
+		virtual void OnStart() {}
+		virtual void OnUpdate() {}
+		virtual void OnDestroy() {}
 	};
 
 	class Entity: public virtual DynamicObject, public virtual Transform {
