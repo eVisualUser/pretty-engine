@@ -22,6 +22,7 @@
 
 #include <imgui.h>
 
+#include <memory>
 #include <utility>
 #include <vcruntime.h>
 #include <vector>
@@ -211,7 +212,7 @@ namespace PrettyEngine {
 			}
 		}
 
-		void RegisterVisualObject(std::string name, VisualObject* visualObject) {
+		void RegisterVisualObject(std::string name, std::shared_ptr<VisualObject> visualObject) {
 			this->CreateLayer(visualObject->renderLayer);
 
 			auto& list = this->visualObjects[visualObject->renderLayer];
@@ -221,15 +222,20 @@ namespace PrettyEngine {
 			list.insert(std::make_pair(name, visualObject));
 		}
 
-		void UnRegisterVisualObject(std::string name, unsigned int layer) {
-			auto& list = this->visualObjects[layer];
+		void UnRegisterVisualObject(std::string name) {
+			auto& list = this->visualObjects;
 
-			list[name]->OnRendererUnRegister((void*)this);
-
-			list.erase(name);
+			for (auto & sublist: list) {
+				for(auto & element: sublist) {
+					if (element.first == name) {
+						element.second->OnRendererUnRegister((void*)this);
+						sublist.erase(name);
+					}
+				}
+			}
 		}
 
-		void RegisterInputHandler(std::string name, InputHandler* inputHandler) {
+		void RegisterInputHandler(std::string name, std::shared_ptr<InputHandler> inputHandler) {
 			auto& list = this->_inputHandlerList;
 
 			list.insert(std::make_pair(name, inputHandler));
@@ -241,8 +247,8 @@ namespace PrettyEngine {
 			list.erase(name);
 		}
 		
-		void SetVisualObjectLayer(std::string name, VisualObject* visualObject, unsigned int oldLayer) {
-			this->UnRegisterVisualObject(name, oldLayer);
+		void SetVisualObjectLayer(std::string name, std::shared_ptr<VisualObject> visualObject) {
+			this->UnRegisterVisualObject(name);
 			this->RegisterVisualObject(name, visualObject);
 		}
 
@@ -678,8 +684,8 @@ namespace PrettyEngine {
 		std::vector<Camera> cameraList;
 
 		/// Contain all the visual objects
-		std::vector<std::unordered_map<std::string, VisualObject*>> visualObjects;
-		std::unordered_map<std::string, InputHandler*> _inputHandlerList;
+		std::vector<std::unordered_map<std::string, std::shared_ptr<VisualObject>>> visualObjects;
+		std::unordered_map<std::string, std::shared_ptr<InputHandler>> _inputHandlerList;
 
 		std::vector<Light*> lights;
 

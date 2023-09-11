@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/visualObject.hpp>
@@ -8,16 +7,19 @@
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/reflect.hpp>
 #include <PrettyEngine/data.hpp>
 
 #include <Guid.hpp>
+#include <toml++/toml.h>
 
 #include <sstream>
 #include <fstream>
 #include <unordered_map>
 #include <utility>
 #include <memory>
+
 
 namespace PrettyEngine {
 	class World;
@@ -52,12 +54,12 @@ namespace PrettyEngine {
 			this->updateMTThreadAlive = false;
 			this->StopMT();
 			this->Clear();
+			delete this->updateMT;
 		}
 
 		void StopMT() {
 			this->updateMTThreadAlive = false;
 			this->updateMT->join();
-			delete this->updateMT;
 		}
 
 		void Start() {
@@ -122,8 +124,13 @@ namespace PrettyEngine {
 		void RegisterEntity(std::shared_ptr<Entity> entity) {
 			this->UpdateLinks();
 			this->entities.insert(std::make_pair(entity->GetGUID(), entity));
+			this->lastEntityRegistred = entity->GetGUID();
 		}
-
+		
+		std::shared_ptr<Entity> GetLastEntityRegistred() {
+			return this->entities[this->lastEntityRegistred];
+		}
+		
 		void UnRegisterEntity(std::shared_ptr<Entity> entity) {
 			this->entities[entity->GetGUID()]->OnDestroy();
 			this->entities.erase(entity->GetGUID());
@@ -224,21 +231,14 @@ namespace PrettyEngine {
 				}
 			}
 		}
-
+		
 		void Clear() {
 			for(auto & entity: this->entities) {
+				entity.second->Clear();
 				entity.second->OnDestroy();
-				entity.second.reset();
 			}
 
 			this->entities.clear();
-
-			return this->ThirdPartyClear();
-		}
-
-		void ThirdPartyClear() {
-			this->renderer->Clear();
-			this->physicalEngine->Clear();
 		}
 		
 	public:
@@ -247,6 +247,8 @@ namespace PrettyEngine {
 		bool updateMTThreadAlive = true;
 
 		std::unordered_map<std::string, std::shared_ptr<Entity>> entities;
+
+		std::string lastEntityRegistred;
 
 		std::shared_ptr<PhysicalEngine> physicalEngine = nullptr;
 		std::shared_ptr<AudioEngine> audioEngine = nullptr;

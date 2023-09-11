@@ -24,8 +24,8 @@ project(pretty C CXX)
 include_directories("include")
 
 add_library(pretty
-	"source/base.cpp"
 	"source/render.cpp"
+	"source/physicsEngine.cpp"
 )
 
 target_link_libraries(pretty PUBLIC

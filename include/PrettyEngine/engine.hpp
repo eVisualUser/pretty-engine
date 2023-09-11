@@ -2,6 +2,7 @@
 
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/world.hpp>
@@ -34,7 +35,7 @@ namespace PrettyEngine {
 			this->_renderer->Setup();
 
 			std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
-			this->engineDatabase = new DataBase(engineDataBaseFile);
+			this->engineDatabase = std::make_shared<DataBase>(engineDataBaseFile);
 
 			auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 			this->_renderer->SetWindowTitle(windowTitle);
@@ -66,11 +67,9 @@ namespace PrettyEngine {
 
 		~Engine() {
 			ImPlot::DestroyContext(this->_imPlotContext);
-
-			this->_physicalEngine.reset();
-			this->_audioEngine.reset();
-			this->_renderer.reset();
-			delete this->engineDatabase;
+			this->RemoveCurrentWorld();
+			this->_physicalEngine->Clear();
+			this->_renderer->Clear();
 		}
 		
 		void Exit() {
@@ -84,10 +83,6 @@ namespace PrettyEngine {
 		void Run() {
 			while(this->_renderer->Valid() && !*this->GetExit()) {
 				this->Update();
-			}
-
-			if (this->_currentWorld != nullptr) {
-				this->_currentWorld->Clear();
 			}
 		}
 
@@ -145,7 +140,8 @@ namespace PrettyEngine {
 			}
 		}
 
-		void Update() {
+		void Update() {	
+			this->_renderer->UpdateIO();
 			if (this->_renderer->WindowActive()) {
 				if (this->_currentWorld != nullptr) {
 					this->_currentWorld->CallFunctionProcesses();
@@ -154,9 +150,7 @@ namespace PrettyEngine {
 					this->_currentWorld->Update();
 					this->_currentWorld->AlwayUpdate();
 				}
-
-				this->_renderer->UpdateIO();
-
+				
 				if (this->_physicsEnabled) {
 					this->_physicalEngine->SetStepTime(this->_renderer->GetDeltaTime());
 					this->_physicalEngine->Simulate();
@@ -181,7 +175,6 @@ namespace PrettyEngine {
 				this->_renderer->Draw();
 				this->_renderer->Show();
 
-
 				if (this->_currentWorld != nullptr) {
 					this->_currentWorld->AlwayUpdate();
 				}
@@ -200,7 +193,7 @@ namespace PrettyEngine {
 			return this->_renderer;
 		}
 
-		void SetCurrentWorld(World* newWorld) {
+		void SetCurrentWorld(std::shared_ptr<World> newWorld) {
 			if (this->_currentWorld != nullptr) {
 				this->RemoveCurrentWorld();
 			}
@@ -216,8 +209,10 @@ namespace PrettyEngine {
 
 		/// Proper way to remove the current world
 		void RemoveCurrentWorld() {
-			this->_currentWorld->Clear();
-			this->_currentWorld = nullptr;
+			if (this->_currentWorld != nullptr) {
+				this->_currentWorld->Clear();
+				this->_currentWorld = nullptr;
+			}
 		}
 		
 		Texture* GetTexture(std::string name) {	
@@ -307,9 +302,9 @@ namespace PrettyEngine {
 		}
 		
 	private:
-		DataBase* engineDatabase;
+		std::shared_ptr<DataBase> engineDatabase;
 
-		World* _currentWorld = nullptr;
+		std::shared_ptr<World> _currentWorld = nullptr;
 
 		bool exit = false;
 

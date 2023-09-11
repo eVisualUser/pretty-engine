@@ -1,5 +1,6 @@
 #pragma once
 
+#include "glm/gtc/constants.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -64,8 +65,8 @@ public:
 	}
 
 public:
-	glm::vec3 position = glm::vec3();
+	glm::vec3 position = glm::zero<glm::vec3>();
 	glm::quat rotation = glm::identity<glm::quat>();
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 halfScale = glm::vec3();
+	glm::vec3 halfScale = glm::zero<glm::vec3>();
 };

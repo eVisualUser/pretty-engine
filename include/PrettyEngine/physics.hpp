@@ -1,5 +1,6 @@
 #pragma once
 
+// Pretty Engine
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -130,7 +131,6 @@ namespace PrettyEngine {
 	    btRigidBody* rigidBody = new btRigidBody(rbInfo);
 	    dynamicsWorld.addRigidBody(rigidBody);
 
-	    // Simulate a few time steps
 	    for (int i = 0; i < 10; ++i) {
 	        dynamicsWorld.stepSimulation(1.0 / 60.0);
 	        btVector3 spherePosition = rigidBody->getWorldTransform().getOrigin();
@@ -155,9 +155,14 @@ namespace PrettyEngine {
 		}
 
 		~PhysicalObject() {
-			delete this->rigidBody;
+			DebugLog(LOG_DEBUG, "Start destroy physical engine", false);
+			if (this->rigidBody != nullptr) {
+				delete this->rigidBody;
+			} else if (this->ghostObject != nullptr) {
+				delete this->ghostObject;
+			}
 			delete this->motionState;
-			delete this->ghostObject;
+			DebugLog(LOG_DEBUG, "End destroy physical engine", false);
 		}
 
 		virtual void OnPhysicPreUpdate(void* physicEngine) {}
@@ -214,10 +219,12 @@ namespace PrettyEngine {
 		}
 
 		void UnLinkBulletDynamicWorld(btDiscreteDynamicsWorld* dynamicWorld) {
-			if (this->physicalType == PhysicalType::RigidBody) {
+			if (this->physicalType == PhysicalType::RigidBody && this->rigidBody != nullptr) {
 				dynamicWorld->removeRigidBody(this->rigidBody);
 			} else if (this->physicalType == PhysicalType::TriggerSensor ||this->physicalType == PhysicalType::Collider) {
-				dynamicWorld->removeCollisionObject(this->ghostObject);
+				if (this->ghostObject != nullptr) {
+					dynamicWorld->removeCollisionObject(this->ghostObject);
+				}
 			}
 		}
 
@@ -317,7 +324,7 @@ namespace PrettyEngine {
 			return this->physicID;
 		}
 
-		virtual void OnCollide(PhysicalObject* other) {}
+		virtual void OnCollide(std::shared_ptr<PhysicalObject> other) {}
 
 	public:
 		PhysicalType physicalType;
@@ -337,143 +344,4 @@ namespace PrettyEngine {
 
 		std::string id;
 	};
-
-	class PhysicalEngine {
-	public:
-		PhysicalEngine(): _dispatcher(&_collisionConfig), _world(&_dispatcher, &_broadphase, &_solver, &_collisionConfig) {
-			this->_world.setGravity(btVector3(0.0f, 0.0f, 0.0f));
-
-			this->simulationSpace.colliderModel = ColliderModel::AABB;
-			this->SetSimulationSpace(100.0f);
-		}
-		
-		~PhysicalEngine() {}
-
-		void SetSimulationSpace(float distance) {
-			this->simulationSpace.SetScale(glm::vec3(distance, distance, distance));
-			this->simulationSpace.UpdateHalfScale();		
-		}
-
-		void Simulate() {
-			if (this->simulationSpacePosition != nullptr) {
-				this->simulationSpace.position = *simulationSpacePosition;
-			}
-
-			for (auto & pair: this->_objects) {
-				pair.second->UpdatePhysicTransform(this);
-
-				if (pair.second->rigidBody != nullptr) {
-					if (this->simulationSpace.PointIn(pair.second->position)) {
-						pair.second->rigidBody->activate();
-					} else {
-						pair.second->rigidBody->setActivationState(DISABLE_SIMULATION);
-					}
-				}
-				
-				if (pair.second->ghostObject != nullptr) {
-					if (this->simulationSpace.PointIn(pair.second->position)) {
-						pair.second->ghostObject->activate();
-					} else {
-						pair.second->ghostObject->setActivationState(DISABLE_SIMULATION);
-					}
-				}
-
-				if (pair.second->unlink) {
-					this->UnLinkObject(pair.second->id);
-				}
-			}
-
-			this->_world.updateVehicles(this->_stepTime);
-			this->_world.updateAabbs();
-			this->_world.stepSimulation(this->_stepTime);
-
-			for(int i = 0; i < this->_dispatcher.getNumManifolds(); i++) {
-				auto manifold = this->_dispatcher.getManifoldByIndexInternal(i);
-
-				auto col0 = manifold->getBody0();
-				auto col1 = manifold->getBody1();
-
-				for (auto & object: this->_objects) {
-					if (object.second->GetID() == col0->getUserIndex()) {
-						for (auto & object2: this->_objects) {
-							if (object2.second->GetID() == col1->getUserIndex()) {
-								object.second->OnCollide(object2.second);
-								object2.second->OnCollide(object.second);
-							}
-						}
-					}
-				}
-			}
-
-			for (auto & pair: this->_objects) {
-				pair.second->UpdateObjectTransform(this);
-			}
-		}
-
-		void SetStepTime(float newStepTime) {
-			this->_stepTime = newStepTime;
-		}
-
-		void LinkObject(std::string id, PhysicalObject* object) {
-			object->LinkBulletDynamicWorld(&this->_world);
-			object->id = id;
-			this->_objects.insert(std::make_pair(id, object));
-		}
-
-		void UnLinkObject(std::string id) {
-			this->_objects[id]->UnLinkBulletDynamicWorld(&this->_world);
-			_objects.erase(id);
-		}
-
-		glm::vec3 GetGlobalGravity() {
-			btVector3 gravity = this->_world.getGravity();
-			return glm::vec3(gravity.getX(), gravity.getY(), gravity.getZ());
-		}
-
-		void SetGlobalGravity(glm::vec3 newGravity) {
-			this->_world.setGravity(btVector3(newGravity.x, newGravity.y, newGravity.z));
-		}
-
-		void AddConstraint(std::string id, btGeneric6DofConstraint* constraints) {
-			this->_constraints.insert(std::make_pair(id, constraints));
-			this->_world.addConstraint(constraints);
-		}
-
-		void RemoveConstraint(std::string id) {
-			this->_world.removeConstraint(this->_constraints[id]);
-			this->_constraints.erase(id);
-		}
-
-		void SetSimulationSpacePosition(glm::vec3* position) {
-			this->simulationSpacePosition = position;
-		}
-
-		void Clear() {
-			for(auto & constraint: this->_constraints) {
-				this->RemoveConstraint(constraint.first);
-			}
-
-			for(auto & physicalObject: this->_objects) {
-				this->UnLinkObject(physicalObject.first);
-			}
-		}
-		
-	private:
-		std::unordered_map<std::string, PhysicalObject*> _objects;
-
-		btDefaultCollisionConfiguration _collisionConfig;
-	    btCollisionDispatcher _dispatcher;
-	    btDbvtBroadphase _broadphase;
-	    btSequentialImpulseConstraintSolver _solver;
-
-		btDiscreteDynamicsWorld _world;
-		float _stepTime = 0.0f;
-
-		std::unordered_map<std::string, btGeneric6DofConstraint*> _constraints;
-
-		Collider simulationSpace;
-		glm::vec3* simulationSpacePosition = nullptr;
-	};
-
-	#define GET_PHYSICAL_ENGINE(ptr) (PrettyEngine::PhysicalEngine*)ptr
 }

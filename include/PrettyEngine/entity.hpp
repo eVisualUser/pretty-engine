@@ -1,10 +1,11 @@
 #pragma once
 
-#include "PrettyEngine/debug.hpp"
+#include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/tags.hpp>
 
@@ -33,16 +34,32 @@ namespace PrettyEngine {
 		virtual void OnDestroy() {}
 		/// Called just before rendering, when the UI is working.
 		virtual void OnRender() {}
+		/// Called before the entity is cleared
+		virtual void OnClear() {}
 
+		/// Remove all related elements of the entity in the different parts of the engine
+		void Clear() {
+			for(auto & visualObject: this->visualObjects) {
+				this->renderer->UnRegisterVisualObject(visualObject);
+			}
+
+			for(auto & physicalObject: this->visualObjects) {
+				this->physicalEngine->UnLinkObject(physicalObject);
+			}
+		}
+		
 	public:
 		std::shared_ptr<Renderer> renderer;
 		std::shared_ptr<AudioEngine> audioEngine;
 		std::shared_ptr<PhysicalEngine> physicalEngine;
 		void* engine;
 
+		std::vector<std::string> visualObjects;
+		std::vector<std::string> physicalObjects;
+
 	public:
-		std::string uniqueGUID;
-		std::string objectGUID;
+		std::string unique;
+		std::string object;
 	};
 
 	class Component: virtual public DynamicObject {
@@ -78,7 +95,7 @@ namespace PrettyEngine {
 
 		void RemoveComponent(Component* component) {
 			for(int i = 0; i < this->components.size(); i++) {
-				if (this->components[i].uniqueGUID == component->uniqueGUID) {
+				if (this->components[i].unique == component->unique) {
 					this->components.erase(this->components.begin() + i);
 					break;
 				}

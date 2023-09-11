@@ -1,7 +1,7 @@
-#include "BulletCollision/CollisionShapes/btBoxShape.h"
-#include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
-#include "LinearMath/btVector3.h"
-#include "PrettyEngine/entity.hpp"
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
+#include <LinearMath/btVector3.h>
+#include <PrettyEngine/entity.hpp>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
 #include <PrettyEngine/camera.hpp>
@@ -145,9 +145,9 @@ class MyGroundObject: public PrettyEngine::VisualObject, public PrettyEngine::Ph
 void Main() {
 	PrettyEngine::Engine* engine = new PrettyEngine::Engine(ASSET_BUILTIN_CONFIG);
 
-	auto world = PrettyEngine::World();
+	auto world = std::make_shared<PrettyEngine::World>();
 
-	engine->SetCurrentWorld(&world);
+	engine->SetCurrentWorld(world);
 
 	auto defaultVertexShader = xg::newGuid();
 	auto defaultFragmentShader = xg::newGuid();
@@ -181,63 +181,51 @@ void Main() {
 	modelC.SetShaderProgram(defaultShaderProgram);
 	modelC.SetMesh(rect);
 	
-	auto myObject = MyVisualObject();
-	myObject.AddRenderModel(&modelA);
-	myObject.renderLayer = 1;
-	myObject.useLight = true;
+	auto myObject = std::make_shared<MyVisualObject>();
+	myObject->AddRenderModel(&modelA);
+	myObject->renderLayer = 1;
+	myObject->useLight = true;
 
-	myObject.AddTexture(engine->GetTexture("SampleA"));
+	myObject->AddTexture(engine->GetTexture("SampleA"));
 
-	world.RegisterEntity(&myObject);
+	world->RegisterEntity(myObject);
 
 	auto objectShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.1f));
-	myObject.CreateRigidbody(objectShape);
-
-	auto myOtherObject = PrettyEngine::VisualObject();
-	myOtherObject.AddRenderModel(&modelC);
-	myOtherObject.baseColor = glm::vec3(1.0f, 0.1f, 0.1f);
-	myOtherObject.renderLayer = 0;
-	myOtherObject.render = true;
-	myOtherObject.scale = glm::vec3(50.0f, 50.0f, 1.0f);
-	myOtherObject.useLight = true;
-	myOtherObject.position.z -= 10;
-	myOtherObject.Toggle3D();
+	myObject->CreateRigidbody(objectShape);
 
 	std::string myObjectGUID = xg::newGuid().str();
-	std::string myOtherObjectGUID = xg::newGuid().str();
 	std::string groundObjectGUID = xg::newGuid().str();
 
-	MyGroundObject groundObject = MyGroundObject();
-	groundObject.AddRenderModel(&modelB);
+	auto groundObject = std::make_shared<MyGroundObject>();
+	groundObject->AddRenderModel(&modelB);
 
 	auto groundShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-	groundObject.CreateCollider(groundShape, true);
-	groundObject.position.y -= 2;
-	groundObject.position.x += 6;
-	groundObject.baseColor = glm::vec3(1.0f, 1.0f, 0.5f);
-	groundObject.Toggle3D();
-	
-	engine->GetPhysicalEngine()->LinkObject(myObjectGUID, &myObject);
-	engine->GetPhysicalEngine()->LinkObject(groundObjectGUID, &groundObject);
+	groundObject->CreateCollider(groundShape, true);
+	groundObject->position.y -= 2;
+	groundObject->position.x += 6;
+	groundObject->baseColor = glm::vec3(1.0f, 1.0f, 0.5f);
+	groundObject->Toggle3D();
 
+	engine->GetPhysicalEngine()->LinkObject(myObjectGUID, myObject);
+	engine->GetPhysicalEngine()->LinkObject(groundObjectGUID, groundObject);
+	/*
 	engine->GetPhysicalEngine()->SetGlobalGravity(glm::vec3(0.0f, 0.0f, 0.0f));
 
-	engine->GetRenderer()->RegisterVisualObject(myObjectGUID, &myObject);
-	engine->GetRenderer()->RegisterVisualObject(groundObjectGUID, &groundObject);
-	//engine->GetRenderer()->RegisterVisualObject(myOtherObjectGUID, &myOtherObject);
+	engine->GetRenderer()->RegisterVisualObject(myObjectGUID, myObject);
+	engine->GetRenderer()->RegisterVisualObject(groundObjectGUID, groundObject);
 
-	engine->GetRenderer()->RegisterInputHandler(myObjectGUID, &myObject);
+	engine->GetRenderer()->RegisterInputHandler(myObjectGUID, myObject);
 
 	PrettyEngine::Light light;
 	light.radius = 100.0f;
 
-	engine->GetRenderer()->RegisterLight(xg::newGuid(), &light);
+	engine->GetRenderer()->RegisterLight(xg::newGuid(), &light);*/
 
 	engine->Run();
 
-	delete engine; 
-	delete groundShape;
-	delete objectShape;
+	delete engine;
+	// delete groundShape;
+	// delete objectShape;
 }
 
 int main() {
