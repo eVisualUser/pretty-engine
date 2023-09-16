@@ -26,16 +26,8 @@ namespace PrettyEngine {
 	}
 
 	void PhysicalEngine::Clear() {
-		DebugLog(LOG_DEBUG, "Start clear", false);
 		for(auto & constraint: this->_constraints) {
 			this->RemoveConstraint(constraint.first);
-		}
-		DebugLog(LOG_DEBUG, "Cleared constraints", false);
-
-		int index = 0;
-		for(auto & physicalObject: this->_objects) {
-			DebugLog(LOG_DEBUG, "Physical object [" << index << "]: " << physicalObject.first, false);
-			index++;
 		}
 
 		while(!this->_objects.empty()) {
