@@ -3,6 +3,7 @@
 #include "PrettyEngine/debug.hpp"
 #include <PrettyEngine/utils.hpp>
 
+#include <cstddef>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -86,8 +87,8 @@ namespace PrettyEngine {
 			bool foundLocalization = false;
 			for (auto & line: this->content) {
 				if (line.front() == first) {
-					if (langIndex > line.size()) {
-						return line[0];
+					if (langIndex >= line.size()) {
+						return line.front();
 					} else {
 						return line[langIndex];
 					}
@@ -96,13 +97,13 @@ namespace PrettyEngine {
 			}
 
 			if (!foundLocalization) {
-				this->content.push_back({first});
+				this->content.push_back(std::vector<std::string>({first}));
 			}
-			
+
 			DebugLog(LOG_ERROR, "Missing localization for: \"" << first << "\"", false);
 			return first;
 		}
-		
+
 		unsigned int GetLangIndex(std::string lang) {
 			StringReplace(&lang, "/;", ";");
 
