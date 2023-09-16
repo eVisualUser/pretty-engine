@@ -1,10 +1,10 @@
 #pragma once
 
-#include <PrettyEngine/debug.hpp>
-
 #include <vector>
 #include <string>
 #include <fstream>
+
+#include <PrettyEngine/debug.hpp>
 
 namespace PrettyEngine {
 	#define PRINT_GLM_VEC3(vec) std::cout << vec.x << ';' << vec.y << ';' << vec.z << std::endl;
@@ -12,9 +12,57 @@ namespace PrettyEngine {
 
 	class OString {
 	public:
+		virtual ~OString() {}
 		virtual std::string ToString() { return "Not overriden"; }
 	};
 
+	static void StringReplace(std::string* str, char base, char replacement) {
+		for (auto & c: *str) {
+			if (c == base) {
+				c = replacement;
+			}
+		}
+	}
+
+	static void StringReplace(std::string* str, std::string base, std::string replacement) {
+		bool match = false;
+		size_t len = 0;
+		size_t matchLen = 0;
+		size_t startMatch = 0;
+		for (auto & c: *str) {
+			if (match && matchLen == base.size()) {
+				for(size_t i = 0; i < matchLen; i++) {
+					str->erase(str->begin() + startMatch);
+				}
+				
+				std::string reversedString;
+				for(auto & c: replacement) {
+					reversedString.insert(reversedString.begin() + 0, c);
+				}
+
+				for(auto & c: reversedString) {
+					str->insert(str->begin() + startMatch, c);
+				}
+				
+				return StringReplace(str, base, replacement);
+			}
+
+			if (c == base[matchLen] && matchLen < base.size()) {
+				matchLen++;
+				
+				if (!match) {
+					startMatch = len;
+				}
+
+				match = true;
+			} else {
+				matchLen = 0;
+				match = false;
+			}
+
+			len++;
+		}
+	}
 	template<typename T>
 	static bool CheckIfVectorContain(std::vector<T>* list, T* target) {
 
