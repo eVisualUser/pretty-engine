@@ -16,6 +16,18 @@ namespace PrettyEngine {
 		virtual std::string ToString() { return "Not overriden"; }
 	};
 
+	static std::string GetEnginePublicPath(std::string base, bool editOriginal = false) {
+		#if _DEBUG
+			if (editOriginal) {
+				return "../assets/ENGINE_PUBLIC/" + base;
+			} else {
+				return "./public/" + base;
+			}
+		#else
+			return "./public/" + base;
+		#endif
+	}
+
 	static void StringReplace(std::string* str, char base, char replacement) {
 		for (auto & c: *str) {
 			if (c == base) {
