@@ -593,6 +593,14 @@ namespace PrettyEngine {
 			glfwSetWindowIcon(this->_window, this->_glfwIcons.size(), this->_glfwIcons.data());
 		}
 
+		bool GetWindowFocus() {
+			return glfwGetWindowAttrib(this->_window, GLFW_FOCUSED);
+		}
+
+		bool GetWindowMinimized() {
+        	return glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
+		}
+		
 	private:
 		std::vector<GLFWimage> _glfwIcons;
 
