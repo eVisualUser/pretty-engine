@@ -28,6 +28,28 @@ namespace PrettyEngine {
 		#endif
 	}
 
+	static bool FileExist(std::string path) {
+		std::ifstream file(path);
+		bool out = file.is_open();
+		file.close();
+
+		return out;
+	}
+
+	static bool CreateFile(std::string path) {
+		if (!FileExist(path)) {
+			std::ofstream file(path);
+			bool out = file.is_open();
+			file.close();
+
+			return out;
+		} else {
+			DebugLog(LOG_ERROR, "File already exists: " << path, true);
+			
+			return false;
+		}
+	}
+
 	static void StringReplace(std::string* str, char base, char replacement) {
 		for (auto & c: *str) {
 			if (c == base) {
