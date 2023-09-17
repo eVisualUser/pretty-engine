@@ -129,6 +129,9 @@ namespace PrettyEngine {
 		}
 
 		std::vector<std::string>* GetAllLanguages() {
+			if (this->content.empty()) {
+				this->content.push_back({"English"});
+			}
 			return &this->content[0];
 		}
 
@@ -151,6 +154,10 @@ namespace PrettyEngine {
 			DebugLog(LOG_ERROR, "Could not save localization file: " << this->filePath, true);
 		}
 
+		std::vector<std::vector<std::string>>* GetRawContent() {
+			return &this->content;
+		}
+		
 	private:
 		int lastLangIndex = 0;
 		std::vector<std::vector<std::string>> content;
