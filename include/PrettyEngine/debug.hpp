@@ -11,7 +11,7 @@
 namespace PrettyEngine {
 	static std::vector<std::string> logs;
 	static bool printDebugMessage = true;
-} 
+}
 
 static std::string GetFileName(const char* name) {
     std::string filePath(name); 

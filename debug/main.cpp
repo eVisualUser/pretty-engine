@@ -36,7 +36,6 @@
 #include <thread>
 #include <string>
 
-
 class MyVisualObject: public PrettyEngine::VisualObject, public PrettyEngine::PhysicalObject, public PrettyEngine::InputHandler, virtual public PrettyEngine::Entity {
 public:
 	void OnStart() override {
@@ -208,7 +207,7 @@ void Main() {
 
 	engine->GetPhysicalEngine()->LinkObject(myObjectGUID, myObject);
 	engine->GetPhysicalEngine()->LinkObject(groundObjectGUID, groundObject);
-	/*
+	
 	engine->GetPhysicalEngine()->SetGlobalGravity(glm::vec3(0.0f, 0.0f, 0.0f));
 
 	engine->GetRenderer()->RegisterVisualObject(myObjectGUID, myObject);
@@ -219,13 +218,13 @@ void Main() {
 	PrettyEngine::Light light;
 	light.radius = 100.0f;
 
-	engine->GetRenderer()->RegisterLight(xg::newGuid(), &light);*/
+	engine->GetRenderer()->RegisterLight(xg::newGuid(), &light);
 
 	engine->Run();
 
 	delete engine;
-	// delete groundShape;
-	// delete objectShape;
+	delete groundShape;
+	delete objectShape;
 }
 
 int main() {
