@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <vector>
 
+#define CONSOLE_COMMAND_BUFFER_SIZE 50
+
 namespace PrettyEngine {
 	class Engine {
 	public:
@@ -148,7 +150,6 @@ namespace PrettyEngine {
 				
 					this->_currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
 					this->_currentWorld->Update();
-					this->_currentWorld->AlwayUpdate();
 				}
 				
 				if (this->_physicsEnabled) {
@@ -175,9 +176,9 @@ namespace PrettyEngine {
 				this->_renderer->Draw();
 				this->_renderer->Show();
 
-				if (this->_currentWorld != nullptr) {
-					this->_currentWorld->AlwayUpdate();
-				}
+			}
+			if (this->_currentWorld != nullptr) {
+				this->_currentWorld->AlwayUpdate();
 			}
 		}
 		
