@@ -1,8 +1,9 @@
 #pragma once
 
-#include "PrettyEngine/debug.hpp"
+#include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <fstream>
 #include <sstream>
@@ -156,6 +157,27 @@ namespace PrettyEngine {
 
 		std::vector<std::vector<std::string>>* GetRawContent() {
 			return &this->content;
+		}
+
+		void CreateLocalization(std::vector<std::string> in = {"New Localization"}) {
+			this->content.push_back(in);
+		}
+
+		void RemoveLocalization(std::string first) {
+			size_t index = 0;
+			for(auto & line: this->content) {
+				if (line.front() == first) {
+					break;
+				}
+				index++;
+			}
+			this->content.erase(this->content.begin() + index);
+		}
+
+		void RemoveLocalizationUsingIndex(int index = -1) {
+			if (index >= 0 && index < this->content.size()) {
+				this->content.erase(this->content.begin() + index);
+			}
 		}
 		
 	private:
