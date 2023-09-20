@@ -66,8 +66,9 @@ namespace PrettyEngine {
 
 			this->SetWindowIcon("WindowIcon");
 		}
-
+		
 		~Engine() {
+			this->debugLocalization.Save();
 			ImPlot::DestroyContext(this->_imPlotContext);
 			this->RemoveCurrentWorld();
 			this->_physicalEngine->Clear();
@@ -77,11 +78,11 @@ namespace PrettyEngine {
 		void Exit() {
 			this->exit = true;
 		}
-
+		
 		bool* GetExit() {
 			return &this->exit;
 		}
-
+		
 		void Run() {
 			while(this->_renderer->Valid() && !*this->GetExit()) {
 				this->Update();
@@ -208,6 +209,10 @@ namespace PrettyEngine {
 			this->_currentWorld->UpdateLinks();
 		}
 
+		std::shared_ptr<World> GetCurrentWorld() {
+			return this->_currentWorld;
+		}
+		
 		/// Proper way to remove the current world
 		void RemoveCurrentWorld() {
 			if (this->_currentWorld != nullptr) {
