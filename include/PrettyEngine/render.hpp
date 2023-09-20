@@ -398,6 +398,23 @@ namespace PrettyEngine {
 		bool GetKeyUp(KeyCode key) {
 			return GLFW_RELEASE == glfwGetKey(this->_window, (int)key);
 		}
+
+		bool GetMouseButton(int button = 0) {
+			int state = glfwGetMouseButton(this->_window, button);
+			if (state == GLFW_PRESS) {
+				return true;
+			}
+			return false;
+		}
+
+		bool GetMouseButtonClick(int button = 0) {
+			static std::unordered_map<int, bool> keyStates;
+		    int state = glfwGetMouseButton(this->_window, button);
+		    bool isKeyDown = (state == GLFW_PRESS) && !keyStates[button];
+		    keyStates[button] = (state == GLFW_PRESS);
+
+		    return isKeyDown;
+		}
 		
 		double GetDeltaTime() {
 			return this->deltaTime * this->GetTimeSpeed();
