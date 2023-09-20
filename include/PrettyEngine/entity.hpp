@@ -11,12 +11,13 @@
 
 #include <Guid.hpp>
 #include <memory>
+#include <unordered_map>
 
 namespace PrettyEngine {
 
 	#define DefaultEntityName "AnyEntity"
 
-	class DynamicObject: virtual public Tagged {
+	class DynamicObject: public Tagged {
 	public:
 		/// Called before the first frame
 		virtual void OnStart() {}
@@ -57,24 +58,34 @@ namespace PrettyEngine {
 		std::vector<std::string> visualObjects;
 		std::vector<std::string> physicalObjects;
 
+		std::unordered_map<std::string, std::string> publicMap;
+
 	public:
 		std::string unique;
 		std::string object;
 	};
 
-	class Component: virtual public DynamicObject {
+	class Component: public DynamicObject {
 	public:
 		virtual void OnStart() {}
 		virtual void OnUpdate() {}
 		virtual void OnDestroy() {}
+
+		std::string owner;
+
+		bool worldFirst = true;
 	};
 
 	class Entity: public virtual DynamicObject, public virtual Transform {
 	public:
+		~Entity() {
+			this->publicMap.clear();
+			this->components.clear();
+		}
+
 		std::string GetGUID() {
 			return this->_entityGUID;
 		}
-		
 	public:
 		std::shared_ptr<Renderer> renderer;
 		std::shared_ptr<AudioEngine> audioEngine;
@@ -95,15 +106,24 @@ namespace PrettyEngine {
 
 		void RemoveComponent(Component* component) {
 			for(int i = 0; i < this->components.size(); i++) {
-				if (this->components[i].unique == component->unique) {
+				if (this->components[i]->unique == component->unique) {
 					this->components.erase(this->components.begin() + i);
 					break;
 				}
 			}
 		}
 
-		std::vector<Component> components;
-		
+		template<typename T>
+		T* GetComponentAs(std::string unique) {
+			for(auto & component: this->components) {
+				if (component->unique == unique) {
+					return dynamic_cast<T*>(component.get());
+				}
+			}
+			return nullptr;
+		}
+
+		std::vector<std::shared_ptr<Component>> components;
 	private:
 		std::string _entityGUID = xg::newGuid();
 	};
