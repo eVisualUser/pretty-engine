@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MyComponent.hpp>
+#include <LocalizationEditor.hpp>
 
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/world.hpp>
@@ -15,9 +15,9 @@
  * REGENERATED AUTOMATICALLY UPON THE NEXT BUILD.    *
  ******************************************************/
 
-static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name, PrettyEngine::World* world) {
-    if(name == "MyComponent") {
-        return std::make_shared<Custom::MyComponent>();
+static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name) {
+    if(name == "LocalizationEditor") {
+        return std::make_shared<Custom::LocalizationEditor>();
     } 
  return nullptr;
 }
