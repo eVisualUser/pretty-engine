@@ -14,15 +14,13 @@ opacity = 1.0
 
 [entities]
 [entities.entityA]
+name = "Editor"
 type = "Entity"
 object = "Editor"
+components = [["LocalizationEditor", "LocalizationEditor"]]
+public_map = [["projectName", "MyNewProject"]]
+
 [entities.entityA.transform]
 position = [0.0, 0.0, 0.0]
 rotation = [0.0, 0.0, 0.0, 0.0]
-size = [1.0, 1.0, 1.0]
-
-[entities.entityA.public.publicA]
-type = "str"
-content = "Hell, World!"
-
-[components]
+scale = [1.0, 1.0, 1.0]
