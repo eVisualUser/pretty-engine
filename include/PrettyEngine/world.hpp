@@ -32,6 +32,9 @@ namespace PrettyEngine {
 				for (auto & entity: *entities) {
 					if (entity.second != nullptr) {
 						entity.second->OnMTUpdate(); 
+						for (auto & component: entity.second->components) {
+							component->OnMTUpdate();
+						}
 					}
 				}
 				*update = false;
@@ -48,7 +51,7 @@ namespace PrettyEngine {
 			this->simulationCollider.colliderModel = ColliderModel::AABB;
 			this->simulationCollider.scale = glm::vec3(100, 100, 100);
 		}
-
+		
 		~World() {
 			this->update = false;
 			this->updateMTThreadAlive = false;
@@ -61,13 +64,21 @@ namespace PrettyEngine {
 			this->updateMTThreadAlive = false;
 			this->updateMT->join();
 		}
-
+		
 		void Start() {
 			for (auto & entity: this->entities) {
-				if (entity.second != nullptr && entity.second->worldFirst) {
+				if (entity.second != nullptr) {
 					this->UpdateLinks();
-					entity.second->OnStart(); 
-					entity.second->worldFirst = false;
+					if (entity.second->worldFirst) {
+						entity.second->OnStart(); 
+						entity.second->worldFirst = false;
+					}
+					for (auto & component: entity.second->components) {
+						if (component->worldFirst) {
+							component->OnStart();
+							component->worldFirst = false;
+						}
+					}
 				}
 			}
 		}
@@ -77,6 +88,9 @@ namespace PrettyEngine {
 			for (auto & entity: this->entities) {
 				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
 					entity.second->OnUpdate();
+					for (auto & component: entity.second->components) {
+						component->OnUpdate();
+					}
 				}
 			}
 		}
@@ -90,17 +104,16 @@ namespace PrettyEngine {
 				// Wait to the thread to call the fucntions
 			}
 
-			for (auto & entity: this->entities) {
-				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
-					entity.second->OnEndUpdate(); 
-				}
-			}
+			this->EndUpdate();
 		}
 
 		void EndUpdate() {
 			for (auto & entity: this->entities) {
 				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
 					entity.second->OnEndUpdate(); 
+					for (auto & component: entity.second->components) {
+						component->OnEndUpdate();
+					}
 				}
 			}
 		}
@@ -109,6 +122,9 @@ namespace PrettyEngine {
 			for (auto & entity: this->entities) {
 				if (entity.second != nullptr) {
 					entity.second->OnAlwaysUpdate(); 
+					for (auto & component: entity.second->components) {
+						component->OnAlwaysEndUpdate();
+					}
 				}
 			}
 		}
@@ -116,8 +132,28 @@ namespace PrettyEngine {
 		void AlwayUpdate() {
 			for (auto & entity: this->entities) {
 				if (entity.second != nullptr) {
-					entity.second->OnAlwaysUpdate(); 
+					entity.second->OnAlwaysUpdate();
+					for (auto & component: entity.second->components) {
+						component->OnAlwaysUpdate();
+					}
 				}
+			}
+		}
+
+		void CallRenderFunctions() {
+			for (auto & entity: this->entities) {
+				if (entity.second != nullptr) {
+					entity.second->OnRender(); 
+					for (auto & component: entity.second->components) {
+						component->OnRender();
+					}
+				}
+			}
+		}
+
+		void CallFunctionProcesses() {
+			for (auto & func: this->processList) {
+				func.second(this);
 			}
 		}
 
@@ -148,10 +184,10 @@ namespace PrettyEngine {
 				entity.second->engine = this->engine;
 
 				for(auto & component: entity.second->components) {
-					component.audioEngine = this->audioEngine;
-					component.physicalEngine = this->physicalEngine;
-					component.renderer = this->renderer;
-					component.engine = this->engine;
+					component->audioEngine = this->audioEngine;
+					component->physicalEngine = this->physicalEngine;
+					component->renderer = this->renderer;
+					component->engine = this->engine;
 				}
 			}
 		}
@@ -198,6 +234,15 @@ namespace PrettyEngine {
 			return nullptr;
 		}
 
+		std::shared_ptr<Entity> GetEntityByName(std::string name) {
+			for (auto & entity: this->entities) {
+				if (entity.second->entityName == name) {
+					return entity.second;
+				}
+			}
+			return nullptr;
+		}
+
 		void AddSharedData(std::string id, void* data) {
 			this->sharedData.insert(std::make_pair(id, data));
 		}
@@ -218,26 +263,11 @@ namespace PrettyEngine {
 			this->processList.erase(id);
 		}
 		
-		void CallFunctionProcesses() {
-			for (auto & func: this->processList) {
-				func.second(this);
-			}
-		}
-
-		void CallRenderFunctions() {
-			for (auto & entity: this->entities) {
-				if (entity.second != nullptr) {
-					entity.second->OnRender(); 
-				}
-			}
-		}
-		
 		void Clear() {
 			for(auto & entity: this->entities) {
 				entity.second->Clear();
 				entity.second->OnDestroy();
 			}
-
 			this->entities.clear();
 		}
 		
