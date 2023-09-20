@@ -12,4 +12,4 @@
  * REGENERATED AUTOMATICALLY UPON THE NEXT BUILD.    *
  ******************************************************/
 
-static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name, PrettyEngine::World* world) {
+static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name) {
