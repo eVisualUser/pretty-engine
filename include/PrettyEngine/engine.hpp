@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PrettyEngine/utils.hpp"
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/physics.hpp>
 #include <PrettyEngine/physicsEngine.hpp>
@@ -60,7 +61,7 @@ namespace PrettyEngine {
 
 			this->_renderer->SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 		
-			this->debugLocalization.LoadFile("public/debug_localization.csv");
+			this->debugLocalization.LoadFile(GetEnginePublicPath("debug_localization.csv", true));
 
 			this->_imPlotContext = ImPlot::CreateContext();
 
