@@ -4,20 +4,29 @@
 #include <PrettyEngine/assets/builtin.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/world.hpp>
-#include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/debug.hpp>
 
 using namespace PrettyEngine;
 
+bool worldFilter(std::string name) {
+	DebugLog(LOG_DEBUG, "World loaded: " << name, false);
+	return true;
+}
+
 int main() {
 	auto engine = PrettyEngine::Engine(ASSET_BUILTIN_EDITOR_CONFIG);
 	
-	auto mainWorld = std::make_shared<PrettyEngine::World>();
+	engine.GetWorldManager()
+		->AddWorldFile(GetEnginePublicPath("worlds/editor.toml", true));
+		
+	engine.GetWorldManager()
+		->FilterWorldList(worldFilter)
+		->ParseWorldsFiles()
+		->CreateWorldsInstances()
+		->LoadWorlds();
 
-	LoadWorld("public/worlds/editor.toml", mainWorld);
-
-	engine.SetCurrentWorld(mainWorld);
+	engine.SetupWorlds();
 
 	engine.Run();
 
