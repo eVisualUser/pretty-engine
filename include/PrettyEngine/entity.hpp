@@ -14,28 +14,28 @@
 #include <unordered_map>
 
 namespace PrettyEngine {
-
+	
 	#define DefaultEntityName "AnyEntity"
 
 	class DynamicObject: public Tagged {
 	public:
-		/// Called before the first frame
+		/// Called before the first frame.
 		virtual void OnStart() {}
-		/// Called each frame
+		/// Called each frame.
 		virtual void OnUpdate() {}
-		/// Called each frame without world optimization
+		/// Called each frame without world optimization.
 		virtual void OnAlwaysUpdate() {}
-		/// The same as OnUpdate but multi-threaded
+		/// The same as OnUpdate but multi-threaded.
 		virtual void OnMTUpdate() {}
-		/// Called when the update is done to let you to sync what was done in and out the thread, or other stuff
+		/// Called when the update is done to let you to sync what was done in and out the thread, or other stuff.
 		virtual void OnEndUpdate() {}
-		/// Called when the update is done to let you to sync what was done in and out the thread, or other stuff
+		/// Called when the update is done to let you to sync what was done in and out the thread, or other stuff.
 		virtual void OnAlwaysEndUpdate() {}
-		/// Called when object destroyed
+		/// Called when object destroyed.
 		virtual void OnDestroy() {}
 		/// Called just before rendering, when the UI is working.
 		virtual void OnRender() {}
-		/// Called before the entity is cleared
+		/// Called before the entity is cleared.
 		virtual void OnClear() {}
 
 		/// Remove all related elements of the entity in the different parts of the engine
