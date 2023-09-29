@@ -1,29 +1,26 @@
 #pragma once
 
-#include "PrettyEngine/utils.hpp"
+#include <PrettyEngine/world.hpp>
+#include <PrettyEngine/worldLoad.hpp>
+#include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/physics.hpp>
 #include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/render.hpp>
-#include <PrettyEngine/world.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/texture.hpp>
 
-#include <memory>
-#include <sstream>
 #include <toml++/toml.h>
-
 #include <imgui.h>
 #include <implot.h>
 
+#include <memory>
 #include <string>
-#include <thread>
-#include <unordered_map>
 #include <vector>
 
-#define CONSOLE_COMMAND_BUFFER_SIZE 50
+#define CONSOLE_COMMAND_BUFFER_SIZE 100
 
 namespace PrettyEngine {
 	class Engine {
@@ -71,7 +68,7 @@ namespace PrettyEngine {
 		~Engine() {
 			this->debugLocalization.Save();
 			ImPlot::DestroyContext(this->_imPlotContext);
-			this->RemoveCurrentWorld();
+			this->_worldManager.Clear();
 			this->_physicalEngine->Clear();
 			this->_renderer->Clear();
 		}
@@ -143,15 +140,18 @@ namespace PrettyEngine {
 				ImGui::End();
 			}
 		}
-
-		void Update() {	
+		
+		void Update() {
+			auto worlds = this->_worldManager.GetWorlds(this->positionIndince);
 			this->_renderer->UpdateIO();
 			if (this->_renderer->WindowActive()) {
-				if (this->_currentWorld != nullptr) {
-					this->_currentWorld->CallFunctionProcesses();
-				
-					this->_currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
-					this->_currentWorld->Update();
+				for (auto currentWorld: worlds) {
+					if (currentWorld != nullptr) {
+						currentWorld->CallFunctionProcesses();
+						
+						currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
+						currentWorld->Update();
+					}
 				}
 				
 				if (this->_physicsEnabled) {
@@ -161,8 +161,10 @@ namespace PrettyEngine {
 
 				this->_renderer->StartUIRendering();
 				this->UpdateDebugUI();
-				if (this->_currentWorld != nullptr) {
-					this->_currentWorld->CallRenderFunctions();
+				for (auto & currentWorld: worlds) {
+					if (currentWorld != nullptr) {
+						currentWorld->CallRenderFunctions();
+					}
 				}
 
 				double currentTime = this->_renderer->GetTime();
@@ -177,10 +179,11 @@ namespace PrettyEngine {
 
 				this->_renderer->Draw();
 				this->_renderer->Show();
-
 			}
-			if (this->_currentWorld != nullptr) {
-				this->_currentWorld->AlwayUpdate();
+			for (auto & currentWorld: worlds) {
+				if (currentWorld != nullptr) {
+					currentWorld->AlwayUpdate();
+				}
 			}
 		}
 		
@@ -196,30 +199,21 @@ namespace PrettyEngine {
 			return this->_renderer;
 		}
 
-		void SetCurrentWorld(std::shared_ptr<World> newWorld) {
-			if (this->_currentWorld != nullptr) {
-				this->RemoveCurrentWorld();
+		void SetupWorlds() {
+			auto worlds = this->_worldManager.GetWorlds(this->positionIndince);
+			for (auto & currentWorld: worlds) {
+				currentWorld->physicalEngine = this->_physicalEngine;
+				currentWorld->audioEngine = this->_audioEngine;
+				currentWorld->renderer = this->_renderer; 
+				currentWorld->engine = this;
+
+				currentWorld->UpdateLinks();
 			}
-
-			newWorld->physicalEngine = this->_physicalEngine;
-			newWorld->audioEngine = this->_audioEngine;
-			newWorld->renderer = this->_renderer; 
-			newWorld->engine = this;
-
-			this->_currentWorld = newWorld;
-			this->_currentWorld->UpdateLinks();
 		}
 
-		std::shared_ptr<World> GetCurrentWorld() {
-			return this->_currentWorld;
-		}
-		
 		/// Proper way to remove the current world
-		void RemoveCurrentWorld() {
-			if (this->_currentWorld != nullptr) {
-				this->_currentWorld->Clear();
-				this->_currentWorld = nullptr;
-			}
+		void ClearWorlds() {
+			this->_worldManager.Clear();
 		}
 		
 		Texture* GetTexture(std::string name) {	
@@ -307,11 +301,15 @@ namespace PrettyEngine {
 				iter++;
 			}
 		}
+
+		PrettyEngine::WorldManager* GetWorldManager() {
+			return &this->_worldManager;
+		}
 		
 	private:
 		std::shared_ptr<DataBase> engineDatabase;
 
-		std::shared_ptr<World> _currentWorld = nullptr;
+		PrettyEngine::WorldManager _worldManager;
 
 		bool exit = false;
 
@@ -337,6 +335,8 @@ namespace PrettyEngine {
 		std::vector<int> frameRateTimeLogs;
 
 		ImPlotContext* _imPlotContext;
+
+		glm::vec3 positionIndince;
 	};
 	
 	static Engine* GetEngine(DynamicObject* object) {
