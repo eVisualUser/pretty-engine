@@ -14,7 +14,7 @@
  * REGENERATED AUTOMATICALLY UPON THE NEXT BUILD.    *
  ******************************************************/
 
-static void AddCustomEntity(std::string name, std::shared_ptr<PrettyEngine::World> world) {
+static void CreateCustomEntity(std::string name, std::shared_ptr<PrettyEngine::World> world) {
     if(name == "Editor") {
         world->RegisterEntity(std::make_shared<Custom::Editor>());
     } 
