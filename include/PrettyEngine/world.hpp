@@ -8,18 +8,14 @@
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/physics.hpp>
 #include <PrettyEngine/physicsEngine.hpp>
-#include <PrettyEngine/reflect.hpp>
 #include <PrettyEngine/data.hpp>
 
 #include <Guid.hpp>
 #include <toml++/toml.h>
+#include <glm/vec3.hpp>
 
-#include <sstream>
-#include <fstream>
 #include <unordered_map>
-#include <utility>
 #include <memory>
-
 
 namespace PrettyEngine {
 	class World;
@@ -86,7 +82,7 @@ namespace PrettyEngine {
 		void Update() {
 			this->Start();
 			for (auto & entity: this->entities) {
-				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+				if (entity.second.get() != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
 					entity.second->OnUpdate();
 					for (auto & component: entity.second->components) {
 						component->OnUpdate();
