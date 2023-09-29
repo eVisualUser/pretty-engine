@@ -83,6 +83,10 @@ namespace PrettyEngine {
 			this->d3 = !this->d3;
 		}
 
+		void Set3DMode(bool value) {
+			this->d3 = value;
+		}
+
 	public:
 		bool render = true;
 		bool active = true;
