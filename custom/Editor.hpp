@@ -32,8 +32,8 @@ namespace Custom {
 	  }
 
 	  void OnUpdate() override {
-	    if (this->renderer->GetKeyPress(KeyCode::LeftControl) &&
-	        this->renderer->GetKeyDown(KeyCode::S)) {
+	    if (this->input->GetKeyPress(KeyCode::LeftControl) &&
+	        this->input->GetKeyDown(KeyCode::S)) {
 	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
 	      	this->requests.push_back(Request::SAVE);    	
 	    }
@@ -71,9 +71,9 @@ namespace Custom {
 	    }
 	    ImGui::End();
 
-	    if (this->renderer->GetMouseButtonClick(1)) {
+	    if (this->input->GetMouseButtonClick(1)) {
 	      actionBox = !actionBox;
-	      auto cursorPosition = this->renderer->GetCursorPosition();
+	      auto cursorPosition = this->input->GetCursorPosition();
 	      actionBoxStartPos = ImVec2(cursorPosition.x, cursorPosition.y);
 	    }
 

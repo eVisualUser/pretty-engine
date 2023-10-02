@@ -177,13 +177,13 @@ namespace PrettyEngine {
 				entity.second->physicalEngine = this->physicalEngine;
 				entity.second->audioEngine = this->audioEngine;
 				entity.second->renderer = this->renderer;
-				entity.second->engine = this->engine;
+				entity.second->input = this->input;
 
 				for(auto & component: entity.second->components) {
 					component->audioEngine = this->audioEngine;
 					component->physicalEngine = this->physicalEngine;
 					component->renderer = this->renderer;
-					component->engine = this->engine;
+					component->input = this->input;
 				}
 			}
 		}
@@ -283,6 +283,7 @@ namespace PrettyEngine {
 		std::shared_ptr<PhysicalEngine> physicalEngine = nullptr;
 		std::shared_ptr<AudioEngine> audioEngine = nullptr;
 		std::shared_ptr<Renderer> renderer = nullptr;
+		std::shared_ptr<Input> input = nullptr;
 
 		std::unordered_map<std::string, void*> sharedData;
 

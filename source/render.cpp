@@ -37,23 +37,10 @@
 #include <Guid.hpp>
 
 #include <fstream>
-#include <sstream>
-#include <limits.h>
 
 #define PRETTY_ENGINE_DEFAULT_WINDOW_NAME "Pretty-Engine Window"
 
 namespace PrettyEngine {
-    glm::vec2 wheelScroll = glm::vec2();
-
-    void MouseWheelScrollCallBack(GLFWwindow* window, double x, double y) {
-        wheelScroll.x = static_cast<float>(x);
-        wheelScroll.y = static_cast<float>(y);
-    }
-
-    float Renderer::GetMouseWheelDelta() {
-        return wheelScroll.y;
-    }
-
     std::vector<unsigned char> DecodeImage(std::vector<unsigned char>* in, int bytes, int* height, int* width, int* channels) {
         
         stbi_uc* imageData = stbi_load_from_memory(in->data(), bytes, width, height, channels, 0);
@@ -424,8 +411,6 @@ namespace PrettyEngine {
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
         glfwMakeContextCurrent(window);
-        
-        glfwSetScrollCallback(window, MouseWheelScrollCallBack);
 
     	this->_window = window;
 
@@ -498,18 +483,6 @@ namespace PrettyEngine {
 
         this->deltaTime =  glfwGetTime() - this->_lastFrame;
         this->_lastFrame = glfwGetTime();
-
-        wheelScroll = glm::vec2();
-        
-        this->_cursorLastPosition = this->GetCursorPosition();
-
-        if (this->GetKeyDown(KeyCode::F11)) {
-            this->SetFullscreen(!this->GetFullscreen());
-        }
-
-        for(auto & inputHandler: this->_inputHandlerList) {
-            inputHandler.second->OnWindowPolls(this);
-        }
     }
 
     void Renderer::StartUIRendering() {
@@ -626,6 +599,10 @@ namespace PrettyEngine {
                                             modelTransform = modelTransform * object->parent->GetTransformMatrix();
                                         }
 
+                                        for(auto & uniformMaker: this->_uniformMakers) {
+                                            uniformMaker(object.get(), &camera);
+                                        }
+                                        
                                         glUniformMatrix4fv(shaderProgram->uniforms["Model"], 1, GL_FALSE, glm::value_ptr(modelTransform));
 
                                         glUniformMatrix4fv(shaderProgram->uniforms["View"], 1, GL_FALSE, glm::value_ptr(currentCameraMatrix));

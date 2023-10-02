@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PrettyEngine/dynamicObject.hpp"
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -12,6 +11,7 @@
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/Input.hpp>
 
 #include <toml++/toml.h>
 #include <imgui.h>
@@ -66,6 +66,8 @@ namespace PrettyEngine {
 			this->SetWindowIcon("WindowIcon");
 
 			this->_renderer->ShowWindow();
+
+			this->_input = std::make_shared<Input>(this->_renderer->GetWindow());
 		}
 		
 		~Engine() {
@@ -143,6 +145,12 @@ namespace PrettyEngine {
 				ImGui::End();
 			}
 		}
+
+		void UpdateUtilShortcut() {
+			if (this->_input->GetKeyDown(KeyCode::F11)) {
+            	this->_renderer->SetFullscreen(!this->_renderer->GetFullscreen());
+        	}
+		}
 		
 		void Update() {
 			auto worlds = this->_worldManager.GetWorlds();
@@ -217,7 +225,7 @@ namespace PrettyEngine {
 				currentWorld->physicalEngine = this->_physicalEngine;
 				currentWorld->audioEngine = this->_audioEngine;
 				currentWorld->renderer = this->_renderer; 
-				currentWorld->engine = this;
+				currentWorld->input = _input;
 
 				currentWorld->UpdateLinks();
 			}
@@ -334,6 +342,7 @@ namespace PrettyEngine {
 		std::shared_ptr<AudioEngine> _audioEngine = std::make_shared<AudioEngine>();
 		std::shared_ptr<PhysicalEngine> _physicalEngine = std::make_shared<PhysicalEngine>();
 		std::shared_ptr<Renderer> _renderer = std::make_shared<Renderer>();
+		std::shared_ptr<Input> _input = nullptr;
 
 		toml::parse_result customConfig;
 

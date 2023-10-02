@@ -5,6 +5,7 @@
 #include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/tags.hpp>
+#include <PrettyEngine/Input.hpp>
 
 #include <Guid.hpp>
 
@@ -52,7 +53,7 @@ namespace PrettyEngine {
 		std::shared_ptr<Renderer> renderer;
 		std::shared_ptr<AudioEngine> audioEngine;
 		std::shared_ptr<PhysicalEngine> physicalEngine;
-		void* engine;
+		std::shared_ptr<Input> input;
 
 		std::vector<std::string> visualObjects;
 		std::vector<std::string> physicalObjects;
