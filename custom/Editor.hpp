@@ -32,6 +32,7 @@ namespace Custom {
 	    if (this->renderer->GetKeyPress(KeyCode::LeftControl) &&
 	        this->renderer->GetKeyDown(KeyCode::S)) {
 	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);
+	      	
 	    }
 	  }
 

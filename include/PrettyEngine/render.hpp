@@ -183,7 +183,7 @@ namespace PrettyEngine {
 		void CreateWindow();
 		void ShowWindow();
 
-		void Setup();
+		void Setup(glm::vec3 renderCubeScale = glm::vec3(20.0f, 20.0f, 100.0f));
 
 		/// Draw elements
 		void Draw();

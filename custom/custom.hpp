@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Editor.hpp>
+#include <Empty.hpp>
 
 #include <PrettyEngine/world.hpp>
 
@@ -17,5 +18,7 @@
 static void CreateCustomEntity(std::string name, std::shared_ptr<PrettyEngine::World> world) {
     if(name == "Editor") {
         world->RegisterEntity(std::make_shared<Custom::Editor>());
+    }     if(name == "Empty") {
+        world->RegisterEntity(std::make_shared<Custom::Empty>());
     } 
 }

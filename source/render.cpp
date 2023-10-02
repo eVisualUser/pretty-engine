@@ -417,6 +417,8 @@ namespace PrettyEngine {
 
         glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE); 
 
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+        
     	auto window = glfwCreateWindow(800, 600, PRETTY_ENGINE_DEFAULT_WINDOW_NAME, nullptr, nullptr);
 
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -426,14 +428,16 @@ namespace PrettyEngine {
         glfwSetScrollCallback(window, MouseWheelScrollCallBack);
 
     	this->_window = window;
+
+        this->HideWindow();
     }
 
     void Renderer::ShowWindow() {
     	glfwShowWindow(this->_window);
     }
 
-    void Renderer::Setup() {
-        this->renderCube.scale = glm::vec3(20.0f, 20.0f, 100.0f);
+    void Renderer::Setup(glm::vec3 renderCubeScale) {
+        this->renderCube.scale = renderCubeScale;
         this->renderCube.colliderModel = ColliderModel::AABB;
         this->renderCube.UpdateHalfScale();
 

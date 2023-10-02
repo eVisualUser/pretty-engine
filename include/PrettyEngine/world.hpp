@@ -266,6 +266,10 @@ namespace PrettyEngine {
 			}
 			this->entities.clear();
 		}
+
+		std::unordered_map<std::string, std::shared_ptr<Entity>>* GetEntities() {
+			return &this->entities;
+		}
 		
 	public:
 		std::thread* updateMT = nullptr;

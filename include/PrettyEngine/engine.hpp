@@ -63,6 +63,8 @@ namespace PrettyEngine {
 			this->_imPlotContext = ImPlot::CreateContext();
 
 			this->SetWindowIcon("WindowIcon");
+
+			this->_renderer->ShowWindow();
 		}
 		
 		~Engine() {
@@ -142,7 +144,7 @@ namespace PrettyEngine {
 		}
 		
 		void Update() {
-			auto worlds = this->_worldManager.GetWorlds(this->positionIndince);
+			auto worlds = this->_worldManager.GetWorlds();
 			this->_renderer->UpdateIO();
 			if (this->_renderer->WindowActive()) {
 				for (auto currentWorld: worlds) {
@@ -200,7 +202,7 @@ namespace PrettyEngine {
 		}
 
 		void SetupWorlds() {
-			auto worlds = this->_worldManager.GetWorlds(this->positionIndince);
+			auto worlds = this->_worldManager.GetWorlds();
 			for (auto & currentWorld: worlds) {
 				currentWorld->physicalEngine = this->_physicalEngine;
 				currentWorld->audioEngine = this->_audioEngine;
@@ -335,8 +337,6 @@ namespace PrettyEngine {
 		std::vector<int> frameRateTimeLogs;
 
 		ImPlotContext* _imPlotContext;
-
-		glm::vec3 positionIndince;
 	};
 	
 	static Engine* GetEngine(DynamicObject* object) {

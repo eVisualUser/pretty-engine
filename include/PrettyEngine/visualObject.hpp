@@ -22,7 +22,7 @@ namespace PrettyEngine {
 		void SetShaderProgram(GLShaderProgramRefs* newShaderProgram) {
 			this->shaderProgram = newShaderProgram;
 		}
-
+	
 	public:
 		GLShaderProgramRefs* shaderProgram;
 		Mesh* mesh;

@@ -4,29 +4,11 @@ name = "World"
 [entities]
 [entities.entityA]
 name = "Editor"
-type = "Entity"
 object = "Editor"
 components = [["LocalizationEditor", "LocalizationEditor"]]
 public_map = [["projectName", "MyNewProject"]]
 
 [entities.entityA.transform]
-position = [0.0, 0.0, 0.0]
-rotation = [0.0, 0.0, 0.0, 0.0]
-scale = [1.0, 1.0, 1.0]
-
-[render_model]
-[rect]
-
-[visualObjects]
-[ground]
-render = true
-active = true
-d3 = false
-base_color = [1.0, 1.0, 1.0, 1.0]
-render_layer = 0
-render_model = "rect"
-
-[ground.transform]
 position = [0.0, 0.0, 0.0]
 rotation = [0.0, 0.0, 0.0, 0.0]
 scale = [1.0, 1.0, 1.0]

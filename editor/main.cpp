@@ -1,9 +1,9 @@
 #include <PrettyEngine/utils.hpp>
+#include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/engine.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/world.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/debug.hpp>
 
@@ -19,7 +19,7 @@ int main() {
 	
 	engine.GetWorldManager()
 		->AddWorldFile(GetEnginePublicPath("worlds/editor.toml", true));
-		
+	
 	engine.GetWorldManager()
 		->FilterWorldList(worldFilter)
 		->ParseWorldsFiles()
@@ -29,6 +29,8 @@ int main() {
 	engine.SetupWorlds();
 
 	engine.Run();
+
+	engine.GetWorldManager()->SaveWorlds();
 
 	return 0;	
 }

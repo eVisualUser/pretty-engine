@@ -1,14 +1,17 @@
 #pragma once
 
+#include "toml++/impl/forward_declarations.h"
 #include <PrettyEngine/physics.hpp>
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 
+#include <array>
 #include <custom.hpp>
 #include <components.hpp>
 
+#include <fstream>
 #include <glm/vec3.hpp>
 #include <toml++/toml.h>
 
@@ -16,34 +19,6 @@
 #include <unordered_map>
 
 namespace PrettyEngine {
-	static void ApplyLoadedTransform(toml::table* transformTable, std::shared_ptr<Transform> transform) {
-		bool isArray = (*transformTable)["position"].is_array();
-		if (isArray) {
-			if ((*transformTable)["position"].is_array()) {
-				auto position = (*transformTable)["position"].as_array();
-
-				transform->position.x = position->get_as<double>(0)->value_or(0.0f);
-				transform->position.y = position->get_as<double>(1)->value_or(0.0f);
-				transform->position.z = position->get_as<double>(2)->value_or(0.0f);
-
-				auto rotation = (*transformTable)["rotation"].as_array();
-
-				transform->rotation.x = rotation->get_as<double>(0)->value_or(0.0f);
-				transform->rotation.y = rotation->get_as<double>(1)->value_or(0.0f);
-				transform->rotation.z = rotation->get_as<double>(2)->value_or(0.0f);
-				transform->rotation.w = rotation->get_as<double>(3)->value_or(0.0f);
-
-				auto scale = (*transformTable)["scale"].as_array();
-
-				transform->scale.x = scale->get_as<double>(0)->value_or(0.0f);
-				transform->scale.y = scale->get_as<double>(1)->value_or(0.0f);
-				transform->scale.z = scale->get_as<double>(2)->value_or(0.0f);
-
-				auto arraySize = position->size();
-			}
-		}
-	}
-
 	class WorldManager {
 	public:
 		void AddWorldFile(std::string fileName) {
@@ -76,11 +51,7 @@ namespace PrettyEngine {
 			}
 			this->_worldsFilesToLoad.clear();
 			return this;
-		}
-
-		bool UpdateWorldTrigger(World* world) {
-			return this->UpdateWorldTrigger(world->worldName);
-		}		
+		}	
 
 		std::shared_ptr<World> GetWorldByName(std::string worldName) {
 			for(auto & world: this->_worldsInstances) {
@@ -92,37 +63,72 @@ namespace PrettyEngine {
 			return nullptr;
 		}
 
-		bool UpdateWorldTrigger(std::string worldName) {
-			for(auto & world: this->_worldsFilesParsed) {
-				auto currentWorldName = world["meta"]["name"].as_string()->value_or("Unknown");
-				if (currentWorldName == worldName) {
-					if (world["meta"]["trigger"].is_table()) {
-						auto rawPosition = world["meta"]["trigger"]["position"].as_array();
-						glm::vec3 position;
-						if (rawPosition->size() == 1) {
-							position.x = rawPosition->get(0)->value_or(0.0f);
-						}
-						if (rawPosition->size() == 2) {
-							position.y = rawPosition->get(1)->value_or(0.0f);
-						}
-						if (rawPosition->size() == 3) {
-							position.z = rawPosition->get(2)->value_or(0.0f);
-						}
-						this->GetWorldByName(currentWorldName)->simulationCollider.position = position;
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-			return false;
-		}
-
 		WorldManager* CreateWorldsInstances() {
 			for(auto & world: this->_worldsFilesParsed) {
-				this->_worldsInstances.push_back( std::make_shared<World>());
+				this->_worldsInstances.push_back(std::make_shared<World>());
 			}
 			return this;
+		}
+
+		void SaveWorlds() {
+			int index = 0;
+			for(auto & world: this->_worldsInstances) {
+				auto filePath = this->_worldsFiles[index];
+
+				std::ofstream out;
+				out.open(filePath);
+
+				if (out.is_open()) {
+					auto base = toml::parse("");
+					base.insert_or_assign("meta", toml::table{});
+					base["meta"].as_table()->insert_or_assign("name", world->worldName);
+
+					base.insert_or_assign("entities", toml::table{});
+					for(auto & entity: world->entities) {
+						auto entitiesTable = base["entities"].as_table();
+						entitiesTable->insert_or_assign(entity.second->unique, toml::table{});
+						auto entityTable = (*entitiesTable)[entity.second->unique].as_table();
+						entityTable->insert_or_assign("name", entity.second->entityName);
+						entityTable->insert_or_assign("object", entity.second->object);
+
+						entityTable->insert_or_assign("transform", toml::table{});
+						auto transformTable = (*entityTable)["transform"].as_table();
+						entity.second->GetTransform()->AddToToml(transformTable);
+
+						auto publicMap = toml::array();
+						for(auto & element: entity.second->publicMap) {
+							auto pair = toml::array();
+							pair.push_back(element.first);
+							pair.push_back(element.second);
+							publicMap.push_back(pair);
+						}
+
+						entityTable->insert_or_assign("public_map", publicMap);
+
+						auto components = toml::array();
+						for(auto & component: entity.second->components) {
+							auto componentOut = toml::array();
+
+							componentOut.push_back(component->unique);
+							componentOut.push_back(component->object);
+
+							auto componentPublicMap = toml::array();
+							for(auto & element: component->publicMap) {
+								componentOut.push_back(element.first);
+								componentOut.push_back(element.second);
+							}
+
+							components.push_back(componentOut); 
+						}
+						entityTable->insert_or_assign("components", components);
+					}
+					out << base;
+					out.flush();
+					out.close();
+				}
+
+				index++;
+			}
 		}
 		
 		void LoadWorlds() {
@@ -131,7 +137,7 @@ namespace PrettyEngine {
 				if (!world.empty()) {
 					auto target = this->_worldsInstances[index];
 					target->worldName = world["meta"]["name"].value_or("World");
-					
+
 					if (world["entities"].is_table()) {
 						for(auto & entity: *world["entities"].as_table()) {
 							std::string newEntity = (*entity.second.as_table())["object"].value_or("undefined");
@@ -181,7 +187,7 @@ namespace PrettyEngine {
 							
 							auto transform = (*entity.second.as_table())["transform"];
 							if (transform.is_table() && target->GetLastEntityRegistred() != nullptr) {
-								ApplyLoadedTransform(transform.as_table(), lastEntity);
+								lastEntity->FromToml(transform.as_table());
 							}
 						}
 					}
@@ -189,19 +195,12 @@ namespace PrettyEngine {
 				index++;
 			}
 		}
-
-		std::vector<std::shared_ptr<World>> GetWorlds(glm::vec3 pointIndice, bool checkPosition = true) {
+		
+		std::vector<std::shared_ptr<World>> GetWorlds() {
 			std::vector<std::shared_ptr<World>> out;
 			
 			for(int i = 0; i < this->_worldsInstances.size(); i++) {
-				auto world = this->_worldsInstances[i];
-				if (this->UpdateWorldTrigger(world->worldName) && checkPosition) {
-					if (world->simulationCollider.PointIn(pointIndice)) {
-						out.push_back(world);
-					}
-				} else {
-					out.push_back(world);
-				}
+				out.push_back(this->_worldsInstances[i]);
 			}
 
 			return out;
@@ -213,6 +212,19 @@ namespace PrettyEngine {
 			this->_worldsFilesToLoad.clear();
 			this->_worldsFilesParsed.clear();
 			this->_worldsInstances.clear();
+		}
+
+		bool WorldLoaded(std::string worldName) {
+			for(auto & world: this->_worldsInstances) {
+				if (world->worldName == worldName) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		void RegisterWorld(std::shared_ptr<World> newWorld) {
+			this->_worldsInstances.push_back(newWorld);
 		}
 
 	private:

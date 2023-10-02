@@ -22,7 +22,6 @@
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/data.hpp>
-#include <PrettyEngine/reflect.hpp>
 #include <PrettyEngine/engine.hpp>
 
 #include <imgui.h>
@@ -31,8 +30,6 @@
 
 #include <glm/glm.hpp>
 
-#include <iostream>
-#include <sstream>
 #include <thread>
 #include <string>
 
@@ -146,7 +143,9 @@ void Main() {
 
 	auto world = std::make_shared<PrettyEngine::World>();
 
-	engine->SetCurrentWorld(world);
+	engine->GetWorldManager()->RegisterWorld(world);
+
+	engine->SetupWorlds();
 
 	auto defaultVertexShader = xg::newGuid();
 	auto defaultFragmentShader = xg::newGuid();

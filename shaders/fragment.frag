@@ -89,8 +89,7 @@ void main()
 
     if (useTexture == 0) {
         outColor = vec4(baseColor * Color, opacity) * lightOutColor;
-    }
-    else if (renderText == 0) {
+    } else if (renderText == 0) {
         outColor = texture(textureBase, Texcoord) * vec4(baseColor * Color, opacity) * lightOutColor;
     } else {
         float smoothing = textOutLineWidth / textureSize(textureBase, 0).x;
