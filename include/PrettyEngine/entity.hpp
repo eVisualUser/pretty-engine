@@ -1,5 +1,6 @@
 #pragma once
 
+#include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
@@ -8,13 +9,11 @@
 #include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/tags.hpp>
-#include <PrettyEngine/dynamicObject.hpp>
 
 #include <Guid.hpp>
 #include <toml++/toml.h>
 
 #include <memory>
-#include <unordered_map>
 
 namespace PrettyEngine {
 	#define DefaultEntityName "AnyEntity"

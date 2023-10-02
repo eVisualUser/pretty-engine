@@ -1,13 +1,12 @@
 #pragma once
 
-#include "toml++/impl/forward_declarations.h"
+#include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/physics.hpp>
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 
-#include <array>
 #include <custom.hpp>
 #include <components.hpp>
 
@@ -225,6 +224,21 @@ namespace PrettyEngine {
 
 		void RegisterWorld(std::shared_ptr<World> newWorld) {
 			this->_worldsInstances.push_back(newWorld);
+		}
+
+		std::vector<Request> GetAllDynamicObjectsRequests() {
+			std::vector<Request> out;
+
+			for(auto & world: this->_worldsInstances) {
+				for(auto & entity: world->entities) {
+					for(auto & req: entity.second->requests) {
+						out.push_back(req);
+					}
+					entity.second->requests.clear();
+				}
+			}
+
+			return out;
 		}
 
 	private:

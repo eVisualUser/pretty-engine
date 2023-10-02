@@ -11,6 +11,11 @@
 #include <memory>
 
 namespace PrettyEngine {
+	enum class Request {
+		SAVE = 0,
+		EXIT,
+	};
+
 	class DynamicObject: public Tagged {
 	public:
 		/// Called before the first frame.
@@ -53,6 +58,8 @@ namespace PrettyEngine {
 		std::vector<std::string> physicalObjects;
 
 		std::unordered_map<std::string, std::string> publicMap;
+
+		std::vector<Request> requests;
 
 	public:
 		std::string unique;

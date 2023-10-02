@@ -1,13 +1,16 @@
 #pragma once
 
-#include <Guid.hpp>
-#include <LocalizationEditor.hpp>
+#include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/utils.hpp>
 
+// Components
+#include <LocalizationEditor.hpp>
+
+#include <Guid.hpp>
 #include <imgui.h>
 
 #include <cstring>
@@ -24,15 +27,15 @@ namespace Custom {
 	    this->localization->LoadFile(GetEnginePublicPath("editor.csv", true));
 
 	    this->localizationEditorPtr =
-	        this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
+	    this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
 	    this->localizationEditorPtr->localization = this->localization;
 	  }
 
 	  void OnUpdate() override {
 	    if (this->renderer->GetKeyPress(KeyCode::LeftControl) &&
 	        this->renderer->GetKeyDown(KeyCode::S)) {
-	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);
-	      	
+	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
+	      	this->requests.push_back(Request::SAVE);    	
 	    }
 	  }
 

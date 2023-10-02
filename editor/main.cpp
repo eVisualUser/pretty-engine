@@ -30,7 +30,5 @@ int main() {
 
 	engine.Run();
 
-	engine.GetWorldManager()->SaveWorlds();
-
 	return 0;	
 }

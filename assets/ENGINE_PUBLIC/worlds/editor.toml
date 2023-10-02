@@ -1,14 +1,13 @@
-[meta]
-name = "World"
-
-[entities]
 [entities.entityA]
-name = "Editor"
-object = "Editor"
-components = [["LocalizationEditor", "LocalizationEditor"]]
-public_map = [["projectName", "MyNewProject"]]
+components = [ [ 'LocalizationEditor', 'LocalizationEditor' ] ]
+name = 'Editor'
+object = 'Editor'
+public_map = [ [ 'projectName', 'MyNewProject' ] ]
 
-[entities.entityA.transform]
-position = [0.0, 0.0, 0.0]
-rotation = [0.0, 0.0, 0.0, 0.0]
-scale = [1.0, 1.0, 1.0]
+    [entities.entityA.transform]
+    position = [ 0.0, 0.0, 0.0 ]
+    rotation = [ 0.0, 0.0, 0.0, 0.0 ]
+    scale = [ 1.0, 1.0, 1.0 ]
+
+[meta]
+name = 'World'

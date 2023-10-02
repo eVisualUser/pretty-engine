@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PrettyEngine/dynamicObject.hpp"
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -187,6 +188,15 @@ namespace PrettyEngine {
 					currentWorld->AlwayUpdate();
 				}
 			}
+
+			auto requests = this->GetWorldManager()->GetAllDynamicObjectsRequests();
+			for (auto & request: requests) {
+				if (request == Request::SAVE) {
+					this->GetWorldManager()->SaveWorlds();
+				} else if (request == Request::EXIT) {
+					this->Exit();
+				}
+			}
 		}
 		
 		std::shared_ptr<AudioEngine> GetAudioEngine() {
@@ -338,12 +348,4 @@ namespace PrettyEngine {
 
 		ImPlotContext* _imPlotContext;
 	};
-	
-	static Engine* GetEngine(DynamicObject* object) {
-		return static_cast<Engine*>(object->engine);
-	}
-
-	static Renderer* GetRenderer(DynamicObject* object) {
-		return static_cast<Renderer*>(object->engine);
-	}
 };
