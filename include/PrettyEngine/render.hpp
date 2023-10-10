@@ -33,7 +33,6 @@
 #include <thread>
 
 namespace PrettyEngine {
-
 	#define CHECK_OPENGL_ERROR() std::cout << "OpenGL Error: " << glGetError() << std::endl;
 
 	std::vector<unsigned char> DecodeImage(std::vector<unsigned char>* in, int bytes, int* height, int* width, int* channels);
@@ -165,7 +164,7 @@ namespace PrettyEngine {
 			TextureType textureType,
 			TextureWrap wrap,
 			TextureFilter filter,
-			TextureChannels channels = TextureChannels::RGBA 
+			TextureChannels channels 
 		);
 
 		Texture* AddTextureFromData(
@@ -238,8 +237,6 @@ namespace PrettyEngine {
  			return std::make_pair(false, nullptr);
 		}
 
-		Font LoadFont(std::string name, std::string fileName, TextureFilter filter = TextureFilter::Linear, float size = 48.0f);
-		
 		double GetDeltaTime() {
 			return this->deltaTime * this->GetTimeSpeed();
 		}

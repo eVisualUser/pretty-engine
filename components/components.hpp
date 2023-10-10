@@ -1,6 +1,7 @@
 #pragma once
 
 #include <LocalizationEditor.hpp>
+#include <Render.hpp>
 
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/world.hpp>
@@ -18,6 +19,8 @@
 static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name) {
     if(name == "LocalizationEditor") {
         return std::make_shared<Custom::LocalizationEditor>();
+    }     if(name == "Render") {
+        return std::make_shared<Custom::Render>();
     } 
  return nullptr;
 }

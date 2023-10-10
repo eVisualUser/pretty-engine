@@ -26,9 +26,6 @@ uniform int mainLayer;
 
 uniform float opacity;
 
-uniform int renderText;
-uniform float textOutLineWidth;
-
 uniform int useSunLight;
 uniform vec3 sunLightColor;
 uniform float sunLightFactor;
@@ -98,15 +95,8 @@ void main()
 
     if (useTexture == 0) {
         outColor = vec4(baseColor * Color, opacity) * lightOutColor;
-    } else if (renderText == 0) {
-        outColor = texture(textureBase, Texcoord) * vec4(baseColor * Color, opacity) * lightOutColor;
     } else {
-        float smoothing = textOutLineWidth / textureSize(textureBase, 0).x;
-        float alpha = texture(textureBase, Texcoord).r;
-        float smoothedAlpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, alpha);
-        
-        vec4 sampled = vec4(1.0, 1.0, 1.0, texture(textureBase, Texcoord).r);
-        outColor = vec4(baseColor, smoothedAlpha) * lightOutColor;
+        outColor = texture(textureBase, Texcoord) * vec4(baseColor * Color, opacity) * lightOutColor;
     }
 
     outColor *= vec4(outColor.xyz * colorFilter, outColor.w);

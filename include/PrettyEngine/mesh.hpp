@@ -7,7 +7,6 @@
 #include <glad/glad.h>
 
 #include <vector>
-#include <iostream>
 
 namespace PrettyEngine {
 	enum class MeshDrawType {
@@ -68,6 +67,8 @@ namespace PrettyEngine {
 		unsigned int vao;
 		unsigned int vbo;
 		unsigned int ebo;
+
+		std::string name;
 	};
 
 	static Mesh CreateRectMesh(float width = 1.0f, float height = 1.0f, glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {

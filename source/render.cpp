@@ -36,8 +36,6 @@
 
 #include <Guid.hpp>
 
-#include <fstream>
-
 #define PRETTY_ENGINE_DEFAULT_WINDOW_NAME "Pretty-Engine Window"
 
 namespace PrettyEngine {
@@ -52,99 +50,6 @@ namespace PrettyEngine {
 
         stbi_image_free(imageData);
 
-        return out;
-    }
-    
-    Font Renderer::LoadFont(std::string name, std::string fileName, TextureFilter filter, float size) {
-        Font out = Font();
-        
-        std::ifstream input(fileName, std::ios::binary);
-        if (!input.is_open()) {
-            DebugLog(LOG_ERROR, "Failed to open font file: " << fileName, true);
-            return out;
-        }
-
-        input.seekg(0, std::ios::end);
-        std::streamsize fileSize = input.tellg();
-        input.seekg(0, std::ios::beg);
-    
-        // Create a vector to store the file contents
-        std::vector<unsigned char> bytes(fileSize);
-    
-        // Read the file byte by byte
-        for (std::streamsize i = 0; i < fileSize; ++i)
-        {
-            unsigned char byte;
-            if (!input.read(reinterpret_cast<char*>(&byte), sizeof(unsigned char)))
-            {
-                DebugLog(LOG_ERROR, "Failed to read font file: " << fileName, true);
-                input.close();
-                return out;
-            }
-        
-            // Store the byte in the vector
-            bytes[i] = byte;
-        }
-
-        if (input.fail() && !input.good()) {
-            DebugLog(LOG_ERROR, "Failed to load font file: " << fileName, true);
-            input.close();            
-        } else {
-            input.close();
-
-            stbtt_fontinfo info;
-            if (!stbtt_InitFont(&info, bytes.data(), 0)) {
-                DebugLog(LOG_ERROR, "Failed to init font info", true);
-            }
-
-            float scale = stbtt_ScaleForPixelHeight(&info, size);
-
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            
-            int ascent, descent, lineGap;
-            stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
-
-            for(unsigned char i = 0; i < 255; i++) {
-                unsigned char character = i;
-
-                int glyphIndex = stbtt_FindGlyphIndex(&info, character);
-                if (!glyphIndex) {
-                    continue;
-                }
-
-                int glyphHeight, glyphWidth;
-                unsigned char* glyphBitmap = stbtt_GetGlyphBitmap(&info, scale, scale, glyphIndex, &glyphWidth, &glyphHeight, NULL, NULL);
-                if (!glyphBitmap) {
-                    continue;
-                }
-
-                auto texture = this->AddTextureFromData(xg::newGuid().str(), glyphBitmap, glyphWidth, glyphHeight, TextureType::Base, TextureWrap::ClampToBorder, filter, TextureChannels::Red);
-                if (texture == nullptr) {
-                    continue;
-                }
-
-                stbtt_FreeBitmap(glyphBitmap, NULL);
-
-                int advanceWidth, leftSideBearing;
-                stbtt_GetGlyphHMetrics(&info, glyphIndex, &advanceWidth, &leftSideBearing);
-
-                int x0, x1, y0, y1;
-                stbtt_GetGlyphBox(&info, glyphIndex, &x0, &y0, &x1, &y1);
-                
-                CharacterInfo info;
-                info.ascent = ascent;
-                info.descent = descent;
-                info.lineGap = lineGap;
-                info.advance = advanceWidth;
-                info.bearing = leftSideBearing;
-                info.bearingY = y1;
-                info.glyphWidth = glyphWidth;
-                info.glyphHeight = glyphHeight;
-
-                out.AddTexture(character, texture);
-                out.charactersInfo.insert(std::make_pair(character, info));
-            }
-        }
         return out;
     }
 
@@ -267,7 +172,7 @@ namespace PrettyEngine {
 
     Texture* Renderer::AddTexture(
         std::string name,
-        std::string fileName,
+        std::string filePath,
         TextureType textureType,
         TextureWrap wrap,
         TextureFilter filter,
@@ -277,41 +182,45 @@ namespace PrettyEngine {
         if (!textureExist.first) {
             Texture texture;
 
-            unsigned int textureID;
-            glGenTextures(1, &textureID);
-            if (!textureID) {
-                DebugLog(LOG_ERROR, "Failed to generate texture for: " << fileName, true);                
-                std::exit(-1);
+            if (FileExist(filePath)) {
+                unsigned int textureID;
+                glGenTextures(1, &textureID);
+                if (!textureID) {
+                    DebugLog(LOG_ERROR, "Failed to generate texture for: " << filePath, true);                
+                    std::exit(-1);
+                }
+
+                int width, height;
+
+                unsigned char* data = stbi_load(filePath.c_str(), &width, &height, nullptr, 0);
+                if (!data) {
+                    DebugLog(LOG_ERROR, "Failed to load image: " << filePath, true);
+                    std::exit(-1);
+                }
+
+                glBindTexture(GL_TEXTURE_2D, textureID);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)channels, width, height, 0, (GLenum)channels, GL_UNSIGNED_BYTE, data);
+
+                stbi_image_free(data);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)wrap);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)wrap);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)filter);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)filter);
+
+                texture.textureID = textureID;
+                texture.textureType = textureType;
+                texture.wrap = wrap; 
+                texture.filter = filter;
+                texture.name = name;
+
+                this->glTextures.insert(std::make_pair(name, texture));
+
+                return &this->glTextures[name];
+            } else {
+                DebugLog(LOG_ERROR, "File not found: " << filePath, true);
             }
-
-            int width, height;
-
-            unsigned char* data = stbi_load(fileName.c_str(), &width, &height, nullptr, 0);
-            if (!data) {
-                DebugLog(LOG_ERROR, "Failed to load image: " << fileName, true);
-                std::exit(-1);
-            }
-
-            glBindTexture(GL_TEXTURE_2D, textureID);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)channels, width, height, 0, (GLenum)channels, GL_UNSIGNED_BYTE, data);
-
-            stbi_image_free(data);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)wrap);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)wrap);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)filter);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)filter);
-
-            texture.textureID = textureID;
-            texture.textureType = textureType;
-            texture.wrap = wrap; 
-            texture.filter = filter;
-            texture.name = name;
-
-            this->glTextures.insert(std::make_pair(name, texture));
-
-            return &this->glTextures[name];
         }
         return textureExist.second;
     }
@@ -586,144 +495,92 @@ namespace PrettyEngine {
 
                                         const auto mesh = object->renderModel->mesh;
                                         const auto shaderProgram = object->renderModel->shaderProgram;
+                                        if (shaderProgram == nullptr) {
+                                            DebugLog(LOG_ERROR, "Missing shader program for: " << visualObject.first, false);
+                                        } else if (mesh == nullptr) {
+                                            DebugLog(LOG_ERROR, "Missing mesh for: " << visualObject.first, false);
+                                        } else {
+                                            glBindVertexArray(mesh->vao);
+                                            glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+                                            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+                                            GL_CHECK_ERROR();
 
-                                        glBindVertexArray(mesh->vao);
-                                        glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-                                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-                                        GL_CHECK_ERROR();
+                                            glUseProgram(shaderProgram->shaderProgram);
 
-                                        glUseProgram(shaderProgram->shaderProgram);
-
-                                        auto modelTransform = object->GetTransformMatrix();
-                                        if (object->haveParent) {
-                                            modelTransform = modelTransform * object->parent->GetTransformMatrix();
-                                        }
-
-                                        for(auto & uniformMaker: this->_uniformMakers) {
-                                            uniformMaker(object.get(), &camera);
-                                        }
-                                        
-                                        glUniformMatrix4fv(shaderProgram->uniforms["Model"], 1, GL_FALSE, glm::value_ptr(modelTransform));
-
-                                        glUniformMatrix4fv(shaderProgram->uniforms["View"], 1, GL_FALSE, glm::value_ptr(currentCameraMatrix));
-                                        glUniformMatrix4fv(shaderProgram->uniforms["Projection"], 1, GL_FALSE, glm::value_ptr(proj));
-                                        
-                                        glUniform1f(shaderProgram->uniforms["Time"], currentTime);
-
-                                        glUniform3fv(shaderProgram->uniforms["BaseColor"], 1, glm::value_ptr(object->baseColor));
-                                        glUniform3fv(shaderProgram->uniforms["ColorFilter"], 1, glm::value_ptr(camera.colorFilter));
-
-                                        glUniform1i(shaderProgram->uniforms["UseTexture"], object->renderModel->useTexture);
-
-                                        glUniform1i(shaderProgram->uniforms["Layer"], object->renderLayer);
-                                        glUniform1i(shaderProgram->uniforms["MainLayer"], this->mainLayer);
-
-                                        glUniform1f(shaderProgram->uniforms["Opacity"], object->opacity);
-
-                                        glUniform1i(shaderProgram->uniforms["RenderText"], object->renderText);
-                                        if (object->renderText) {
-                                            glUniform1f(shaderProgram->uniforms["TextOutLineWidth"], object->text->textOutLineWidth);
-                                        }
-
-                                        glUniform1i(shaderProgram->uniforms["UseSunLight"], object->sunLight);
-                                        if (object->sunLight) {
-                                            glUniform3fv(shaderProgram->uniforms["SunLightColor"], 1, glm::value_ptr(this->sunColor));
-                                            glUniform1f(shaderProgram->uniforms["SunLightFactor"], this->sunLightFactor);
-                                        }
-
-                                        glUniform1i(shaderProgram->uniforms["UseLight"], object->useLight);
-                                        if (object->useLight) {
-                                            glUniform1i(shaderProgram->uniforms["LightsCount"], lightsCount);
-                                            glUniform1i(shaderProgram->uniforms["LightLayer"], object->lightLayer);
-                                            
-                                            glUniform1iv(shaderProgram->uniforms["LightsLayer"], lightsCount, flattenedLightsLayer.data());
-
-                                            glUniform3fv(shaderProgram->uniforms["LightsPosition"], lightsCount, flattenedLightsColor.data());
-                                            glUniform3fv(shaderProgram->uniforms["LightsColor"], lightsCount, flattenedLightsColor.data());
-                                            
-                                            glUniform1fv(shaderProgram->uniforms["LightsRadius"], lightsCount, flattenedRadius.data());
-                                            glUniform1fv(shaderProgram->uniforms["LightsFactor"], lightsCount, flattenedLightsFactor.data());
-                                            glUniform1fv(shaderProgram->uniforms["LightsDeferredFactor"], lightsCount, flattenedLightsDeferredFactor.data());
-                                            glUniform1fv(shaderProgram->uniforms["LightsOpacityFactorEffect"], lightsCount, flattenedLightsOpacityFactorEffect.data());
-                                        
-                                            glUniform1iv(shaderProgram->uniforms["SpotLight"], lightsCount, flattenedLightsSpotLight.data());
-                                            glUniform3fv(shaderProgram->uniforms["SpotLightDirection"], lightsCount, flattenedLightsDirection.data());
-                                            glUniform1fv(shaderProgram->uniforms["SpotLightCutOff"], lightsCount, flattenedLightsCutOff.data());
-                                        }
-
-                                        if (object->render) {
-                                            if (object->renderModel->useTexture) {
-                                                for (auto & texture: object->textures) {
-                                                    if (texture && texture->textureID && texture->textureType == TextureType::Base) {
-                                                        glActiveTexture(GL_TEXTURE0);
-                                                        
-                                                        glBindTexture(GL_TEXTURE_2D, texture->textureID);
-                                                        
-                                                        glUniform1i(glGetUniformLocation(
-                                                            object->renderModel->shaderProgram->shaderProgram,
-                                                            "textureBase"
-                                                        ), 0);
-                                                    }
-                                                }
+                                            auto modelTransform = object->GetTransformMatrix();
+                                            if (object->haveParent) {
+                                                modelTransform = modelTransform * object->parent->GetTransformMatrix();
                                             }
 
-                                            glDrawElements((GLenum)object->renderModel->drawMode, mesh->vertexCount, GL_UNSIGNED_INT, 0);
-                                        }
+                                            for(auto & uniformMaker: this->_uniformMakers) {
+                                                uniformMaker(object.get(), &camera);
+                                            }
 
-                                        if (object->renderText) {
-                                            glm::vec3 textPosition = object->position; // Starting position of the text
-                                            float lineSpacing = 1.0f; // Adjust this value to control vertical spacing between lines
-                                            float charSpacing = 1.0f; // Adjust this value to control horizontal spacing between characters
+                                            glUniformMatrix4fv(shaderProgram->uniforms["Model"], 1, GL_FALSE, glm::value_ptr(modelTransform));
 
-                                            for (auto & c : object->text->content) {
-                                                auto texture = c.font->textures[c.character];
-                                                auto info = &c.font->charactersInfo[c.character];
+                                            glUniformMatrix4fv(shaderProgram->uniforms["View"], 1, GL_FALSE, glm::value_ptr(currentCameraMatrix));
+                                            glUniformMatrix4fv(shaderProgram->uniforms["Projection"], 1, GL_FALSE, glm::value_ptr(proj));
+                                            
+                                            glUniform1f(shaderProgram->uniforms["Time"], currentTime);
 
-                                                if (info) {
-                                                    float charWidth = info->glyphWidth * c.size * object->textSize;
-                                                    float charHeight = info->glyphHeight * c.size * object->textSize;
-                                                    
-                                                    // Calculate the position for the next character
-                                                    textPosition.x += charWidth * charSpacing;
+                                            glUniform3fv(shaderProgram->uniforms["BaseColor"], 1, glm::value_ptr(object->baseColor));
+                                            glUniform3fv(shaderProgram->uniforms["ColorFilter"], 1, glm::value_ptr(camera.colorFilter));
 
-                                                    if (c.character == '\n') {
-                                                        // Move to the next line
-                                                        textPosition.x = object->position.x;
-                                                        textPosition.y += charHeight + lineSpacing;
-                                                    }
+                                            glUniform1i(shaderProgram->uniforms["UseTexture"], object->renderModel->useTexture);
 
-                                                    // Calculate the transformation for the current character
-                                                    textPosition.x -= charWidth * 2.0f * charSpacing * c.size * object->textSize;
-                                                    textPosition.y += charHeight / 2.0f;
-                                                    glm::mat4 textTransform = glm::translate(glm::mat4(1.0f), textPosition);
-                                                    textPosition.x += charWidth * 2.0f * charSpacing * c.size * object->textSize;
-                                                    textPosition.y -= charHeight / 2.0f;
-                                                    textTransform = glm::scale(textTransform, glm::vec3(charWidth, charHeight, 1.0f));
+                                            glUniform1i(shaderProgram->uniforms["Layer"], object->renderLayer);
+                                            glUniform1i(shaderProgram->uniforms["MainLayer"], this->mainLayer);
 
-                                                    // Combine the text transformation with the model transformation
-                                                    glm::mat4 modelTransformWithText = modelTransform * textTransform;
+                                            glUniform1f(shaderProgram->uniforms["Opacity"], object->opacity);
 
-                                                    // Set the uniforms and render the character
-                                                    glUniformMatrix4fv(shaderProgram->uniforms["Model"], 1, GL_FALSE, glm::value_ptr(modelTransformWithText));
-                                                    glUniform1f(shaderProgram->uniforms["Opacity"], object->opacity + c.opacity);
+                                            glUniform1i(shaderProgram->uniforms["UseSunLight"], object->sunLight);
+                                            if (object->sunLight) {
+                                                glUniform3fv(shaderProgram->uniforms["SunLightColor"], 1, glm::value_ptr(this->sunColor));
+                                                glUniform1f(shaderProgram->uniforms["SunLightFactor"], this->sunLightFactor);
+                                            }
 
-                                                    if (texture) {
-                                                        glActiveTexture(GL_TEXTURE0);
-                                                        glBindTexture(GL_TEXTURE_2D, texture->textureID);
+                                            glUniform1i(shaderProgram->uniforms["UseLight"], object->useLight);
+                                            if (object->useLight) {
+                                                glUniform1i(shaderProgram->uniforms["LightsCount"], lightsCount);
+                                                glUniform1i(shaderProgram->uniforms["LightLayer"], object->lightLayer);
+                                                
+                                                glUniform1iv(shaderProgram->uniforms["LightsLayer"], lightsCount, flattenedLightsLayer.data());
 
-                                                        glUniform1i(glGetUniformLocation(
-                                                            object->renderModel->shaderProgram->shaderProgram,
-                                                            "textureBase"
-                                                        ), 0);
+                                                glUniform3fv(shaderProgram->uniforms["LightsPosition"], lightsCount, flattenedLightsColor.data());
+                                                glUniform3fv(shaderProgram->uniforms["LightsColor"], lightsCount, flattenedLightsColor.data());
+                                                
+                                                glUniform1fv(shaderProgram->uniforms["LightsRadius"], lightsCount, flattenedRadius.data());
+                                                glUniform1fv(shaderProgram->uniforms["LightsFactor"], lightsCount, flattenedLightsFactor.data());
+                                                glUniform1fv(shaderProgram->uniforms["LightsDeferredFactor"], lightsCount, flattenedLightsDeferredFactor.data());
+                                                glUniform1fv(shaderProgram->uniforms["LightsOpacityFactorEffect"], lightsCount, flattenedLightsOpacityFactorEffect.data());
+                                            
+                                                glUniform1iv(shaderProgram->uniforms["SpotLight"], lightsCount, flattenedLightsSpotLight.data());
+                                                glUniform3fv(shaderProgram->uniforms["SpotLightDirection"], lightsCount, flattenedLightsDirection.data());
+                                                glUniform1fv(shaderProgram->uniforms["SpotLightCutOff"], lightsCount, flattenedLightsCutOff.data());
+                                            }
 
-                                                        glDrawElements((GLenum)object->renderModel->drawMode, mesh->vertexCount, GL_UNSIGNED_INT, 0);
+                                            if (object->render) {
+                                                if (object->renderModel->useTexture) {
+                                                    for (auto & texture: object->textures) {
+                                                        if (texture && texture->textureID && texture->textureType == TextureType::Base) {
+                                                            glActiveTexture(GL_TEXTURE0);
+                                                            
+                                                            glBindTexture(GL_TEXTURE_2D, texture->textureID);
+                                                            
+                                                            glUniform1i(glGetUniformLocation(
+                                                                object->renderModel->shaderProgram->shaderProgram,
+                                                                "textureBase"
+                                                            ), 0);
+                                                        }
                                                     }
                                                 }
+
+                                                glDrawElements((GLenum)object->renderModel->drawMode, mesh->vertexCount, GL_UNSIGNED_INT, 0);
                                             }
+                                            object->OnDraw((void*)this);
+                                            glBindVertexArray(0);
+                                            GL_CHECK_ERROR();
                                         }
-                                        object->OnDraw((void*)this);
-                                        glBindVertexArray(0);
-                                        GL_CHECK_ERROR();
                                     }
                                 }
                             }

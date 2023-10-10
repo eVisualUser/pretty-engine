@@ -1,5 +1,19 @@
 [entities.entityA]
-components = [ [ 'LocalizationEditor', 'LocalizationEditor' ] ]
+components = [
+    [ 'LocalizationEditor', 'LocalizationEditor' ],
+    [
+        'Render',
+        'Render',
+        'Texture Base',
+        'image.png',
+        'Mesh',
+        'rect',
+        'UseLight',
+        'false',
+        'SunLight',
+        'false'
+    ]
+]
 name = 'Editor'
 object = 'Editor'
 public_map = [ [ 'projectName', 'MyNewProject' ] ]

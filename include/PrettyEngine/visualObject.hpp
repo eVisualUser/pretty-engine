@@ -34,6 +34,8 @@ namespace PrettyEngine {
 	
 	class VisualObject: virtual public Transform {
 	public:
+		VisualObject() {}
+		
 		~VisualObject() {
 			for (auto & texture: this->textures) {
 				texture->userCount--;
@@ -103,11 +105,6 @@ namespace PrettyEngine {
 
 		std::vector<Texture*> textures;
 		float opacity = 1.0f;
-
-		bool renderText = false;
-		Text* text;
-		float lineJump = 0.1f;
-		float textSize = 0.5f;
 
 		bool allowRenderCube = true;
 

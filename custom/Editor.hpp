@@ -1,11 +1,16 @@
 #pragma once
 
+#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/mesh.hpp>
+#include <PrettyEngine/shaders.hpp>
+#include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/utils.hpp>
+#include <PrettyEngine/gl.hpp>
 
 // Components
 #include <LocalizationEditor.hpp>
@@ -29,6 +34,8 @@ namespace Custom {
 	    this->localizationEditorPtr =
 	    this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
 	    this->localizationEditorPtr->localization = this->localization;
+
+	    this->renderer->GetCurrentCamera()->position.z = -1;
 	  }
 
 	  void OnUpdate() override {
@@ -87,7 +94,9 @@ namespace Custom {
 	    }
 	  }
 
-	  void OnDestroy() override { this->localization->Save(); }
+	  void OnDestroy() override { 
+	  	this->localization->Save();
+	  }
 
 	private:
 	  bool actionBox = false;

@@ -10,6 +10,7 @@
 #include <Guid.hpp>
 
 #include <memory>
+#include <utility>
 
 namespace PrettyEngine {
 	enum class Request {
@@ -47,6 +48,21 @@ namespace PrettyEngine {
 			for(auto & physicalObject: this->visualObjects) {
 				this->physicalEngine->UnLinkObject(physicalObject);
 			}
+		}
+
+		/// Create a public var but do not override
+		void CreatePublicVar(std::string name) {
+			if (!this->publicMap.contains(name)) {
+				this->publicMap.insert(std::make_pair(name, ""));
+			}
+		}
+
+		std::string GetPublicVarValue(std::string name) {
+			return this->publicMap[name];
+		}
+
+		void SetPublicVarValue(std::string name, std::string value) {
+			this->publicMap.insert_or_assign(name, value);
 		}
 		
 	public:
