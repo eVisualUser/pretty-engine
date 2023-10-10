@@ -1,0 +1,27 @@
+[entities.entityA]
+components = [
+    [ 'LocalizationEditor', 'LocalizationEditor' ],
+    [
+        'Render',
+        'Render',
+        'Texture Base',
+        'image.png',
+        'Mesh',
+        'rect',
+        'UseLight',
+        'false',
+        'SunLight',
+        'false'
+    ]
+]
+name = 'Editor'
+object = 'Editor'
+public_map = [ [ 'projectName', 'MyNewProject' ] ]
+
+    [entities.entityA.transform]
+    position = [ 0.0, 0.0, 0.0 ]
+    rotation = [ 0.0, 0.0, 0.0, 0.0 ]
+    scale = [ 1.0, 1.0, 1.0 ]
+
+[meta]
+name = 'World'
