@@ -2,7 +2,6 @@
 
 #include <PrettyEngine/serial.hpp>
 
-#include <array>
 #include <glm/gtc/constants.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>

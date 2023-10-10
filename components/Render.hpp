@@ -37,6 +37,10 @@ namespace Custom {
 		}
 
 		void OnUpdate() override {
+			this->visualObject->position = dynamic_cast<Entity*>(this->owner)->position;
+			this->visualObject->rotation = dynamic_cast<Entity*>(this->owner)->rotation;
+			this->visualObject->scale = dynamic_cast<Entity*>(this->owner)->scale;
+
 			bool loadMesh = false;
 
 			auto meshName = this->GetPublicVarValue("Mesh");
@@ -57,7 +61,7 @@ namespace Custom {
 
 			auto path = GetEnginePublicPath(baseTexturePath, true);
 
-			if (FileExist(path) && this->texture == nullptr) {
+			if (this->texture == nullptr && FileExist(path)) {
 				this->renderer->RemoveTexture(this->textureGuid);
 				this->visualObject->RemoveTexture(this->texture);
 				this->texture = this->renderer->AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);

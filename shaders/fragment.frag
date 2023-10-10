@@ -45,10 +45,6 @@ uniform vec3 colorFilter;
 vec4 GetVertexLight() {
     vec4 lightOutColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-    if (useSunLight == 0 || useLight == 0) {
-        vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
     if (useSunLight != 0) {
         lightOutColor = vec4(sunLightColor * sunLightFactor, 1.0f);
     }
@@ -75,6 +71,10 @@ vec4 GetVertexLight() {
                 }
             }
         }
+    }
+
+    if (useSunLight == 0 && useLight == 0) {
+        return vec4(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     return lightOutColor;

@@ -1,10 +1,2 @@
 **/build
-**/cache
-**/binaries
-
-**/.vscode
-**/.idea
 **/.cache
-
-pretty-engine.sublime-workspace
-pretty-engine.sublime-project

@@ -24,7 +24,7 @@ namespace PrettyEngine {
 		virtual void OnUpdate() {}
 		virtual void OnDestroy() {}
 
-		std::string owner;
+		DynamicObject* owner;
 
 		bool worldFirst = true;
 	};

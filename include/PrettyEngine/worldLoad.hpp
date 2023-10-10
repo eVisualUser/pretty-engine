@@ -143,6 +143,7 @@ namespace PrettyEngine {
 							std::string newEntityName = (*entity.second.as_table())["name"].value_or("undefined");
 							
 							CreateCustomEntity(newEntity, target);
+
 							auto lastEntity = target->GetLastEntityRegistred();
 							lastEntity->entityName = newEntityName;
 
@@ -166,11 +167,16 @@ namespace PrettyEngine {
 								}
 
 								auto newComponent = GetCustomComponent(componentName);
-								newComponent->publicMap = publicMap;
-								newComponent->owner = lastEntity->entityName;
-								newComponent->object = componentName;
-								newComponent->unique = componentUnique;
-								lastEntity->components.push_back(newComponent);
+
+								if (newComponent == nullptr) {
+									DebugLog(LOG_ERROR, "Mising component: " << componentName, true);
+								} else {
+									newComponent->publicMap = publicMap;
+									newComponent->owner = dynamic_cast<DynamicObject*>(lastEntity.get());
+									newComponent->object = componentName;
+									newComponent->unique = componentUnique;
+									lastEntity->components.push_back(newComponent);
+								}
 							}
 							
 							auto publicMap = (*entity.second.as_table())["public_map"].as_array();
