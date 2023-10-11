@@ -6,10 +6,12 @@
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/Input.hpp>
+#include <PrettyEngine/localization.hpp>
 
 #include <Guid.hpp>
 
 #include <memory>
+#include <string>
 #include <utility>
 
 namespace PrettyEngine {
@@ -63,6 +65,16 @@ namespace PrettyEngine {
 
 		void SetPublicVarValue(std::string name, std::string value) {
 			this->publicMap.insert_or_assign(name, value);
+		}
+
+		std::vector<float> GetPublicVarAsFloatVec(std::string name) {
+			std::vector<float> out;
+
+			for(auto & value: ParseCSVLine(this->GetPublicVarValue(name))) {
+				out.push_back(std::stof(value.c_str()));
+			}
+
+			return out;
 		}
 		
 	public:
