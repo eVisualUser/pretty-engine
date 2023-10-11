@@ -67,7 +67,6 @@ namespace Custom {
 				this->texture = this->renderer->AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 				this->visualObject->AddTexture(this->texture);
 				this->renderModel.useTexture = true;
-				DebugLog(LOG_DEBUG, "Added texture", false);
 			}
 
 			if (loadMesh) {

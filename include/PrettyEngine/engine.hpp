@@ -156,7 +156,7 @@ namespace PrettyEngine {
 			auto worlds = this->_worldManager.GetWorlds();
 			this->_renderer->UpdateIO();
 			if (this->_renderer->WindowActive()) {
-				for (auto currentWorld: worlds) {
+				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
 						currentWorld->CallFunctionProcesses();
 						

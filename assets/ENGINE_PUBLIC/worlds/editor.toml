@@ -1,19 +1,27 @@
 [entities.entityA]
 components = [
     [ 'LocalizationEditor', 'LocalizationEditor' ],
+    [ 'Render', 'Render', 'Texture Base', 'image.png', 'Mesh', 'rect', 'UseLight', 'true', 'SunLight', 'false' ],
     [
-        'Render',
-        'Render',
-        'Texture Base',
-        'image.png',
-        'Mesh',
-        'rect',
-        'UseLight',
-        'false',
-        'SunLight',
-        'false'
-    ],
-    ['Light', 'Light']
+        'Light',
+        'Light',
+        'LightLayer',
+        '0',
+        'LightFactor',
+        '2.0',
+        'Color',
+        '1;1;1;1;',
+        'Type',
+        '',
+        'DeferredFactor',
+        '1.0',
+        'Radius',
+        '5.0',
+        'SpotDirection',
+        '',
+        'SpotLightCutOff',
+        ''
+    ]
 ]
 name = 'Editor'
 object = 'Editor'

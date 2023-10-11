@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Light.hpp>
 #include <LocalizationEditor.hpp>
 #include <Render.hpp>
 
@@ -17,7 +18,9 @@
  ******************************************************/
 
 static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name) {
-    if(name == "LocalizationEditor") {
+    if(name == "Light") {
+        return std::make_shared<Custom::Light>();
+    }     if(name == "LocalizationEditor") {
         return std::make_shared<Custom::LocalizationEditor>();
     }     if(name == "Render") {
         return std::make_shared<Custom::Render>();

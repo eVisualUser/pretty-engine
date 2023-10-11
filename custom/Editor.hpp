@@ -88,7 +88,9 @@ namespace Custom {
 	      ImGui::SetNextWindowPos(actionBoxStartPos);
 	      if (ImGui::Begin("actionBox", NULL,
 	                       ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
-	        ImGui::Text("ToDo");
+	        if (ImGui::Button(this->localization->Get("Save Editor").c_str())) {
+	        	this->requests.push_back(Request::SAVE);
+	        }
 	      }
 	      ImGui::End();
 	    }

@@ -45,7 +45,7 @@ namespace PrettyEngine {
 			this->updateMT = new std::thread(MTUpdate, &this->updateMTThreadAlive, &this->update, &this->entities);
 
 			this->simulationCollider.colliderModel = ColliderModel::AABB;
-			this->simulationCollider.scale = glm::vec3(100, 100, 100);
+			this->simulationCollider.SetScale(glm::vec3(100, 100, 100));
 		}
 		
 		~World() {
