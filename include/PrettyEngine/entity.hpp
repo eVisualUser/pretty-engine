@@ -5,8 +5,7 @@
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/visualObject.hpp>
-#include <PrettyEngine/physics.hpp>
-#include <PrettyEngine/physicsEngine.hpp>
+#include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/tags.hpp>
 
@@ -42,7 +41,6 @@ namespace PrettyEngine {
 	public:
 		std::shared_ptr<Renderer> renderer;
 		std::shared_ptr<AudioEngine> audioEngine;
-		std::shared_ptr<PhysicalEngine> physicalEngine;
 
 		void* engine;
 

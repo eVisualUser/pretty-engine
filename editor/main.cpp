@@ -10,7 +10,7 @@
 using namespace PrettyEngine;
 
 bool worldFilter(std::string name) {
-	DebugLog(LOG_DEBUG, "World loaded: " << name, false);
+	/* Do nothing, this is more useful for the game build. */
 	return true;
 }
 

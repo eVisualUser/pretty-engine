@@ -1,7 +1,7 @@
 #pragma once
 
 #include <PrettyEngine/dynamicObject.hpp>
-#include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/debug.hpp>

@@ -36,22 +36,12 @@ message("-- TomlPlusPlus")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/tomlplusplus")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/crossguid")
 
-message("-- Bullet3")
-set(BUILD_BULLET3_DEMOS OFF)
-set(BUILD_BULLET2_DEMOS OFF)
-set(BUILD_CPU_DEMOS OFF)
-set(BUILD_UNIT_TESTS OFF)
-set(BUILD_BULLET3_TOOLS ON)
-set(BUILD_BULLET3 ON)
-add_subdirectory("${CMAKE_SOURCE_DIR}/external/bullet3")
-
 message("-- SQLITE3")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/sqlite/sqlite3")
 
 include_directories("${CMAKE_SOURCE_DIR}/external/sqlite")
 include_directories("${CMAKE_SOURCE_DIR}/external/Boxer/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/tomlplusplus/include")
-include_directories("${CMAKE_SOURCE_DIR}/external/bullet3/src")
 include_directories("${CMAKE_SOURCE_DIR}/external/crossguid")
 
 # ImGUI
@@ -112,12 +102,6 @@ target_link_libraries(external PUBLIC
  	glfw
  	glad
  	glm
- 	LinearMath
- 	Bullet3Common
- 	BulletInverseDynamics
- 	BulletCollision
- 	BulletDynamics
- 	BulletSoftBody
  	xg
  	assimp
  	imgui

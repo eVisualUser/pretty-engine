@@ -3,13 +3,11 @@
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
-#include <iostream>
 
 namespace PrettyEngine {
 	static std::vector<std::string> ParseCSVLine(std::string line, char separator = ';') {

@@ -2,6 +2,7 @@
 
 #include <Light.hpp>
 #include <LocalizationEditor.hpp>
+#include <Physical.hpp>
 #include <Render.hpp>
 
 #include <PrettyEngine/entity.hpp>
@@ -22,6 +23,8 @@ static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string n
         return std::make_shared<Custom::Light>();
     }     if(name == "LocalizationEditor") {
         return std::make_shared<Custom::LocalizationEditor>();
+    }     if(name == "Physical") {
+        return std::make_shared<Custom::Physical>();
     }     if(name == "Render") {
         return std::make_shared<Custom::Render>();
     } 

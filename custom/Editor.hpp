@@ -11,6 +11,9 @@
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/KeyCode.hpp>
+
+#include <Render.hpp>
 
 // Components
 #include <LocalizationEditor.hpp>
@@ -36,16 +39,37 @@ namespace Custom {
 	    this->localizationEditorPtr->localization = this->localization;
 
 	    this->renderer->GetCurrentCamera()->position.z = -1;
+
+	    this->keyUp.name = "EditorKeyUp";
+	    this->keyUp.key = KeyCode::UpArrow;
+	    this->keyUp.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&this->keyUp);
+
+	    this->keyDown.name = "EditorKeyDown";
+	    this->keyDown.key = KeyCode::DownArrow;
+	    this->keyDown.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&this->keyDown);
+	    
+	    this->keyLeft.name = "EditorKeyLeft";
+	    this->keyLeft.key = KeyCode::LeftArrow;
+	    this->keyLeft.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&this->keyLeft);
+	    
+	    this->keyRight.name = "EditorKeyRight";
+	    this->keyRight.key = KeyCode::RightArrow;
+	    this->keyRight.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&this->keyRight);
 	  }
 
-	  void OnUpdate() override {
-	    if (this->input->GetKeyPress(KeyCode::LeftControl) &&
+	  /// Called only in the editor
+	  void OnEditorUpdate() override {
+	  	if (this->input->GetKeyPress(KeyCode::LeftControl) &&
 	        this->input->GetKeyDown(KeyCode::S)) {
 	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
 	      	this->requests.push_back(Request::SAVE);    	
 	    }
 	  }
-
+ 
 	  void OnAlwaysUpdate() override {
 	    if (!this->renderer->GetWindowFocus()) {
 	      this->renderer->SetWindowOpacity(0.1f);
@@ -55,6 +79,20 @@ namespace Custom {
 	  }
 
 	  void OnRender() override {
+	  	if (this->keyUp.state) {
+	  		this->position.y += this->_speed * this->renderer->GetDeltaTime();
+	  	} else if (this->keyDown.state) {
+	  		this->position.y -= this->_speed * this->renderer->GetDeltaTime();
+	  	}
+
+	  	if (this->keyLeft.state) {
+	  		this->position.x -= this->_speed * this->renderer->GetDeltaTime();
+	  	} else if (this->keyRight.state) {
+	  		this->position.x += this->_speed * this->renderer->GetDeltaTime();
+	  	}
+
+	  	this->Rotate(this->input->GetMouseWheelDelta() * 500.0f * this->renderer->GetDeltaTime());
+
 	    if (ImGui::Begin(this->localization->Get("Editor Guide").c_str())) {
 	      ImGui::Text(
 	          "%s",
@@ -98,6 +136,11 @@ namespace Custom {
 
 	  void OnDestroy() override { 
 	  	this->localization->Save();
+
+	  	this->input->RemoveKeyWatcher(&this->keyUp);
+	  	this->input->RemoveKeyWatcher(&this->keyDown);
+	  	this->input->RemoveKeyWatcher(&this->keyLeft);
+	  	this->input->RemoveKeyWatcher(&this->keyRight);
 	  }
 
 	private:
@@ -109,5 +152,12 @@ namespace Custom {
 	  std::string file = "game.toml";
 
 	  std::shared_ptr<Localization> localization;
+
+	  float _speed = 3.0f;
+
+	  KeyWatcher keyUp;
+	  KeyWatcher keyDown;
+	  KeyWatcher keyLeft;
+	  KeyWatcher keyRight;
 	};
-} // namespace Custom
+}

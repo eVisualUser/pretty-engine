@@ -2,11 +2,11 @@
 
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
-#include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/localization.hpp>
+#include <PrettyEngine/PhysicalSpace.hpp>
 
 #include <Guid.hpp>
 
@@ -26,6 +26,8 @@ namespace PrettyEngine {
 		virtual void OnStart() {}
 		/// Called each frame.
 		virtual void OnUpdate() {}
+		/// Called each update if the editor its in the editor.
+		virtual void OnEditorUpdate() {}
 		/// Called each frame without world optimization.
 		virtual void OnAlwaysUpdate() {}
 		/// The same as OnUpdate but multi-threaded.
@@ -45,10 +47,6 @@ namespace PrettyEngine {
 		void Clear() {
 			for(auto & visualObject: this->visualObjects) {
 				this->renderer->UnRegisterVisualObject(visualObject);
-			}
-
-			for(auto & physicalObject: this->visualObjects) {
-				this->physicalEngine->UnLinkObject(physicalObject);
 			}
 		}
 
@@ -80,8 +78,8 @@ namespace PrettyEngine {
 	public:
 		std::shared_ptr<Renderer> renderer;
 		std::shared_ptr<AudioEngine> audioEngine;
-		std::shared_ptr<PhysicalEngine> physicalEngine;
 		std::shared_ptr<Input> input;
+		PhysicalSpace* physicalSpace;
 
 		std::vector<std::string> visualObjects;
 		std::vector<std::string> physicalObjects;

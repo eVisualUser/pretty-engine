@@ -4,21 +4,22 @@
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/physics.hpp>
-#include <PrettyEngine/physicsEngine.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/Input.hpp>
+#include <PrettyEngine/PhysicalSpace.hpp>
 
+#include <cstring>
 #include <toml++/toml.h>
 #include <imgui.h>
 #include <implot.h>
 
 #include <memory>
 #include <string>
+#include <cstring>
 #include <vector>
 
 #define CONSOLE_COMMAND_BUFFER_SIZE 100
@@ -74,7 +75,6 @@ namespace PrettyEngine {
 			this->debugLocalization.Save();
 			ImPlot::DestroyContext(this->_imPlotContext);
 			this->_worldManager.Clear();
-			this->_physicalEngine->Clear();
 			this->_renderer->Clear();
 		}
 		
@@ -93,11 +93,55 @@ namespace PrettyEngine {
 		}
 
 		void UpdateDebugUI() {
-			if (ImGui::IsKeyPressed(ImGuiKey_F3)) {
+			if (this->_input->GetKeyDown(KeyCode::F3)) {
 				this->showDebugUI = !showDebugUI;
 			}
-
+			
 			if (this->showDebugUI) {
+				if (ImGui::Begin("Key Debugger")) {
+					auto keyWatchers = this->_input->GetKeyWatchers();
+					if (ImGui::BeginTable("Key Stats", 3) && !keyWatchers->empty()) {
+						ImGui::TableSetupColumn("Name");
+						ImGui::TableSetupColumn("Mode");
+						ImGui::TableSetupColumn("State");
+						
+						ImGui::TableHeadersRow();
+						for (int i = 0; i < keyWatchers->size(); i++) {
+							ImGui::TableNextRow();
+							ImGui::TableNextColumn();
+
+							auto keyName = (*keyWatchers)[i]->name;
+
+							ImGui::Text("%s", keyName.c_str());
+							
+							ImGui::TableNextColumn();
+							std::string keyMode = "Unknown";
+							if ((*keyWatchers)[i]->mode == KeyWatcherMode::Down) {
+								keyMode = "Down";
+							} else if ((*keyWatchers)[i]->mode == KeyWatcherMode::Press) {
+								keyMode = "Press";
+							} else if ((*keyWatchers)[i]->mode == KeyWatcherMode::Up) {
+								keyMode = "Up";
+							}
+
+							if (ImGui::Button(keyMode.c_str())) {
+								if (keyMode == "Down") {
+									(*keyWatchers)[i]->mode = KeyWatcherMode::Press;
+								} else if (keyMode == "Press") {
+									(*keyWatchers)[i]->mode = KeyWatcherMode::Up;
+								} else if (keyMode == "Up") {
+									(*keyWatchers)[i]->mode = KeyWatcherMode::Down;
+								}
+							}
+
+							ImGui::TableNextColumn();
+							ImGui::Checkbox((keyName + " State").c_str(), &(*keyWatchers)[i]->state);
+						}
+					}
+					ImGui::EndTable();
+				}
+				ImGui::End();
+				
 				if(ImGui::Begin("Console")) {
 					int index = 0;
 					for (auto & line: logs) {
@@ -111,20 +155,22 @@ namespace PrettyEngine {
 					ImGuiWindowFlags_MenuBar |
 					ImGuiWindowFlags_NoSavedSettings
 				)) {
-						ImGui::BeginMenuBar();
-							for (std::string language: *this->debugLocalization.GetAllLanguages()) {
-								if (ImGui::Button(language.c_str())) {
-									this->debugLocalization.GetLangIndex(language.c_str());
-								}
+					ImGui::BeginMenuBar();
+						for (std::string language: *this->debugLocalization.GetAllLanguages()) {
+							if (ImGui::Button(language.c_str())) {
+								this->debugLocalization.GetLangIndex(language.c_str());
 							}
-						ImGui::EndMenuBar();
-						
-						auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
-						ImGui::Text("%s%i", visualObjects.c_str(), this->_renderer->GetVisualObjectsCount());
-						auto lights = this->debugLocalization.Get("Lights: ");
-						ImGui::Text("%s%i", lights.c_str(), this->_renderer->GetLightCount());
+						}
+					ImGui::EndMenuBar();
+					
+					auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
+					ImGui::Text("%s%i", visualObjects.c_str(), this->_renderer->GetVisualObjectsCount());
+					auto lights = this->debugLocalization.Get("Lights: ");
+					ImGui::Text("%s%i", lights.c_str(), this->_renderer->GetLightCount());
+					
+					if (!this->frameRateLogs.empty()) {
 						auto frameRate = this->debugLocalization.Get("Frame rate: ");
-						ImGui::Text("%s%i", frameRate.c_str(), (int)glm::floor(1.0f / this->_renderer->GetDeltaTime()));
+						ImGui::Text("%s%i", frameRate.c_str(), this->frameRateLogs.back());
 
 						if (ImGui::Button(this->debugLocalization.Get("Frame Rate Graph").c_str())) {
 							this->showFrameRateGraph = !this->showFrameRateGraph;
@@ -141,6 +187,7 @@ namespace PrettyEngine {
 							    ImPlot::EndPlot();
 							}
 						}
+					}
 				}
 				ImGui::End();
 			}
@@ -154,6 +201,7 @@ namespace PrettyEngine {
 		
 		void Update() {
 			auto worlds = this->_worldManager.GetWorlds();
+			this->_input->Update();
 			this->_renderer->UpdateIO();
 			if (this->_renderer->WindowActive()) {
 				for (auto & currentWorld: worlds) {
@@ -162,12 +210,8 @@ namespace PrettyEngine {
 						
 						currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
 						currentWorld->Update();
+						currentWorld->EditorUpdate();
 					}
-				}
-				
-				if (this->_physicsEnabled) {
-					this->_physicalEngine->SetStepTime(this->_renderer->GetDeltaTime());
-					this->_physicalEngine->Simulate();
 				}
 
 				this->_renderer->StartUIRendering();
@@ -187,13 +231,16 @@ namespace PrettyEngine {
 					this->frameRateLogs.push_back(this->_renderer->GetFPS());
 					this->frameRateTimeLogs.push_back(currentTime);
 				}
-
+				
+				this->_physicalSpace.UpdateRigidBodies(this->_renderer->GetDeltaTime());
+				
 				this->_renderer->Draw();
 				this->_renderer->Show();
 			}
 			for (auto & currentWorld: worlds) {
 				if (currentWorld != nullptr) {
 					currentWorld->AlwayUpdate();
+					currentWorld->EndUpdate();
 				}
 			}
 
@@ -211,10 +258,6 @@ namespace PrettyEngine {
 			return this->_audioEngine;
 		}
 
-		std::shared_ptr<PhysicalEngine> GetPhysicalEngine() {
-			return this->_physicalEngine;
-		}
-
 		std::shared_ptr<Renderer> GetRenderer() {
 			return this->_renderer;
 		}
@@ -222,16 +265,16 @@ namespace PrettyEngine {
 		void SetupWorlds() {
 			auto worlds = this->_worldManager.GetWorlds();
 			for (auto & currentWorld: worlds) {
-				currentWorld->physicalEngine = this->_physicalEngine;
 				currentWorld->audioEngine = this->_audioEngine;
 				currentWorld->renderer = this->_renderer; 
+				currentWorld->physicalSpace = &this->_physicalSpace;
 				currentWorld->input = _input;
 
 				currentWorld->UpdateLinks();
 			}
 		}
 
-		/// Proper way to remove the current world
+		/// Proper way to remove the current worlds
 		void ClearWorlds() {
 			this->_worldManager.Clear();
 		}
@@ -340,9 +383,10 @@ namespace PrettyEngine {
 
 	private:
 		std::shared_ptr<AudioEngine> _audioEngine = std::make_shared<AudioEngine>();
-		std::shared_ptr<PhysicalEngine> _physicalEngine = std::make_shared<PhysicalEngine>();
 		std::shared_ptr<Renderer> _renderer = std::make_shared<Renderer>();
 		std::shared_ptr<Input> _input = nullptr;
+
+		PhysicalSpace _physicalSpace = PhysicalSpace();
 
 		toml::parse_result customConfig;
 

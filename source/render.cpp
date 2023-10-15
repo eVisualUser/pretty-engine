@@ -1,5 +1,5 @@
 #include <PrettyEngine/light.hpp>
-#include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/camera.hpp>
 #include <PrettyEngine/text.hpp>
 #include <PrettyEngine/render.hpp>

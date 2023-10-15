@@ -8,7 +8,7 @@
 #include <PrettyEngine/gl.hpp>
 #include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/camera.hpp>
-#include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/light.hpp>
 #include <PrettyEngine/KeyCode.hpp>
 

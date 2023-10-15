@@ -25,7 +25,6 @@ include_directories("include")
 
 add_library(pretty
 	"source/render.cpp"
-	"source/physicsEngine.cpp"
 )
 
 target_link_libraries(pretty PUBLIC
@@ -89,3 +88,4 @@ string(REPLACE "\n" " " extend ${extend})
 endif()
 
 target_link_libraries(editor pretty custom components ${extend})
+target_compile_definitions(editor PRIVATE ENGINE_EDITOR=1)

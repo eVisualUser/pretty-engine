@@ -1,13 +1,13 @@
 #pragma once
 
+#include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/physics.hpp>
-#include <PrettyEngine/physicsEngine.hpp>
+#include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/data.hpp>
 
 #include <Guid.hpp>
@@ -89,6 +89,19 @@ namespace PrettyEngine {
 					}
 				}
 			}
+		}
+
+		void EditorUpdate() {
+			#if ENGINE_EDITOR
+				for (auto & entity: this->entities) {
+					if (entity.second.get() != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+						entity.second->OnEditorUpdate();
+						for (auto & component: entity.second->components) {
+							component->OnEditorUpdate();
+						}
+					}
+				}
+			#endif
 		}
 
 		void StartUpdateMT() {
@@ -174,16 +187,16 @@ namespace PrettyEngine {
 
 		void UpdateLinks() {
 			for (auto & entity: this->entities) {
-				entity.second->physicalEngine = this->physicalEngine;
 				entity.second->audioEngine = this->audioEngine;
 				entity.second->renderer = this->renderer;
 				entity.second->input = this->input;
+				entity.second->physicalSpace = this->physicalSpace;
 
 				for(auto & component: entity.second->components) {
 					component->audioEngine = this->audioEngine;
-					component->physicalEngine = this->physicalEngine;
 					component->renderer = this->renderer;
 					component->input = this->input;
+					component->physicalSpace = this->physicalSpace;
 				}
 			}
 		}
@@ -280,10 +293,10 @@ namespace PrettyEngine {
 
 		std::string lastEntityRegistred;
 
-		std::shared_ptr<PhysicalEngine> physicalEngine = nullptr;
 		std::shared_ptr<AudioEngine> audioEngine = nullptr;
 		std::shared_ptr<Renderer> renderer = nullptr;
 		std::shared_ptr<Input> input = nullptr;
+		PhysicalSpace* physicalSpace = nullptr;
 
 		std::unordered_map<std::string, void*> sharedData;
 

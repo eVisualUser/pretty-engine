@@ -39,7 +39,7 @@ namespace PrettyEngine {
 		}
 	};
 
-	// Call glGetError() after an OpenGL function call to check for errors
+	/// Call glGetError() after an OpenGL function call to check for errors
 	static void CheckOpenGLError(const char* file, int line) {
 	    GLenum errorCode;
 	    while ((errorCode = glGetError()) != GL_NO_ERROR) {

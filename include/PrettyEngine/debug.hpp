@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <sstream>
 #include <chrono>
 
 namespace PrettyEngine {
@@ -36,6 +35,13 @@ static void ShowMessageBox(std::string type, std::string message) {
 	boxer::show(message.c_str(), type.c_str(), style, boxer::Buttons::OK);
 }
 
+static bool RepeatedLog(std::string newLog) {
+	if (!PrettyEngine::logs.empty()) {
+		return newLog == PrettyEngine::logs.back();
+	}
+	return false;
+}
+
 static void AddLog(std::string newLog) {
 	PrettyEngine::logs.push_back(newLog);
 }
@@ -56,12 +62,13 @@ static std::string GetTimeAsString() {
 	std::stringstream text; \
 	text << "Time: " << GetTimeAsString() << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl; \
 	text << msg << std::endl; \
+	if (!RepeatedLog(text.str())) { \
 	AddLog(text.str()); \
     if (msgBox) { \
     	ShowMessageBox(type, text.str()); \
     }  \
-	} \
-	std::cout << '[' << type << " Time: " << GetTimeAsString() << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl;
+	std::cout << '[' << type << " Time: " << GetTimeAsString() << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl; \
+	}}
 
 namespace PrettyEngine {
 	namespace Debug {

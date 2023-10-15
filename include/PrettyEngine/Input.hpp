@@ -1,11 +1,14 @@
 #pragma once
 
+#include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/KeyCode.hpp>
 
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
 #include <unordered_map>
+#include <vector>
+#include <string>
 
 namespace PrettyEngine {
 	enum class CursorState {
@@ -21,10 +24,32 @@ namespace PrettyEngine {
         wheelScroll.y = static_cast<float>(y);
     }
 
+    enum class KeyWatcherMode {
+    	Press = 0,
+    	Down,
+    	Up,
+    };
+
+    struct KeyWatcher {
+    public:
+    	std::string name = "?";
+    	KeyCode key;
+    	KeyWatcherMode mode;
+    	bool state;
+    };
+
 	class Input {
 	public:
 		Input(GLFWwindow* window) {
 			this->SetWindow(window);
+
+			if (!FileExist(this->_savePath)) {
+				CreateFile(this->_savePath);
+			}
+		}
+
+		~Input() {
+
 		}
 
 		void SetWindow(GLFWwindow* window) {
@@ -84,18 +109,67 @@ namespace PrettyEngine {
 	    }
 
 	    void Update() {
-	    	wheelScroll = glm::vec2();
+	    	wheelScroll = glm::vec2(0.0f, 0.0f);
         
         	this->_cursorLastPosition = this->GetCursorPosition();
+
+        	for(auto & watcher: this->_keyWatchers) {
+        		if (watcher->mode == KeyWatcherMode::Press) {
+        			watcher->state = this->GetKeyPress(watcher->key);
+        		} else if (watcher->mode == KeyWatcherMode::Down) {
+        			watcher->state = this->GetKeyDown(watcher->key);
+        		} else if (watcher->mode == KeyWatcherMode::Down) {
+        			watcher->state = this->GetKeyUp(watcher->key);
+        		}
+        	}
 	    }
 
 	    void SetCursorState(CursorState state) {
 			glfwSetInputMode(this->_window, GLFW_CURSOR, (int)state);
 		}
 
+		void AddKeyWatcher(KeyWatcher* keyWatcher) {
+			this->_keyWatchers.push_back(keyWatcher);
+			this->_keyWatchersLog.push_back(*keyWatcher);
+		}
+
+		void RemoveKeyWatcher(KeyWatcher* keyWatcher) {
+			size_t index = 0;
+			for(auto & watcher: this->_keyWatchers) {
+				if (watcher == keyWatcher) {
+					this->_keyWatchers.erase(this->_keyWatchers.begin() + index);
+					return;
+				}
+				index++;
+			}
+		}
+
+		const std::vector<KeyWatcher*>* GetKeyWatchers() {
+			return &this->_keyWatchers;
+		}
+
+		bool KeyWatcherExist(KeyWatcher* keyWatcher) {
+			if (keyWatcher->name == "?") {
+				return false;
+			}
+
+			for(auto & key: this->_keyWatchers) {
+				if (key->name == keyWatcher->name) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 	private:
 		glm::vec2 _cursorLastPosition = glm::vec2();
 
+		std::vector<KeyWatcher*> _keyWatchers;
+		std::vector<KeyWatcher> _keyWatchersLog;
+
 		GLFWwindow* _window;
+
+		std::string _savePath = GetEnginePublicPath("input.pe");
 	};
 }

@@ -2,7 +2,7 @@
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/physics.hpp>
+#include <PrettyEngine/collider.hpp>
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -99,13 +99,7 @@ namespace PrettyEngine {
 		/// Sync the threaded listener with the current values
 		void UpdateAudioListener() {
 
-			if (relatedPhysicalObject != nullptr) {
-				auto velocity = relatedPhysicalObject->GetLinearVelocity();
-				alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
-				alListener3f(AL_POSITION, this->relatedPhysicalObject->position.x, this->relatedPhysicalObject->position.y, this->relatedPhysicalObject->position.z);	
-			} else {
-				alListener3f(AL_POSITION, this->position.x, this->position.y, this->position.y);	
-			}
+			alListener3f(AL_POSITION, this->position.x, this->position.y, this->position.y);	
 
 			float orientation[6] = { 
 				this->listenerForwardVector.x, 
@@ -119,17 +113,9 @@ namespace PrettyEngine {
 			alListenerfv(AL_ORIENTATION, orientation);
 		}
 
-		/// Link a physical object(velocity), to apply some related audio effects
-		void LinkPhysicalObjectToListener(PhysicalObject* object) {
-			this->relatedPhysicalObject = object;
-		}
-
 	public:
 		glm::vec3 listenerForwardVector = glm::vec3(0.0, 0.0f, -1.0f);
 		glm::vec3 listenerUpVector = glm::vec3(0.0, 1.0f, 0.0f);
-
-	private:
-		PhysicalObject* relatedPhysicalObject = nullptr;
 	};
 
 	/// 3D Audio Source
@@ -156,21 +142,9 @@ namespace PrettyEngine {
 			}
 		}
 
-		/// Link a physical object to apply physics related effects
-		void LinkPhysicalObjectToAudioSource(PhysicalObject* object) {
-			this->relatedPhysicalObject = object;
-		}
-
 		/// Update the threaded part of the audio source properties
 		void UpdateAudioSourceProperties() {
 			alSource3f(this->openALSource, AL_POSITION, this->position.x, this->position.y, this->position.z);
-			
-			if (this->relatedPhysicalObject != nullptr) {
-				glm::vec3 velocity = this->relatedPhysicalObject->GetLinearVelocity();
-				alSource3f(this->openALSource, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
-			} else {
-		    	alSource3f(this->openALSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-			}
 		    
 		    alSourcef(this->openALSource, AL_REFERENCE_DISTANCE, this->radius);
 		}
@@ -324,7 +298,6 @@ namespace PrettyEngine {
 		float pitch = 1.0f;
 		bool looping = false;
 
-		PhysicalObject* relatedPhysicalObject = nullptr;
 		unsigned int openALBuffer = 0;
 		unsigned int openALSource = 0;
 	};

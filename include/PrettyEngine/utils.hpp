@@ -1,12 +1,21 @@
 #pragma once
 
-#include <vector>
+#include <PrettyEngine/debug.hpp>
+
 #include <string>
 #include <fstream>
 
-#include <PrettyEngine/debug.hpp>
+#include <glm/vec3.hpp>
 
 namespace PrettyEngine {
+	static bool Vec3Greater(glm::vec3 a, glm::vec3 b) {
+		return (a.x >= b.x && a.y >= b.y && a.z >= b.z);
+	}
+
+	static bool Vec3Lower(glm::vec3 a, glm::vec3 b) {
+		return (a.x <= b.x && a.y <= b.y && a.z <= b.z);
+	}
+
 	#define PRINT_GLM_VEC3(vec) std::cout << vec.x << ';' << vec.y << ';' << vec.z << std::endl;
 	#define PRINT_GLM_VEC3_PTR(vec) std::cout << vec->x << ';' << vec->y << ';' << vec->z << std::endl;
 
