@@ -81,6 +81,10 @@ namespace PrettyEngine {
 		void SetRigidbody(bool state = true) {
 			this->isRigidBody = state;
 		}
+
+		void Move(glm::vec3 direction) {
+			this->velocity += direction;
+		}
 		
 	private:
 		bool BadSetup() {

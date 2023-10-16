@@ -5,7 +5,9 @@
 namespace PrettyEngine {
 	struct Collision {
 	public:
-		Collider* colliderA;
-		Collider* colliderB;
+		Collider* colliderSource;
+		Collider* colliderOther;
+
+		bool colliderCenterInOther = false;
 	};
 }

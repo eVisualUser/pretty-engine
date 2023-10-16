@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Physical.hpp"
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/shaders.hpp>
@@ -34,42 +35,33 @@ namespace Custom {
 	    this->localization = std::make_shared<Localization>();
 	    this->localization->LoadFile(GetEnginePublicPath("editor.csv", true));
 
-	    this->localizationEditorPtr =
-	    this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
+	    this->localizationEditorPtr = this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
 	    this->localizationEditorPtr->localization = this->localization;
+	    this->rigidbody = this->GetComponentAs<Physical>("Physical");
 
 	    this->renderer->GetCurrentCamera()->position.z = -1;
 
-	    this->keyUp.name = "EditorKeyUp";
-	    this->keyUp.key = KeyCode::UpArrow;
-	    this->keyUp.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&this->keyUp);
+	    keyUp.name = "EditorKeyUp";
+	    keyUp.key = KeyCode::UpArrow;
+	    keyUp.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&keyUp);
+	    
+	    keyDown.name = "EditorKeyDown";
+	    keyDown.key = KeyCode::DownArrow;
+	    keyDown.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&keyDown);
 
-	    this->keyDown.name = "EditorKeyDown";
-	    this->keyDown.key = KeyCode::DownArrow;
-	    this->keyDown.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&this->keyDown);
-	    
-	    this->keyLeft.name = "EditorKeyLeft";
-	    this->keyLeft.key = KeyCode::LeftArrow;
-	    this->keyLeft.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&this->keyLeft);
-	    
-	    this->keyRight.name = "EditorKeyRight";
-	    this->keyRight.key = KeyCode::RightArrow;
-	    this->keyRight.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&this->keyRight);
+	    keyLeft.name = "EditorKeyLeft";
+	    keyLeft.key = KeyCode::LeftArrow;
+	    keyLeft.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&keyLeft);
+
+	    keyRight.name = "EditorKeyRight";
+	    keyRight.key = KeyCode::RightArrow;
+	    keyRight.mode = KeyWatcherMode::Press;
+	    this->input->AddKeyWatcher(&keyRight);
 	  }
 
-	  /// Called only in the editor
-	  void OnEditorUpdate() override {
-	  	if (this->input->GetKeyPress(KeyCode::LeftControl) &&
-	        this->input->GetKeyDown(KeyCode::S)) {
-	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
-	      	this->requests.push_back(Request::SAVE);    	
-	    }
-	  }
- 
 	  void OnAlwaysUpdate() override {
 	    if (!this->renderer->GetWindowFocus()) {
 	      this->renderer->SetWindowOpacity(0.1f);
@@ -79,17 +71,32 @@ namespace Custom {
 	  }
 
 	  void OnRender() override {
-	  	if (this->keyUp.state) {
-	  		this->position.y += this->_speed * this->renderer->GetDeltaTime();
+	  	auto newCamPosition = -this->position;
+	  	newCamPosition.z -= 5;
+	  	
+	  	this->renderer->GetCurrentCamera()->position = newCamPosition;
+
+	  	if (this->input->GetKeyPress(KeyCode::LeftControl) &&
+	        this->input->GetKeyDown(KeyCode::S)) {
+	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
+	      	this->requests.push_back(Request::SAVE);    	
+	    }
+
+	    auto moveDirection = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	    if (this->keyUp.state) {
+	  		moveDirection.y += this->_speed * this->renderer->GetDeltaTime();
 	  	} else if (this->keyDown.state) {
-	  		this->position.y -= this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.y -= this->_speed * this->renderer->GetDeltaTime();
 	  	}
 
 	  	if (this->keyLeft.state) {
-	  		this->position.x -= this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.x -= this->_speed * this->renderer->GetDeltaTime();
 	  	} else if (this->keyRight.state) {
-	  		this->position.x += this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.x += this->_speed * this->renderer->GetDeltaTime();
 	  	}
+
+	  	this->rigidbody->Move(moveDirection);
 
 	  	this->Rotate(this->input->GetMouseWheelDelta() * 500.0f * this->renderer->GetDeltaTime());
 
@@ -129,18 +136,13 @@ namespace Custom {
 	        if (ImGui::Button(this->localization->Get("Save Editor").c_str())) {
 	        	this->requests.push_back(Request::SAVE);
 	        }
+
+	        if (ImGui::Button(this->localization->Get("Save Editor localization").c_str())) {
+	        	this->localization->Save();
+	        }
 	      }
 	      ImGui::End();
 	    }
-	  }
-
-	  void OnDestroy() override { 
-	  	this->localization->Save();
-
-	  	this->input->RemoveKeyWatcher(&this->keyUp);
-	  	this->input->RemoveKeyWatcher(&this->keyDown);
-	  	this->input->RemoveKeyWatcher(&this->keyLeft);
-	  	this->input->RemoveKeyWatcher(&this->keyRight);
 	  }
 
 	private:
@@ -159,5 +161,7 @@ namespace Custom {
 	  KeyWatcher keyDown;
 	  KeyWatcher keyLeft;
 	  KeyWatcher keyRight;
+
+	  Physical* rigidbody;
 	};
 }

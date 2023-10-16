@@ -98,7 +98,9 @@ namespace PrettyEngine {
 			}
 			
 			if (this->showDebugUI) {
-				if (ImGui::Begin("Key Debugger")) {
+				if (ImGui::Begin("Input Debugger")) {
+					ImGui::Text("Mouse scroll delta: %f", this->_input->GetMouseWheelDelta());
+
 					auto keyWatchers = this->_input->GetKeyWatchers();
 					if (ImGui::BeginTable("Key Stats", 3) && !keyWatchers->empty()) {
 						ImGui::TableSetupColumn("Name");
@@ -106,36 +108,30 @@ namespace PrettyEngine {
 						ImGui::TableSetupColumn("State");
 						
 						ImGui::TableHeadersRow();
-						for (int i = 0; i < keyWatchers->size(); i++) {
+						
+						for (auto & key: *keyWatchers) {
 							ImGui::TableNextRow();
 							ImGui::TableNextColumn();
 
-							auto keyName = (*keyWatchers)[i]->name;
+							auto keyName = key->name;
 
 							ImGui::Text("%s", keyName.c_str());
 							
 							ImGui::TableNextColumn();
-							std::string keyMode = "Unknown";
-							if ((*keyWatchers)[i]->mode == KeyWatcherMode::Down) {
-								keyMode = "Down";
-							} else if ((*keyWatchers)[i]->mode == KeyWatcherMode::Press) {
-								keyMode = "Press";
-							} else if ((*keyWatchers)[i]->mode == KeyWatcherMode::Up) {
-								keyMode = "Up";
-							}
+							std::string keyMode = KeyWatcherModeToString(key->mode);
 
 							if (ImGui::Button(keyMode.c_str())) {
 								if (keyMode == "Down") {
-									(*keyWatchers)[i]->mode = KeyWatcherMode::Press;
+									key->mode = KeyWatcherMode::Press;
 								} else if (keyMode == "Press") {
-									(*keyWatchers)[i]->mode = KeyWatcherMode::Up;
+									key->mode = KeyWatcherMode::Up;
 								} else if (keyMode == "Up") {
-									(*keyWatchers)[i]->mode = KeyWatcherMode::Down;
+									key->mode = KeyWatcherMode::Down;
 								}
 							}
 
 							ImGui::TableNextColumn();
-							ImGui::Checkbox((keyName + " State").c_str(), &(*keyWatchers)[i]->state);
+							ImGui::Checkbox((keyName + " State").c_str(), &key->state);
 						}
 					}
 					ImGui::EndTable();

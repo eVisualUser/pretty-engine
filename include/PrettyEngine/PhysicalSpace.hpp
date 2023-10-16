@@ -60,8 +60,12 @@ namespace PrettyEngine {
 			for(auto & i: *layer) {
 				if (i->name != collider->name && i->OtherIn(collider)) {
 					Collision collision;
-					collision.colliderA = collider;
-					collision.colliderB = i;
+					collision.colliderSource = collider;
+					collision.colliderOther = i;
+
+					if (i->PointIn(collider->position)) {
+						collision.colliderCenterInOther = true;
+					}
 
 					out.push_back(collision);
 				}
@@ -70,10 +74,29 @@ namespace PrettyEngine {
 			return out;
 		}
 
+		/// Solution low-cost to avoid big overlap
+		void ExpressOverlapExtraction(Collision* collision) {
+			if (collision->colliderOther->position != collision->colliderSource->position) {
+				collision->colliderSource->Translate(collision->colliderSource->position - collision->colliderOther->position);
+			} else {
+				collision->colliderSource->position.x += 0.001;
+			}
+		}
+
+		void RigidbodyApplyVelocity(Collider* collider) {
+			auto startPosition = collider->position;
+			collider->position += collider->velocity;
+			if (!this->GetCollisions(collider).empty()) {
+				collider->position = startPosition;
+			}
+			collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+
 		void UpdateRigidBodies(float deltaTime) {
 			for(auto & layer: this->_colliders) {
 				for(auto & collider: layer.second) {
 					this->UpdateRigidBody(collider, deltaTime);
+					this->RigidbodyApplyVelocity(collider);
 				}
 			}
 		}
@@ -82,15 +105,25 @@ namespace PrettyEngine {
 			if (collider->isRigidBody) {
 				auto collisions = this->GetCollisions(collider);
 				for(auto & collision: collisions) {
-					if (collision.colliderB->isRigidBody) {
-						DebugLog(LOG_DEBUG, "Collision !", false);
-						// collision.colliderA->position.x += glm::distance(collision.colliderA->position, collision.colliderB->position);
+					if (collision.colliderOther->isRigidBody) {
+						if (collision.colliderCenterInOther) {
+							this->ExpressOverlapExtraction(&collision);
+						} else {
+							this->RigidbodyApplyVelocity(collider);
+						}
 					}
 				}
 			}
 		}
 
+		/// Set the smooth physcis state, when active it will make all physics operation smooth (can impact performance and precision).
+		void SetSmoothPhysics(bool state) {
+			this->smoothPhysics = state;
+		}
+
 	private:
 		std::unordered_map<std::string, std::vector<Collider*>> _colliders;
+
+		bool smoothPhysics = true;
 	};
 }

@@ -30,6 +30,28 @@ namespace PrettyEngine {
     	Up,
     };
 
+    static std::string KeyWatcherModeToString(KeyWatcherMode mode) {
+    	if (mode == KeyWatcherMode::Press) {
+    		return "Press";
+    	} else if (mode == KeyWatcherMode::Down) {
+    		return "Down";
+    	} else if (mode == KeyWatcherMode::Up) {
+    		return "Up";
+    	}
+    	return "Press";
+    }
+
+    static KeyWatcherMode KeyWatcherModeFromString(std::string mode) {
+    	if (mode == "Press") {
+    		return KeyWatcherMode::Press;
+    	} else if (mode == "Down") {
+    		return KeyWatcherMode::Down;
+    	} else if (mode == "Up") {
+    		return KeyWatcherMode::Up;
+    	}
+    	return KeyWatcherMode::Press;
+    }
+
     struct KeyWatcher {
     public:
     	std::string name = "?";
@@ -42,14 +64,6 @@ namespace PrettyEngine {
 	public:
 		Input(GLFWwindow* window) {
 			this->SetWindow(window);
-
-			if (!FileExist(this->_savePath)) {
-				CreateFile(this->_savePath);
-			}
-		}
-
-		~Input() {
-
 		}
 
 		void SetWindow(GLFWwindow* window) {
@@ -118,7 +132,7 @@ namespace PrettyEngine {
         			watcher->state = this->GetKeyPress(watcher->key);
         		} else if (watcher->mode == KeyWatcherMode::Down) {
         			watcher->state = this->GetKeyDown(watcher->key);
-        		} else if (watcher->mode == KeyWatcherMode::Down) {
+        		} else if (watcher->mode == KeyWatcherMode::Up) {
         			watcher->state = this->GetKeyUp(watcher->key);
         		}
         	}
@@ -170,6 +184,8 @@ namespace PrettyEngine {
 
 		GLFWwindow* _window;
 
-		std::string _savePath = GetEnginePublicPath("input.pe");
+		std::string _savePath = GetEnginePublicPath("input.pe", true);
+
+		toml::table _fileData;
 	};
 }

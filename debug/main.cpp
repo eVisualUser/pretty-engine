@@ -2,6 +2,8 @@
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/debug.hpp>
 
+#include <iostream>
+
 int main() {
 
 	auto physicalSpace = PrettyEngine::PhysicalSpace();
@@ -41,6 +43,14 @@ int main() {
 
 	DebugLog(LOG_DEBUG, "ColliderA Position: " << colliderA.position.x << ';' << colliderA.position.y << ';' << colliderA.position.z, false);
 	DebugLog(LOG_DEBUG, "ColliderB Position: " << colliderB.position.x << ';' << colliderB.position.y << ';' << colliderB.position.z, false);
+
+	int i[5] = {0, 0, 0, 10};
+
+	for(auto & iter: i) {
+		iter = 100;
+	}
+
+	std::cout << i[0] << std::endl; 
 
 	return 0;
 }

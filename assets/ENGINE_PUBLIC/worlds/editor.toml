@@ -1,6 +1,6 @@
 [entities.otherCollider]
 components = [
-    [ 'Render', 'Render', 'Texture Base', 'image.png', 'Mesh', 'rect', 'UseLight', 'false', 'SunLight', 'false' ],
+    [ 'Render', 'Render', 'Texture Base', 'c#.png', 'Mesh', 'rect', 'UseLight', 'false', 'SunLight', 'false' ],
     ['Physical', 'Physical']
 ]
 name = 'PhysicalObject'
@@ -10,7 +10,7 @@ public_map = [ [ 'projectName', 'MyNewProject' ] ]
     [entities.otherCollider.transform]
     position = [ 0.0, 0.0, 0.0 ]
     rotation = [ 0.0, 0.0, 0.0, 0.0 ]
-    scale = [ 0.5, 0.5, 0.5 ]
+    scale = [ 1.0, 1.0, 1.0 ]
 
 [entities.entityA]
 components = [
@@ -45,7 +45,7 @@ public_map = [ [ 'projectName', 'MyNewProject' ] ]
     [entities.entityA.transform]
     position = [ 0.0, 0.0, 0.0 ]
     rotation = [ 0.0, 0.0, -0.61097586154937744, 0.79164934158325195 ]
-    scale = [ 0.5, 0.5, 0.5 ]
+    scale = [ 1.0, 1.0, 1.0 ]
 
 [meta]
 name = 'World'
