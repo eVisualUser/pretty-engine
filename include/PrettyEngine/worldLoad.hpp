@@ -175,6 +175,7 @@ namespace PrettyEngine {
 									newComponent->owner = dynamic_cast<DynamicObject*>(lastEntity.get());
 									newComponent->object = componentName;
 									newComponent->unique = componentUnique;
+									newComponent->OnUpdatePublicVariables();
 									lastEntity->components.push_back(newComponent);
 								}
 							}
@@ -189,6 +190,7 @@ namespace PrettyEngine {
 
 							lastEntity->unique = entity.first;
 							lastEntity->object = newEntity;
+							lastEntity->OnUpdatePublicVariables();
 							
 							auto transform = (*entity.second.as_table())["transform"];
 							if (transform.is_table() && target->GetLastEntityRegistred() != nullptr) {

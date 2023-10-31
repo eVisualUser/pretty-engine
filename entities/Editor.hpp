@@ -41,6 +41,8 @@ namespace Custom {
 
 	    this->renderer->GetCurrentCamera()->position.z = -1;
 
+	    this->visualObject = this->GetComponentAs<Render>("Render")->GetVisualObject();
+
 	    keyUp.name = "EditorKeyUp";
 	    keyUp.key = KeyCode::UpArrow;
 	    keyUp.mode = KeyWatcherMode::Press;
@@ -60,6 +62,13 @@ namespace Custom {
 	    keyRight.key = KeyCode::RightArrow;
 	    keyRight.mode = KeyWatcherMode::Press;
 	    this->input->AddKeyWatcher(&keyRight);
+	  }
+
+	  void OnDestroy() override {
+	  	this->input->RemoveKeyWatcher(&keyUp);
+	  	this->input->RemoveKeyWatcher(&keyDown);
+	  	this->input->RemoveKeyWatcher(&keyLeft);
+	  	this->input->RemoveKeyWatcher(&keyRight);
 	  }
 
 	  void OnAlwaysUpdate() override {
@@ -94,6 +103,16 @@ namespace Custom {
 	  		moveDirection.x -= this->_speed * this->renderer->GetDeltaTime();
 	  	} else if (this->keyRight.state) {
 	  		moveDirection.x += this->_speed * this->renderer->GetDeltaTime();
+	  	}
+
+	  	auto collisions = this->physicalSpace->GetCollisions(this->rigidbody->GetCollider());
+
+	  	if (collisions != nullptr) {
+	 	  	if (!collisions->empty()) {
+		  		this->visualObject->baseColor = glm::vec3(0.67, 0.22, 0.17);
+		  	} else {
+		  		this->visualObject->baseColor = glm::vec3(1.0f, 1.0f, 1.0f);
+		  	}
 	  	}
 
 	  	this->rigidbody->Move(moveDirection);
@@ -163,5 +182,6 @@ namespace Custom {
 	  KeyWatcher keyRight;
 
 	  Physical* rigidbody;
+	  VisualObject* visualObject;
 	};
 }

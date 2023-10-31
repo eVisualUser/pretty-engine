@@ -8,9 +8,15 @@ out vec4 outColor;
 
 uniform float time;
 uniform vec3 baseColor;
-uniform int useTexture;
 
+uniform int useTexture;
 uniform sampler2D textureBase;
+
+uniform int useTransparencyTexture;
+uniform sampler2D transparencyTexture;
+
+uniform int useNormal;
+uniform sampler2D normalTexture;
 
 uniform int layer;
 uniform int mainLayer;
@@ -50,7 +56,6 @@ vec4 GetVertexLight() {
     }
 
     if (useLight != 0) {
-        int haveLightning = 0;
         for (int i = 0; i < lightsCount; i++) {
             if (lightsLayer[i] == lightLayer) {
                 float distance = distance(Vertex.xyz, lightsPosition[i]);
@@ -59,15 +64,17 @@ vec4 GetVertexLight() {
                 float intensityReduction = smoothstep(0.0, 1.0, distanceRatio);
                 float adjustedFactor = lightsFactor[i] * intensityReduction * lightsDeferredFactor[i];
 
-                vec3 lightDirection = normalize(lightsPosition[i] - Vertex.xyz);
-                float cosTheta = dot(lightDirection, normalize(-spotLightDirection[i]));
+                if (spotLight[i] != 0) {
+                    vec3 lightDirection = normalize(lightsPosition[i] - Vertex.xyz);
+                    float cosTheta = dot(lightDirection, normalize(-spotLightDirection[i]));
+
+                    if (cosTheta > cos(spotLightCutOff[i])) {
+                        lightOutColor = vec4((vec3(1.0f, 1.0f, 1.0f) + lightOutColor.xyz) * lightsColor[i] * adjustedFactor, lightsOpacityFactorEffect[i]);
+                    }
+                }
                 
-                if (spotLight[i] != 0 && cosTheta > cos(spotLightCutOff[i])) {
+                if (spotLight[i] == 0 && distance < lightsRadius[i]) {
                     lightOutColor = vec4((vec3(1.0f, 1.0f, 1.0f) + lightOutColor.xyz) * lightsColor[i] * adjustedFactor, lightsOpacityFactorEffect[i]);
-                    haveLightning = 1;
-                } else if (spotLight[i] == 0 && distance < lightsRadius[i]) {
-                    lightOutColor = vec4((vec3(1.0f, 1.0f, 1.0f) + lightOutColor.xyz) * lightsColor[i] * adjustedFactor, lightsOpacityFactorEffect[i]);
-                    haveLightning = 1;
                 }
             }
         }
@@ -84,10 +91,30 @@ void main()
 {
     vec4 lightOutColor = GetVertexLight();
 
+    float outOpacity = 1.0f;
+
+    if (useTransparencyTexture == 1) {
+        outOpacity = texture(transparencyTexture, Texcoord).a;
+    }
+
     if (useTexture == 0) {
         outColor = vec4(baseColor * Color, opacity) * lightOutColor;
     } else {
-        outColor = texture(textureBase, Texcoord) * vec4(baseColor * Color, opacity) * lightOutColor;
+        outColor = (texture(textureBase, Texcoord) * vec4(baseColor * Color, opacity)) * lightOutColor;
+    }
+
+    if (useNormal == 1 && useLight == 1) {
+        for(int i = 0; i < lightsCount; i++) {
+            if (lightsLayer[i] == lightLayer) {
+                vec3 normalColor = texture(normalTexture, Texcoord).rgb;
+
+                vec3 lightDirection = normalize(lightsPosition[i] - Vertex.xyz);
+
+                float diff = max(dot(normalColor, lightDirection), 0.0);
+
+                outColor *= diff;
+            }
+        }
     }
 
     outColor *= vec4(outColor.xyz * colorFilter, outColor.w);

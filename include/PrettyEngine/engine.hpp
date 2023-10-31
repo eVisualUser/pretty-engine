@@ -11,6 +11,7 @@
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
+#include <PrettyEngine/editor.hpp>
 
 #include <cstring>
 #include <toml++/toml.h>
@@ -20,7 +21,6 @@
 #include <memory>
 #include <string>
 #include <cstring>
-#include <vector>
 
 #define CONSOLE_COMMAND_BUFFER_SIZE 100
 
@@ -60,8 +60,6 @@ namespace PrettyEngine {
 
 			this->_renderer->SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 		
-			this->debugLocalization.LoadFile(GetEnginePublicPath("debug_localization.csv", true));
-
 			this->_imPlotContext = ImPlot::CreateContext();
 
 			this->SetWindowIcon("WindowIcon");
@@ -72,7 +70,6 @@ namespace PrettyEngine {
 		}
 		
 		~Engine() {
-			this->debugLocalization.Save();
 			ImPlot::DestroyContext(this->_imPlotContext);
 			this->_worldManager.Clear();
 			this->_renderer->Clear();
@@ -98,94 +95,7 @@ namespace PrettyEngine {
 			}
 			
 			if (this->showDebugUI) {
-				if (ImGui::Begin("Input Debugger")) {
-					ImGui::Text("Mouse scroll delta: %f", this->_input->GetMouseWheelDelta());
-
-					auto keyWatchers = this->_input->GetKeyWatchers();
-					if (ImGui::BeginTable("Key Stats", 3) && !keyWatchers->empty()) {
-						ImGui::TableSetupColumn("Name");
-						ImGui::TableSetupColumn("Mode");
-						ImGui::TableSetupColumn("State");
-						
-						ImGui::TableHeadersRow();
-						
-						for (auto & key: *keyWatchers) {
-							ImGui::TableNextRow();
-							ImGui::TableNextColumn();
-
-							auto keyName = key->name;
-
-							ImGui::Text("%s", keyName.c_str());
-							
-							ImGui::TableNextColumn();
-							std::string keyMode = KeyWatcherModeToString(key->mode);
-
-							if (ImGui::Button(keyMode.c_str())) {
-								if (keyMode == "Down") {
-									key->mode = KeyWatcherMode::Press;
-								} else if (keyMode == "Press") {
-									key->mode = KeyWatcherMode::Up;
-								} else if (keyMode == "Up") {
-									key->mode = KeyWatcherMode::Down;
-								}
-							}
-
-							ImGui::TableNextColumn();
-							ImGui::Checkbox((keyName + " State").c_str(), &key->state);
-						}
-					}
-					ImGui::EndTable();
-				}
-				ImGui::End();
-				
-				if(ImGui::Begin("Console")) {
-					int index = 0;
-					for (auto & line: logs) {
-						ImGui::Text("%i - %s", index, line.c_str());
-					}
-				}
-				ImGui::End();
-				
-				if (ImGui::Begin(this->debugLocalization.Get("Debug Tools").c_str(),
-					NULL,
-					ImGuiWindowFlags_MenuBar |
-					ImGuiWindowFlags_NoSavedSettings
-				)) {
-					ImGui::BeginMenuBar();
-						for (std::string language: *this->debugLocalization.GetAllLanguages()) {
-							if (ImGui::Button(language.c_str())) {
-								this->debugLocalization.GetLangIndex(language.c_str());
-							}
-						}
-					ImGui::EndMenuBar();
-					
-					auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
-					ImGui::Text("%s%i", visualObjects.c_str(), this->_renderer->GetVisualObjectsCount());
-					auto lights = this->debugLocalization.Get("Lights: ");
-					ImGui::Text("%s%i", lights.c_str(), this->_renderer->GetLightCount());
-					
-					if (!this->frameRateLogs.empty()) {
-						auto frameRate = this->debugLocalization.Get("Frame rate: ");
-						ImGui::Text("%s%i", frameRate.c_str(), this->frameRateLogs.back());
-
-						if (ImGui::Button(this->debugLocalization.Get("Frame Rate Graph").c_str())) {
-							this->showFrameRateGraph = !this->showFrameRateGraph;
-						}
-
-						if (this->showFrameRateGraph) {
-							auto graphName = this->debugLocalization.Get("Frame Rate Graph");
-							auto x = this->debugLocalization.Get("Time");
-							auto y = this->debugLocalization.Get("Frame Rate");
-							auto data = this->debugLocalization.Get("Frame per second");
-
-						    if (ImPlot::BeginPlot(graphName.c_str(), x.c_str(), y.c_str())) {
-							    ImPlot::PlotBars(data.c_str(), this->frameRateLogs.data(), this->frameRateLogs.size());
-							    ImPlot::EndPlot();
-							}
-						}
-					}
-				}
-				ImGui::End();
+				this->editor.Update(&this->_worldManager, this->_input.get(), this->_renderer.get(), &this->_physicalSpace, &this->frameRateLogs);
 			}
 		}
 
@@ -202,16 +112,24 @@ namespace PrettyEngine {
 			if (this->_renderer->WindowActive()) {
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
-						currentWorld->CallFunctionProcesses();
+						
+						#if ENGINE_EDITOR
+						if(!engineEditor)
+						#endif 
+						{
+							currentWorld->CallFunctionProcesses();
+						}
+						currentWorld->Update();
 						
 						currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
-						currentWorld->Update();
 						currentWorld->EditorUpdate();
 					}
 				}
 
 				this->_renderer->StartUIRendering();
-				this->UpdateDebugUI();
+				#if ENGINE_EDITOR
+					this->UpdateDebugUI();
+				#endif
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
 						currentWorld->CallRenderFunctions();
@@ -228,7 +146,7 @@ namespace PrettyEngine {
 					this->frameRateTimeLogs.push_back(currentTime);
 				}
 				
-				this->_physicalSpace.UpdateRigidBodies(this->_renderer->GetDeltaTime());
+				this->_physicalSpace.Update(this->_renderer->GetDeltaTime());
 				
 				this->_renderer->Draw();
 				this->_renderer->Show();
@@ -372,12 +290,10 @@ namespace PrettyEngine {
 
 		bool exit = false;
 
-		Localization debugLocalization;
 		bool showDebugUI = false;
 
 		bool _physicsEnabled = true;
 
-	private:
 		std::shared_ptr<AudioEngine> _audioEngine = std::make_shared<AudioEngine>();
 		std::shared_ptr<Renderer> _renderer = std::make_shared<Renderer>();
 		std::shared_ptr<Input> _input = nullptr;
@@ -396,5 +312,13 @@ namespace PrettyEngine {
 		std::vector<int> frameRateTimeLogs;
 
 		ImPlotContext* _imPlotContext;
+
+		#if ENGINE_EDITOR
+			bool engineEditor = true;
+		#else
+			bool engineEditor = false;
+		#endif
+
+		Editor editor;
 	};
 };

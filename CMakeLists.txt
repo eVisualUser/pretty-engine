@@ -25,6 +25,7 @@ include_directories("include")
 
 add_library(pretty
 	"source/render.cpp"
+	"source/assetsManager.cpp"
 )
 
 target_link_libraries(pretty PUBLIC

@@ -1,21 +1,38 @@
-[entities.otherCollider]
-components = [
-    [ 'Render', 'Render', 'Texture Base', 'c#.png', 'Mesh', 'rect', 'UseLight', 'false', 'SunLight', 'false' ],
-    ['Physical', 'Physical']
-]
-name = 'PhysicalObject'
-object = 'Empty'
-public_map = [ [ 'projectName', 'MyNewProject' ] ]
-
-    [entities.otherCollider.transform]
-    position = [ 0.0, 0.0, 0.0 ]
-    rotation = [ 0.0, 0.0, 0.0, 0.0 ]
-    scale = [ 1.0, 1.0, 1.0 ]
-
 [entities.entityA]
 components = [
     [ 'LocalizationEditor', 'LocalizationEditor' ],
-    [ 'Render', 'Render', 'Texture Base', 'cpp_logo.png', 'Mesh', 'rect', 'UseLight', 'true', 'SunLight', 'false' ],
+    [
+        'Render',
+        'Render',
+        'TextureBase',
+        'cpp_logo.png',
+        'Mesh',
+        'rect',
+        'UseTextureNormal',
+        'true',
+        'UseLight',
+        'true',
+        'TextureBaseGUID',
+        '31fddb7b-2891-48d0-a635-414bcc4e851d',
+        'SunLight',
+        'false',
+        'TextureTransparencyGUID',
+        'a7c119e4-f6c7-4bf6-a813-8d12231e38ce',
+        'TextureTransparency',
+        '',
+        'TextureNormal',
+        'c#.png',
+        'UseTextureBase',
+        'true',
+        'TextureNormalGUID',
+        '50120765-9599-4ea3-a28d-5f91860ca514',
+        'MeshGUID',
+        'fb3058da-a860-45e8-aa31-f91d12ec6d09',
+        'UseTexture',
+        'true',
+        'UseTextureTransparency',
+        'false'
+    ],
     [
         'Light',
         'Light',
@@ -36,16 +53,91 @@ components = [
         'SpotLightCutOff',
         ''
     ],
-    ['Physical', 'Physical']
+    [
+        'Physical',
+        'Physical',
+        'rigidbody',
+        'true',
+        'model',
+        'Sphere',
+        'name',
+        '8479fe4c-453c-45bd-b2f0-4016d4c3debf',
+        'layer',
+        'Default',
+        'mass',
+        '1'
+    ]
 ]
 name = 'Editor'
 object = 'Editor'
 public_map = [ [ 'projectName', 'MyNewProject' ] ]
 
     [entities.entityA.transform]
+    position = [
+        0.0,
+        0.0,
+        0.0
+    ]
+    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
+    scale = [ 0.5, 0.5, 0.5 ]
+
+[entities.otherCollider]
+components = [
+    [
+        'Render',
+        'Render',
+        'TextureBase',
+        'c#.png',
+        'Mesh',
+        'rect',
+        'UseTextureNormal',
+        'false',
+        'UseLight',
+        'false',
+        'TextureBaseGUID',
+        '639b3521-35c1-4f1f-bfc6-76f9cd631082',
+        'SunLight',
+        'false',
+        'TextureTransparencyGUID',
+        '58aa741d-70e7-44b9-bb00-49280f5b8c4f',
+        'TextureTransparency',
+        '',
+        'TextureNormal',
+        '',
+        'UseTextureBase',
+        'false',
+        'TextureNormalGUID',
+        'd23a39ac-dff9-428e-976d-6f89a8433092',
+        'MeshGUID',
+        '7c1cc3c4-8caa-4cfe-a3d3-c7c5972656fb',
+        'UseTexture',
+        'false',
+        'UseTextureTransparency',
+        'false'
+    ],
+    [
+        'Physical',
+        'Physical',
+        'rigidbody',
+        'true',
+        'model',
+        'Sphere',
+        'name',
+        '66ec23e4-099f-4c77-9429-7e343b2882b3',
+        'layer',
+        'Default',
+        'mass',
+        '1'
+    ]
+]
+name = 'PhysicalObject'
+object = 'Empty'
+public_map = [ [ 'projectName', 'MyNewProject' ] ]
+
+    [entities.otherCollider.transform]
     position = [ 0.0, 0.0, 0.0 ]
-    rotation = [ 0.0, 0.0, -0.61097586154937744, 0.79164934158325195 ]
-    scale = [ 1.0, 1.0, 1.0 ]
+    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
+    scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]
-name = 'World'
+name = 'Editor'

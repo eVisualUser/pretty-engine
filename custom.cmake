@@ -1,16 +1,18 @@
 # Entities
 
-file(GLOB customFiles "${CMAKE_SOURCE_DIR}/custom/*.hpp")
-file(GLOB customSources "${CMAKE_SOURCE_DIR}/custom/*.cpp")
+set(CUSTOM_DIRECTORY "${CMAKE_SOURCE_DIR}/entities")
 
-file(READ "${CMAKE_SOURCE_DIR}/custom/template.hxx" template)
+file(GLOB customFiles "${CUSTOM_DIRECTORY}/*.hpp")
+file(GLOB customSources "${CUSTOM_DIRECTORY}/*.cpp")
 
-include_directories("${CMAKE_SOURCE_DIR}/custom")
+file(READ "${CUSTOM_DIRECTORY}/template.hxx" template)
+
+include_directories("${CUSTOM_DIRECTORY}")
 
 set(customOut "#pragma once\n")
 
 foreach(file ${customFiles})
-		file(RELATIVE_PATH relative "${CMAKE_SOURCE_DIR}/custom" ${file})
+		file(RELATIVE_PATH relative "${CUSTOM_DIRECTORY}" ${file})
 		if(NOT(${relative} STREQUAL "custom.hpp"))
 			set(customOut "${customOut}\n#include <${relative}>")
 		endif()
@@ -18,16 +20,20 @@ endforeach()
 
 set(customOut "${customOut}\n${template}")
 
+set(customList "")
+
 foreach(file ${customFiles})
 
 	get_filename_component(id ${file} NAME_WE)
 	if(NOT(${id} STREQUAL "custom"))
 		set(customOut "${customOut}    if(name == \"${id}\") {\n        world->RegisterEntity(std::make_shared<Custom::${id}>())\;\n    } ")
+		set(customList "${customList}${id}\;")
 	endif()
 
 endforeach()
 set(customOut "${customOut}\n}")
-file(WRITE "${CMAKE_SOURCE_DIR}/custom/custom.hpp" ${customOut})
+file(WRITE "${CUSTOM_DIRECTORY}/custom.hpp" ${customOut})
+file(WRITE "${CUSTOM_DIRECTORY}/list.csv" ${customList})
 
 project(custom)
 
@@ -58,18 +64,19 @@ foreach(file ${customFiles})
 endforeach()
 
 set(customOut "${customOut}\n${template}")
+set(componentList "")
 
 foreach(file ${customFiles})
-
 	get_filename_component(id ${file} NAME_WE)
 	if(NOT(${id} STREQUAL "components"))
 		set(customOut "${customOut}    if(name == \"${id}\") {\n        return std::make_shared<Custom::${id}>()\;\n    } ")
+		set(componentList "${componentList}${id}\;")
 	endif()
-
 endforeach()
 set(customOut "${customOut}\n return nullptr\;")
 set(customOut "${customOut}\n}")
 file(WRITE "${CMAKE_SOURCE_DIR}/components/components.hpp" ${customOut})
+file(WRITE "${CMAKE_SOURCE_DIR}/components/list.csv" ${componentList})
 
 project(components)
 

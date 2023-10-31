@@ -22,6 +22,8 @@ namespace PrettyEngine {
 
 	class DynamicObject: public Tagged {
 	public:
+		/// Called when the components loaded
+		virtual void OnUpdatePublicVariables() {}
 		/// Called before the first frame.
 		virtual void OnStart() {}
 		/// Called each frame.
@@ -51,9 +53,9 @@ namespace PrettyEngine {
 		}
 
 		/// Create a public var but do not override
-		void CreatePublicVar(std::string name) {
+		void CreatePublicVar(std::string name, std::string defaultValue = "") {
 			if (!this->publicMap.contains(name)) {
-				this->publicMap.insert(std::make_pair(name, ""));
+				this->publicMap.insert(std::make_pair(name, defaultValue));
 			}
 		}
 

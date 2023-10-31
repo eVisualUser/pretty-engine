@@ -16,10 +16,29 @@ namespace Custom {
 	class Render: public PrettyEngine::Component {
 	public:
 		void OnStart() {
-			this->CreatePublicVar("Texture Base");
+			this->CreatePublicVar("UseTexture", "false");
+
+			this->CreatePublicVar("UseTextureBase", "false");
+			this->CreatePublicVar("TextureBase");
+			this->CreatePublicVar("TextureBaseGUID", xg::newGuid());
+
+			this->CreatePublicVar("UseTextureTransparency", "false");
+			this->CreatePublicVar("TextureTransparency");
+			this->CreatePublicVar("TextureTransparencyGUID", xg::newGuid());
+
+			this->CreatePublicVar("UseTextureNormal", "false");
+			this->CreatePublicVar("TextureNormal");
+			this->CreatePublicVar("TextureNormalGUID", xg::newGuid());
+
 			this->CreatePublicVar("Mesh");
+			this->CreatePublicVar("MeshGUID", xg::newGuid());
 			this->CreatePublicVar("UseLight");
 			this->CreatePublicVar("SunLight");
+
+			this->meshGuid = this->GetPublicVarValue("MeshGUID");
+			this->textureGuid = this->GetPublicVarValue("TextureBaseGUID");
+			this->textureTransparancyGuid = this->GetPublicVarValue("TextureTransparencyGUID");
+			this->textureNormalGuid = this->GetPublicVarValue("TextureNormalGUID");
 
 			this->visualObject->useLight = (this->GetPublicVarValue("UseLight") == "true");
 			this->visualObject->sunLight = (this->GetPublicVarValue("SunLight") == "true");
@@ -30,16 +49,41 @@ namespace Custom {
 
 			this->renderModel.SetShaderProgram(shader);
 			this->visualObject->AddRenderModel(&this->renderModel);
-		}
 
-		void OnDestroy() {
-			this->renderer->UnRegisterVisualObject(visualObjectGuid);
-		}
+			this->renderModel.useTexture = (this->GetPublicVarValue("UseTexture") == "true");
 
-		void OnUpdate() override {
-			this->visualObject->position = dynamic_cast<Entity*>(this->owner)->position;
-			this->visualObject->rotation = dynamic_cast<Entity*>(this->owner)->rotation;
-			this->visualObject->scale = dynamic_cast<Entity*>(this->owner)->scale;
+			if (this->GetPublicVarValue("UseTextureBase") == "true" && this->texture == nullptr) {
+				auto baseTexturePath = this->GetPublicVarValue("TextureBase");
+				auto path = GetEnginePublicPath(baseTexturePath, true);
+					if (FileExist(path)) {
+					this->renderer->RemoveTexture(this->textureGuid);
+					this->visualObject->RemoveTexture(this->texture);
+					this->texture = this->renderer->AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+					this->visualObject->AddTexture(this->texture);
+				}
+			}
+
+			if (this->GetPublicVarValue("UseTextureTransparency") == "true") {
+				auto baseTexturePath = this->GetPublicVarValue("TextureNormal");
+				auto path = GetEnginePublicPath(baseTexturePath, true);
+					if (FileExist(path)) {
+					this->renderer->RemoveTexture(this->textureTransparancyGuid);
+					this->visualObject->RemoveTexture(this->textureTransparency);
+					this->textureTransparency = this->renderer->AddTexture(this->textureTransparancyGuid, path, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+					this->visualObject->AddTexture(this->textureTransparency);
+				}
+			}
+
+			if (this->GetPublicVarValue("UseTextureNormal") == "true") {
+				auto baseTexturePath = this->GetPublicVarValue("TextureTransparency");
+				auto path = GetEnginePublicPath(baseTexturePath, true);
+					if (FileExist(path)) {
+					this->renderer->RemoveTexture(this->textureGuid);
+					this->visualObject->RemoveTexture(this->textureTransparency);
+					this->textureTransparency = this->renderer->AddTexture(this->textureGuid, path, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+					this->visualObject->AddTexture(this->textureTransparency);
+				}
+			}
 
 			bool loadMesh = false;
 
@@ -57,33 +101,36 @@ namespace Custom {
 				DebugLog(LOG_WARNING, "Missing mesh for: " << this->unique, false);
 			}
 
-			auto baseTexturePath = this->GetPublicVarValue("Texture Base");
-
-			auto path = GetEnginePublicPath(baseTexturePath, true);
-
-			if (this->texture == nullptr && FileExist(path)) {
-				this->renderer->RemoveTexture(this->textureGuid);
-				this->visualObject->RemoveTexture(this->texture);
-				this->texture = this->renderer->AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
-				this->visualObject->AddTexture(this->texture);
-				this->renderModel.useTexture = true;
-			}
-
 			if (loadMesh) {
 				this->renderer->UnRegisterVisualObject(visualObjectGuid);
 				this->renderer->RegisterVisualObject(visualObjectGuid, this->visualObject);
 			}
+
 		}
 
-		std::shared_ptr<VisualObject> GetVisualObject() {
-			return this->visualObject;
+		void OnDestroy() {
+			this->renderer->UnRegisterVisualObject(visualObjectGuid);
+		}
+
+		void OnUpdate() override {
+			this->visualObject->position = dynamic_cast<Entity*>(this->owner)->position;
+			this->visualObject->rotation = dynamic_cast<Entity*>(this->owner)->rotation;
+			this->visualObject->scale = dynamic_cast<Entity*>(this->owner)->scale;
+		}
+
+		VisualObject* GetVisualObject() {
+			return this->visualObject.get();
 		}
 
 	private:
 		Mesh* mesh = nullptr;
 		std::string meshGuid = xg::newGuid();
 		Texture* texture = nullptr;
+		Texture* textureTransparency = nullptr;
+		Texture* textureNormal = nullptr;
 		std::string textureGuid = xg::newGuid();
+		std::string textureTransparancyGuid = xg::newGuid();
+		std::string textureNormalGuid = xg::newGuid();
 
 		RenderModel renderModel;
 		std::shared_ptr<VisualObject> visualObject = std::make_shared<VisualObject>();

@@ -3,6 +3,7 @@
 #include <PrettyEngine/debug.hpp>
 
 #include <string>
+#include <vector>
 #include <fstream>
 
 #include <glm/vec3.hpp>
@@ -25,6 +26,7 @@ namespace PrettyEngine {
 		virtual std::string ToString() { return "Not overriden"; }
 	};
 
+	/// Concat the path of the public directory.
 	static std::string GetEnginePublicPath(std::string base, bool editOriginal = false) {
 		#if _DEBUG
 			if (editOriginal) {
@@ -59,7 +61,35 @@ namespace PrettyEngine {
 		}
 	}
 
-	static void StringReplace(std::string* str, char base, char replacement) {
+	static std::string ReadFileToString(std::string path) {
+	    std::ifstream input_file(path);
+	    if (!input_file.is_open()) {
+	    	DebugLog(LOG_ERROR, "Could not open: " << path, true);
+	    	return "";
+	    }
+	    std::string out = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+
+	    input_file.close();
+	    return out;
+	}
+
+	static bool WriteFileString(std::string path, std::string content) {
+		std::ofstream outFile;
+		outFile.open(path);
+		if (outFile.is_open()) {
+
+			outFile << content;
+
+			outFile.flush();
+			outFile.close();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	static void StringReplaceChar(std::string* str, char base, char replacement) {
 		for (auto & c: *str) {
 			if (c == base) {
 				c = replacement;
@@ -145,20 +175,4 @@ namespace PrettyEngine {
 	#else
 		#define PUBLIC_ASSET(fileName) "./public/" + fileName
 	#endif
-
-	static std::string FileToString(std::string fileName) {
-		std::ifstream ifs(fileName);
-
-		if (!ifs.is_open()) {
-			DebugLog(LOG_ERROR, "Failed to read: " << fileName, true);
-			return nullptr;
-		}
-
-  		std::string content( (std::istreambuf_iterator<char>(ifs) ),
-                       	(std::istreambuf_iterator<char>()    ) );
-
-  		ifs.close();
-
-  		return content;
-	}
 }

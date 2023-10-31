@@ -42,7 +42,7 @@ namespace PrettyEngine {
 	public:
 		void LoadFile(std::string path) {
 			this->filePath = path;
-			auto fileContent = FileToString(path);
+			auto fileContent = ReadFileToString(path);
 			this->LoadString(fileContent);
 		}
 

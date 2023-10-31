@@ -1,5 +1,9 @@
 #pragma once
 
+#include "PrettyEngine/debug.hpp"
+#include <PrettyEngine/localization.hpp>
+#include <PrettyEngine/utils.hpp>
+
 #include <glad/glad.h>
 
 #include <string>
@@ -36,6 +40,21 @@ namespace PrettyEngine {
 		void CreateUniform(std::string keyName, std::string name) {
 			unsigned int id = glGetUniformLocation(this->shaderProgram, name.c_str());
 			this->uniforms.insert(std::make_pair(keyName, id));
+		}
+
+		void CreateUniformsFromCSV(std::string content) {
+			std::string stringBuffer;
+			for(auto & c: content) {
+				if (c != '\n') {
+					stringBuffer.push_back(c);
+				} else {
+					auto csv = ParseCSVLine(stringBuffer);
+					if (csv.size() > 1) {
+						this->CreateUniform(csv[0], csv[1]);
+					}
+					stringBuffer.clear();
+				}
+			}
 		}
 	};
 

@@ -47,3 +47,33 @@ static const char* ASSET_BUILTIN_EXAMPLE = R"(# Example
 
 This is an asset example ...
 )";
+
+static const char* ASSET_BUILTIN_UNIFORMS = R"(Time;time;
+Model;model;
+View;view;
+Projection;proj;
+BaseColor;baseColor;
+UseTexture;useTexture;
+UseTransparencyTexture;UseTransparencyTexture;
+UseNormal;UseNormal;
+UseTexture;useTexture;
+Layer;layer;
+MainLayer;mainLayer;
+Opacity;opacity;
+ColorFilter;colorFilter;
+LightsCount;lightsCount;
+LightsPosition;lightsPosition;
+LightsColor;lightsColor;
+LightsFactor;lightsFactor;
+LightsRadius;lightsRadius;
+LightsDeferredFactor;lightsDeferredFactor;
+LightsLayer;lightsLayer;
+LightLayer;lightLayer;
+UseLight;useLight;
+LightsOpacityFactorEffect;lightsOpacityFactorEffect;
+SpotLight;spotLight;
+SpotLightDirection;spotLightDirection;
+SpotLightCutOff;spotLightCutOff;
+UseSunLight;useSunLight;
+SunLightColor;sunLightColor;
+SunLightFactor;sunLightFactor;)";

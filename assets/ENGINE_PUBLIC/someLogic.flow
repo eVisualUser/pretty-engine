@@ -1,0 +1,6 @@
+Begin:condition
+~BeginFailed
+Do:condition
+~DoFailed
+End:condition
+~EndFailed

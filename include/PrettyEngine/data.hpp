@@ -7,7 +7,6 @@
 #include <sqlite3/sqlite3.h>
 
 #include <vector>
-#include <unordered_map>
 #include <string>
 #include <sstream>
 
@@ -35,7 +34,7 @@ namespace PrettyEngine {
 		}
 
 		~DataBase() {
-			sqlite3_close(this->db);
+			while(SQLITE_BUSY == sqlite3_close(this->db)) {};
 		}
 
 	public:

@@ -3,11 +3,11 @@
 #include <PrettyEngine/collider.hpp>
 
 namespace PrettyEngine {
-	struct Collision {
+	class Collision {
 	public:
 		Collider* colliderSource;
 		Collider* colliderOther;
 
-		bool colliderCenterInOther = false;
+		bool hit = false;
 	};
 }

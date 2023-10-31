@@ -16,13 +16,13 @@
 
 namespace PrettyEngine {
 	enum class ColliderModel {
-		/// Optimized collision detection
+		/// Only trigger point in
 		AABB,
 		/// Simple Sphere collision detection
 		Sphere,
 	};
 
-	class Collider: public Transform {
+	class Collider: public Transform, public virtual Tagged {
 	public:
 		bool PointIn(glm::vec3 point) { 
 			if (this->colliderModel == ColliderModel::AABB) {
@@ -39,23 +39,14 @@ namespace PrettyEngine {
 		
 		bool OtherIn(Collider* other) { 
 			if (this->colliderModel == ColliderModel::AABB) {
-				if (other->colliderModel == ColliderModel::AABB) {
-					auto min = this->GetMinHalf();
-					auto max = this->GetMaxHalf();
-
-					return (Vec3Greater(other->GetMaxHalf(), min) && Vec3Lower(other->GetMinHalf(), max));
-				} else if (other->colliderModel == ColliderModel::Sphere) {
-					glm::vec3 buffer = this->position - other->position;
-					buffer = glm::clamp(buffer, this->GetMaxHalf(), this->GetMinHalf());
-					return glm::distance(buffer, other->position) < other->radius;
-				}
+				return false;
 			} else if (this->colliderModel == ColliderModel::Sphere) {
 				if (other->colliderModel == ColliderModel::Sphere) {
-					return other->radius + this->radius >= glm::distance(this->position, other->position);
-				} else if (other->colliderModel == ColliderModel::AABB) {
-					glm::vec3 buffer = other->position - this->position;
-					buffer = glm::clamp(buffer, other->GetMaxHalf(), other->GetMinHalf());
-					return glm::distance(buffer, this->position) < this->radius;
+					if (glm::distance(other->position, this->position) < other->radius + this->radius) {
+						return true;
+					} else {
+						return false;
+					}
 				}
 			}
 
@@ -101,12 +92,11 @@ namespace PrettyEngine {
 
 		bool isRigidBody;
 
-		/// Mass of the object
 		float mass = 1.0f;
 
 		float bounce = 1.0f;
 		
-		glm::vec3 gravity;
+		glm::vec3 gravity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		glm::vec3 velocity;
 	};

@@ -9,6 +9,8 @@
 namespace PrettyEngine {
 	enum class TextureType {
 		Base,
+		Normal,
+		Transparency,
 	};
 
 	enum class TextureFilter {
@@ -47,5 +49,4 @@ namespace PrettyEngine {
 		TextureFilter filter;
 		TextureType textureType;
 	};
-
 }

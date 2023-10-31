@@ -1,9 +1,9 @@
 #include <PrettyEngine/light.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/camera.hpp>
-#include <PrettyEngine/text.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/assets/builtin.hpp>
 
 #include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/texture.hpp>
@@ -133,38 +133,7 @@ namespace PrettyEngine {
         auto shaderProgramRefs = GLShaderProgramRefs();
         shaderProgramRefs.shaderProgram = shaderProgram;
 
-        shaderProgramRefs.CreateUniform("Time", "time");
-        shaderProgramRefs.CreateUniform("Model", "model");
-        shaderProgramRefs.CreateUniform("View", "view");
-        shaderProgramRefs.CreateUniform("Projection", "proj");
-        shaderProgramRefs.CreateUniform("BaseColor", "baseColor");
-        shaderProgramRefs.CreateUniform("UseTexture", "useTexture");
-        shaderProgramRefs.CreateUniform("Layer", "layer");
-        shaderProgramRefs.CreateUniform("MainLayer", "mainLayer");
-        shaderProgramRefs.CreateUniform("Opacity", "opacity");
-        shaderProgramRefs.CreateUniform("RenderText", "renderText");
-        shaderProgramRefs.CreateUniform("TextOutLineWidth", "textOutLineWidth");
-        shaderProgramRefs.CreateUniform("ColorFilter", "colorFilter");
-        // Light
-        shaderProgramRefs.CreateUniform("LightsCount", "lightsCount");
-        shaderProgramRefs.CreateUniform("LightsPosition", "lightsPosition");
-        shaderProgramRefs.CreateUniform("LightsColor", "lightsColor");
-        shaderProgramRefs.CreateUniform("LightsFactor", "lightsFactor");
-        shaderProgramRefs.CreateUniform("LightsRadius", "lightsRadius");
-        shaderProgramRefs.CreateUniform("LightsDeferredFactor", "lightsDeferredFactor");
-        shaderProgramRefs.CreateUniform("LightsLayer", "lightsLayer");
-        shaderProgramRefs.CreateUniform("LightLayer", "lightLayer");
-        shaderProgramRefs.CreateUniform("UseLight", "useLight");
-        shaderProgramRefs.CreateUniform("LightsOpacityFactorEffect", "lightsOpacityFactorEffect");
-        
-        /// Spot Light
-        shaderProgramRefs.CreateUniform("SpotLight", "spotLight");
-        shaderProgramRefs.CreateUniform("SpotLightDirection", "spotLightDirection");
-        shaderProgramRefs.CreateUniform("SpotLightCutOff", "spotLightCutOff");
-        /// Sun Light
-        shaderProgramRefs.CreateUniform("UseSunLight", "useSunLight");
-        shaderProgramRefs.CreateUniform("SunLightColor", "sunLightColor");
-        shaderProgramRefs.CreateUniform("SunLightFactor", "sunLightFactor");
+        shaderProgramRefs.CreateUniformsFromCSV(ASSET_BUILTIN_UNIFORMS);
 
         this->glShaderPrograms.insert(std::make_pair(name, shaderProgramRefs));
         return &this->glShaderPrograms[name];
@@ -526,7 +495,12 @@ namespace PrettyEngine {
                                             glUniform3fv(shaderProgram->uniforms["BaseColor"], 1, glm::value_ptr(object->baseColor));
                                             glUniform3fv(shaderProgram->uniforms["ColorFilter"], 1, glm::value_ptr(camera.colorFilter));
 
-                                            glUniform1i(shaderProgram->uniforms["UseTexture"], object->renderModel->useTexture);
+                                            auto baseTexture = object->GetTexture(TextureType::Base);
+                                            glUniform1i(shaderProgram->uniforms["UseTexture"], baseTexture != nullptr);
+                                            auto transparencyTexture = object->GetTexture(TextureType::Transparency);
+                                            glUniform1i(shaderProgram->uniforms["UseTransparencyTexture"], transparencyTexture != nullptr);
+                                            auto normalTexture = object->GetTexture(TextureType::Normal);
+                                            glUniform1i(shaderProgram->uniforms["UseNormal"], normalTexture != nullptr);
 
                                             glUniform1i(shaderProgram->uniforms["Layer"], object->renderLayer);
                                             glUniform1i(shaderProgram->uniforms["MainLayer"], this->mainLayer);
@@ -561,17 +535,35 @@ namespace PrettyEngine {
 
                                             if (object->render) {
                                                 if (object->renderModel->useTexture) {
-                                                    for (auto & texture: object->textures) {
-                                                        if (texture && texture->textureID && texture->textureType == TextureType::Base) {
-                                                            glActiveTexture(GL_TEXTURE0);
-                                                            
-                                                            glBindTexture(GL_TEXTURE_2D, texture->textureID);
-                                                            
-                                                            glUniform1i(glGetUniformLocation(
-                                                                object->renderModel->shaderProgram->shaderProgram,
-                                                                "textureBase"
-                                                            ), 0);
-                                                        }
+                                                    if (baseTexture != nullptr) {
+                                                        glActiveTexture(GL_TEXTURE0);
+                                                                    
+                                                        glBindTexture(GL_TEXTURE_2D, baseTexture->textureID);
+                                                        
+                                                        glUniform1i(glGetUniformLocation(
+                                                            object->renderModel->shaderProgram->shaderProgram,
+                                                            "textureBase"
+                                                        ), 0);
+                                                    }
+                                                    if (transparencyTexture != nullptr) {
+                                                        glActiveTexture(GL_TEXTURE1);
+                                                                    
+                                                        glBindTexture(GL_TEXTURE_2D, transparencyTexture->textureID);
+                                                        
+                                                        glUniform1i(glGetUniformLocation(
+                                                            object->renderModel->shaderProgram->shaderProgram,
+                                                            "transparencyTexture"
+                                                        ), 0);
+                                                    }
+                                                    if (normalTexture != nullptr) {
+                                                        glActiveTexture(GL_TEXTURE3);
+                                                                    
+                                                        glBindTexture(GL_TEXTURE_2D, normalTexture->textureID);
+                                                        
+                                                        glUniform1i(glGetUniformLocation(
+                                                            object->renderModel->shaderProgram->shaderProgram,
+                                                            "normalTexture"
+                                                        ), 0);
                                                     }
                                                 }
 

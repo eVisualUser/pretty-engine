@@ -4,7 +4,6 @@
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/gl.hpp>
-#include <PrettyEngine/text.hpp>
 #include <PrettyEngine/camera.hpp>
 
 #include <string>
@@ -75,6 +74,24 @@ namespace PrettyEngine {
 				}
 				index++;
 			}
+		}
+
+		bool HaveTexture(TextureType textureType) {
+			for(auto & texture: this->textures) {
+				if (texture->textureType == textureType) {
+					return true;
+				}
+			}		
+			return false;
+		}
+
+		Texture* GetTexture(TextureType textureType) {
+			for(auto & texture: this->textures) {
+				if (texture->textureType == textureType) {
+					return texture;
+				}
+			}		
+			return nullptr;
 		}
 
 		virtual void OnDraw(void* renderer) {}

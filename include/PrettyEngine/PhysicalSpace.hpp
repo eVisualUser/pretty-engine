@@ -1,10 +1,12 @@
 #pragma once
 
+#include "glm/geometric.hpp"
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/Collision.hpp>
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -52,7 +54,7 @@ namespace PrettyEngine {
 			return nullptr;
 		}
 
-		std::vector<Collision> GetCollisions(Collider* collider) {
+		std::vector<Collision> FindCollisions(Collider* collider) {
 			std::vector<Collision> out;
 			
 			auto layer = this->FindColliderLayer(collider);
@@ -63,10 +65,6 @@ namespace PrettyEngine {
 					collision.colliderSource = collider;
 					collision.colliderOther = i;
 
-					if (i->PointIn(collider->position)) {
-						collision.colliderCenterInOther = true;
-					}
-
 					out.push_back(collision);
 				}
 			}
@@ -74,56 +72,48 @@ namespace PrettyEngine {
 			return out;
 		}
 
-		/// Solution low-cost to avoid big overlap
-		void ExpressOverlapExtraction(Collision* collision) {
-			if (collision->colliderOther->position != collision->colliderSource->position) {
-				collision->colliderSource->Translate(collision->colliderSource->position - collision->colliderOther->position);
-			} else {
-				collision->colliderSource->position.x += 0.001;
-			}
-		}
+		void RigidbodyApplyVelocity(std::vector<Collision>* collisions, Collider* collider) {
+			collider->velocity += collider->gravity;
 
-		void RigidbodyApplyVelocity(Collider* collider) {
 			auto startPosition = collider->position;
 			collider->position += collider->velocity;
-			if (!this->GetCollisions(collider).empty()) {
-				collider->position = startPosition;
-			}
+
 			collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 
-		void UpdateRigidBodies(float deltaTime) {
+		void Update(float deltaTime) {
+			this->_collisions.clear();
 			for(auto & layer: this->_colliders) {
 				for(auto & collider: layer.second) {
-					this->UpdateRigidBody(collider, deltaTime);
-					this->RigidbodyApplyVelocity(collider);
+					auto collisions = this->FindCollisions(collider);
+					this->UpdateRigidBody(collider, &collisions, deltaTime);
+					this->RigidbodyApplyVelocity(&collisions, collider);
+					this->_collisions.insert(std::make_pair(collider, collisions));
 				}
 			}
 		}
 
-		void UpdateRigidBody(Collider* collider, float deltaTime) {
+		void UpdateRigidBody(Collider* collider, std::vector<Collision>* collisions, float deltaTime) {
 			if (collider->isRigidBody) {
-				auto collisions = this->GetCollisions(collider);
-				for(auto & collision: collisions) {
-					if (collision.colliderOther->isRigidBody) {
-						if (collision.colliderCenterInOther) {
-							this->ExpressOverlapExtraction(&collision);
-						} else {
-							this->RigidbodyApplyVelocity(collider);
-						}
-					}
+				for(auto & collision: *collisions) {
+					this->RigidbodyApplyVelocity(collisions, collider);
 				}
 			}
 		}
 
-		/// Set the smooth physcis state, when active it will make all physics operation smooth (can impact performance and precision).
-		void SetSmoothPhysics(bool state) {
-			this->smoothPhysics = state;
+		std::vector<Collision>* GetCollisions(Collider* collider) {
+			for(auto & collisions: this->_collisions) {
+				if (collisions.first->name == collider->name) {
+					return &collisions.second;
+				}
+			}
+
+			return nullptr;
 		}
 
 	private:
 		std::unordered_map<std::string, std::vector<Collider*>> _colliders;
 
-		bool smoothPhysics = true;
+		std::unordered_map<Collider*, std::vector<Collision>> _collisions;
 	};
 }
