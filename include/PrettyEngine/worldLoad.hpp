@@ -81,6 +81,13 @@ namespace PrettyEngine {
 					auto base = toml::parse("");
 					base.insert_or_assign("meta", toml::table{});
 					base["meta"].as_table()->insert_or_assign("name", world->worldName);
+					if (base["meta"]["editor_only"].value_or(false) == true) {
+						#if ENGINE_EDITOR
+
+						#else
+						continue;
+						#endif
+					}
 
 					base.insert_or_assign("entities", toml::table{});
 					for(auto & entity: world->entities) {

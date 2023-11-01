@@ -42,7 +42,7 @@ project(demo C CXX)
 add_executable(demo
 	"debug/main.cpp"
 )
-target_link_libraries(demo pretty custom components)
+target_link_libraries(demo pretty custom components renderFeatures)
 
 # Game
 

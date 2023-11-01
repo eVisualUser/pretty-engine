@@ -11,6 +11,7 @@
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/light.hpp>
 #include <PrettyEngine/KeyCode.hpp>
+#include <PrettyEngine/RenderFeature.hpp>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -30,7 +31,6 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
-#include <thread>
 
 namespace PrettyEngine {
 	#define CHECK_OPENGL_ERROR() std::cout << "OpenGL Error: " << glGetError() << std::endl;
@@ -422,7 +422,12 @@ namespace PrettyEngine {
 		void AddUniformMake(UniformMaker uniformMaker) {
 			this->_uniformMakers.push_back(uniformMaker);
 		}
-		
+
+		/// Add a render feature, a feature must be never deleted.
+		void AddRenderFeature(std::shared_ptr<RenderFeature> renderFeature) {
+			this->_renderFeatures.push_back(renderFeature);
+		}
+
 	private:
 		std::vector<GLFWimage> _glfwIcons;
 
@@ -522,6 +527,8 @@ namespace PrettyEngine {
 		glm::vec3 sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	private:
+		std::vector<std::shared_ptr<RenderFeature>> _renderFeatures;
+
 		unsigned int mainLayer = 0;
 
 		std::vector<unsigned int> hiddenLayers;
@@ -545,8 +552,6 @@ namespace PrettyEngine {
 		unsigned int frameBufferColorTexture = 0;
 
 		std::vector<UniformMaker> _uniformMakers;
-
-		std::thread flatenThread;
 
 		unsigned int _textVAO, _textVBO;
 

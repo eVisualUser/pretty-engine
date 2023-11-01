@@ -85,3 +85,47 @@ add_library(components
 	${customSources}
 )
 target_link_libraries(components PRIVATE pretty)
+
+# Render Features
+
+set(customFiles "")
+
+file(GLOB customFiles "${CMAKE_SOURCE_DIR}/RenderFeatures/*.hpp")
+file(GLOB customSources "${CMAKE_SOURCE_DIR}/RenderFeatures/*.cpp")
+
+file(READ "${CMAKE_SOURCE_DIR}/RenderFeatures/template.hxx" template)
+
+include_directories("${CMAKE_SOURCE_DIR}/RenderFeatures")
+
+set(customOut "#pragma once\n")
+
+foreach(file ${customFiles})
+		file(RELATIVE_PATH relative "${CMAKE_SOURCE_DIR}/RenderFeatures" ${file})
+		if(NOT(${relative} STREQUAL "RenderFeatures.hpp"))
+			set(customOut "${customOut}\n#include <${relative}>")
+		endif()
+endforeach()
+
+set(customOut "${customOut}\n${template}")
+set(componentList "")
+
+foreach(file ${customFiles})
+	get_filename_component(id ${file} NAME_WE)
+	if(NOT(${id} STREQUAL "RenderFeatures"))
+		set(customOut "${customOut}    if(name == \"${id}\") {\n        return std::make_shared<Custom::${id}>()\;\n    } ")
+		set(componentList "${componentList}${id}\;")
+	endif()
+endforeach()
+set(customOut "${customOut}\n return nullptr\;")
+set(customOut "${customOut}\n}")
+file(WRITE "${CMAKE_SOURCE_DIR}/RenderFeatures/RenderFeatures.hpp" ${customOut})
+file(WRITE "${CMAKE_SOURCE_DIR}/RenderFeatures/RenderFeaturesList.csv" ${componentList})
+file(COPY "${CMAKE_SOURCE_DIR}/RenderFeatures/RenderFeaturesList.csv" DESTINATION "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC")
+
+project(renderFeatures)
+
+add_library(renderFeatures
+	${customFiles}
+	${customSources}
+)
+target_link_libraries(renderFeatures PRIVATE pretty)

@@ -31,6 +31,8 @@ components = [
         'UseTexture',
         'true',
         'UseTextureTransparency',
+        'false',
+        'ScreenObject',
         'false'
     ],
     [
@@ -70,14 +72,10 @@ components = [
 ]
 name = 'Editor'
 object = 'Editor'
-public_map = [ [ 'projectName', 'MyNewProject' ] ]
+public_map = []
 
     [entities.entityA.transform]
-    position = [
-        0.0,
-        0.0,
-        0.0
-    ]
+    position = [ 1.4953851699829102, -1.5534082651138306, 0.0 ]
     rotation = [ 0.0, 0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
@@ -105,14 +103,16 @@ components = [
         'TextureNormal',
         '',
         'UseTextureBase',
-        'false',
+        'true',
         'TextureNormalGUID',
         'd23a39ac-dff9-428e-976d-6f89a8433092',
         'MeshGUID',
         '7c1cc3c4-8caa-4cfe-a3d3-c7c5972656fb',
         'UseTexture',
-        'false',
+        'true',
         'UseTextureTransparency',
+        'false',
+        'ScreenObject',
         'false'
     ],
     [
@@ -132,11 +132,11 @@ components = [
 ]
 name = 'PhysicalObject'
 object = 'Empty'
-public_map = [ [ 'projectName', 'MyNewProject' ] ]
+public_map = []
 
     [entities.otherCollider.transform]
     position = [ 0.0, 0.0, 0.0 ]
-    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]

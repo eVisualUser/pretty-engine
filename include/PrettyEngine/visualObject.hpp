@@ -130,5 +130,7 @@ namespace PrettyEngine {
 		bool sunLight = false;
 
 		bool useLight = true;
+
+		bool screenObject = false;
 	};
 }

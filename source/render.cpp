@@ -1,3 +1,4 @@
+#include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/light.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/camera.hpp>
@@ -10,9 +11,9 @@
 #include <PrettyEngine/shaders.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
+#include <RenderFeatures.hpp>
 
 // GLM
-#include <cstring>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -30,6 +31,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION 
 #include <stb/stb_truetype.h>
 
+// ImGYU
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
@@ -254,6 +256,18 @@ namespace PrettyEngine {
     	if (!glfwInit()) {
     		std::exit(-1);
     	}
+
+        auto filePath = GetEnginePublicPath("RenderFeaturesList.csv", true);
+        if (FileExist(filePath)) {
+            auto features = ReadFileToString(filePath);
+
+            for (auto & feature: ParseCSVLine(features)) {
+                this->AddRenderFeature(GetRenderFeature(feature));
+                this->_renderFeatures.back()->OnCreated();
+            }
+        } else {
+            DebugLog(LOG_WARNING, "RenderFeature list not found", true);
+        }
     }
 
     Renderer::~Renderer() {
@@ -331,31 +345,6 @@ namespace PrettyEngine {
         ImGui_ImplOpenGL3_Init();
     }
 
-    void FlatenThread(
-            std::vector<Light*>* lightsBuffer,
-            std::vector<float>* flattenedLightsPosition,
-            std::vector<float>* flattenedLightsColor,
-            std::vector<float>* flattenedLightsFactor,
-            std::vector<float>* flattenedLightsDeferredFactor,
-            std::vector<float>* flattenedLightsOpacityFactorEffect
-        ) {
-        for (const auto& light : *lightsBuffer) {
-                flattenedLightsOpacityFactorEffect->push_back(light->opacityFactorEffect);
-
-                flattenedLightsPosition->push_back(light->position.x);
-                flattenedLightsPosition->push_back(light->position.y);
-                flattenedLightsPosition->push_back(light->position.z);
-
-                flattenedLightsColor->push_back(light->color.x);
-                flattenedLightsColor->push_back(light->color.y);
-                flattenedLightsColor->push_back(light->color.z);
-
-                flattenedLightsFactor->push_back(light->lightFactor);
-
-                flattenedLightsDeferredFactor->push_back(light->deferredFactor);
-        }
-    }
-
     void Renderer::UpdateIO() {
         glfwPollEvents();
 
@@ -389,49 +378,15 @@ namespace PrettyEngine {
                 }
             }
 
-            size_t lightsCount = lightsBuffer.size();
-
-            std::vector<float> flattenedLightsPosition;
-            std::vector<float> flattenedLightsColor;
-            std::vector<float> flattenedLightsFactor;
-            std::vector<float> flattenedLightsDeferredFactor;
-            std::vector<float> flattenedLightsOpacityFactorEffect;
-            
-            std::vector<int> flattenedLightsLayer;
-            std::vector<float> flattenedRadius;
-
-            std::vector<int> flattenedLightsSpotLight;
-            std::vector<float> flattenedLightsDirection;
-            std::vector<float> flattenedLightsCutOff;
-
-            this->flatenThread = std::thread(FlatenThread, 
-                &lightsBuffer,
-                &flattenedLightsPosition,
-                &flattenedLightsColor,
-                &flattenedLightsFactor,
-                &flattenedLightsDeferredFactor,
-                &flattenedLightsOpacityFactorEffect
-            );
-            
-            for (const auto& light : lightsBuffer) {
-                flattenedLightsDirection.push_back(light->spotDirection.x);
-                flattenedLightsDirection.push_back(light->spotDirection.y);
-                flattenedLightsDirection.push_back(light->spotDirection.z);
-                
-                flattenedLightsSpotLight.push_back((int)(light->lightType == LightType::SpotLight));
-                flattenedLightsCutOff.push_back(light->spotLightCutOff);
-
-                flattenedLightsLayer.push_back(light->lightLayer);
-
-                flattenedRadius.push_back(light->radius);
+            for(auto & renderFeature: this->_renderFeatures) {
+                renderFeature->lights = &lightsBuffer;
+                renderFeature->OnInit();
             }
             
             int width, height;
             glfwGetFramebufferSize(this->_window, &width, &height);
 
             float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-
-            this->flatenThread.join();
 
             for (auto & camera: this->cameraList) {
                 if (camera.mainCamera) {
@@ -487,8 +442,16 @@ namespace PrettyEngine {
 
                                             glUniformMatrix4fv(shaderProgram->uniforms["Model"], 1, GL_FALSE, glm::value_ptr(modelTransform));
 
-                                            glUniformMatrix4fv(shaderProgram->uniforms["View"], 1, GL_FALSE, glm::value_ptr(currentCameraMatrix));
-                                            glUniformMatrix4fv(shaderProgram->uniforms["Projection"], 1, GL_FALSE, glm::value_ptr(proj));
+                                            glm::mat4 view = currentCameraMatrix;
+                                            glm::mat4 projection = proj;
+
+                                            if (object->screenObject) {
+                                                view = glm::identity<glm::mat4>();
+                                                projection = glm::identity<glm::mat4>();
+                                            }
+
+                                            glUniformMatrix4fv(shaderProgram->uniforms["View"], 1, GL_FALSE, glm::value_ptr(view));
+                                            glUniformMatrix4fv(shaderProgram->uniforms["Projection"], 1, GL_FALSE, glm::value_ptr(projection));
                                             
                                             glUniform1f(shaderProgram->uniforms["Time"], currentTime);
 
@@ -513,27 +476,15 @@ namespace PrettyEngine {
                                                 glUniform1f(shaderProgram->uniforms["SunLightFactor"], this->sunLightFactor);
                                             }
 
-                                            glUniform1i(shaderProgram->uniforms["UseLight"], object->useLight);
-                                            if (object->useLight) {
-                                                glUniform1i(shaderProgram->uniforms["LightsCount"], lightsCount);
-                                                glUniform1i(shaderProgram->uniforms["LightLayer"], object->lightLayer);
-                                                
-                                                glUniform1iv(shaderProgram->uniforms["LightsLayer"], lightsCount, flattenedLightsLayer.data());
-
-                                                glUniform3fv(shaderProgram->uniforms["LightsPosition"], lightsCount, flattenedLightsColor.data());
-                                                glUniform3fv(shaderProgram->uniforms["LightsColor"], lightsCount, flattenedLightsColor.data());
-                                                
-                                                glUniform1fv(shaderProgram->uniforms["LightsRadius"], lightsCount, flattenedRadius.data());
-                                                glUniform1fv(shaderProgram->uniforms["LightsFactor"], lightsCount, flattenedLightsFactor.data());
-                                                glUniform1fv(shaderProgram->uniforms["LightsDeferredFactor"], lightsCount, flattenedLightsDeferredFactor.data());
-                                                glUniform1fv(shaderProgram->uniforms["LightsOpacityFactorEffect"], lightsCount, flattenedLightsOpacityFactorEffect.data());
-                                            
-                                                glUniform1iv(shaderProgram->uniforms["SpotLight"], lightsCount, flattenedLightsSpotLight.data());
-                                                glUniform3fv(shaderProgram->uniforms["SpotLightDirection"], lightsCount, flattenedLightsDirection.data());
-                                                glUniform1fv(shaderProgram->uniforms["SpotLightCutOff"], lightsCount, flattenedLightsCutOff.data());
+                                            for(auto & renderFeature: this->_renderFeatures) {
+                                                renderFeature->OnUniform(object.get());
                                             }
 
                                             if (object->render) {
+                                                for(auto & renderFeature: this->_renderFeatures) {
+                                                    renderFeature->OnRender(object.get());
+                                                }
+
                                                 if (object->renderModel->useTexture) {
                                                     if (baseTexture != nullptr) {
                                                         glActiveTexture(GL_TEXTURE0);
@@ -569,6 +520,7 @@ namespace PrettyEngine {
 
                                                 glDrawElements((GLenum)object->renderModel->drawMode, mesh->vertexCount, GL_UNSIGNED_INT, 0);
                                             }
+
                                             object->OnDraw((void*)this);
                                             glBindVertexArray(0);
                                             GL_CHECK_ERROR();

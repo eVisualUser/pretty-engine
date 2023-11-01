@@ -34,7 +34,10 @@ namespace Custom {
 			this->CreatePublicVar("MeshGUID", xg::newGuid());
 			this->CreatePublicVar("UseLight");
 			this->CreatePublicVar("SunLight");
+			this->CreatePublicVar("ScreenObject", "false");
 
+			this->visualObject->screenObject = (this->GetPublicVarValue("ScreenObject") == "true");
+			
 			this->meshGuid = this->GetPublicVarValue("MeshGUID");
 			this->textureGuid = this->GetPublicVarValue("TextureBaseGUID");
 			this->textureTransparancyGuid = this->GetPublicVarValue("TextureTransparencyGUID");
