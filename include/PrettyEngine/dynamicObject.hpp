@@ -7,12 +7,12 @@
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
+#include <PrettyEngine/event.hpp>
+#include <PrettyEngine/EngineContent.hpp>
 
 #include <Guid.hpp>
 
-#include <memory>
 #include <string>
-#include <utility>
 
 namespace PrettyEngine {
 	enum class Request {
@@ -42,15 +42,8 @@ namespace PrettyEngine {
 		virtual void OnDestroy() {}
 		/// Called just before rendering, when the UI is working.
 		virtual void OnRender() {}
-		/// Called before the entity is cleared.
-		virtual void OnClear() {}
-
-		/// Remove all related elements of the entity in the different parts of the engine
-		void Clear() {
-			for(auto & visualObject: this->visualObjects) {
-				this->renderer->UnRegisterVisualObject(visualObject);
-			}
-		}
+		/// Called just before updating the physics.
+		virtual void OnPrePhysics() {}
 
 		/// Create a public var but do not override
 		void CreatePublicVar(std::string name, std::string defaultValue = "") {
@@ -78,13 +71,7 @@ namespace PrettyEngine {
 		}
 		
 	public:
-		std::shared_ptr<Renderer> renderer;
-		std::shared_ptr<AudioEngine> audioEngine;
-		std::shared_ptr<Input> input;
-		PhysicalSpace* physicalSpace;
-
-		std::vector<std::string> visualObjects;
-		std::vector<std::string> physicalObjects;
+		EngineContent* engineContent;
 
 		std::unordered_map<std::string, std::string> publicMap;
 

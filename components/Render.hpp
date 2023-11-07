@@ -46,9 +46,9 @@ namespace Custom {
 			this->visualObject->useLight = (this->GetPublicVarValue("UseLight") == "true");
 			this->visualObject->sunLight = (this->GetPublicVarValue("SunLight") == "true");
 
-			this->renderer->AddShader("DefaultVertex", ShaderType::Vertex, SHADER_VERTEX);
-			this->renderer->AddShader("DefaultFragment", ShaderType::Fragment, SHADER_FRAGMENT);
-			auto shader = this->renderer->AddShaderProgram("Default", "DefaultVertex", "DefaultFragment");
+			this->engineContent->renderer.AddShader("DefaultVertex", ShaderType::Vertex, SHADER_VERTEX);
+			this->engineContent->renderer.AddShader("DefaultFragment", ShaderType::Fragment, SHADER_FRAGMENT);
+			auto shader = this->engineContent->renderer.AddShaderProgram("Default", "DefaultVertex", "DefaultFragment");
 
 			this->renderModel.SetShaderProgram(shader);
 			this->visualObject->AddRenderModel(&this->renderModel);
@@ -59,9 +59,9 @@ namespace Custom {
 				auto baseTexturePath = this->GetPublicVarValue("TextureBase");
 				auto path = GetEnginePublicPath(baseTexturePath, true);
 					if (FileExist(path)) {
-					this->renderer->RemoveTexture(this->textureGuid);
+					this->engineContent->renderer.RemoveTexture(this->textureGuid);
 					this->visualObject->RemoveTexture(this->texture);
-					this->texture = this->renderer->AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+					this->texture = this->engineContent->renderer.AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 					this->visualObject->AddTexture(this->texture);
 				}
 			}
@@ -70,9 +70,9 @@ namespace Custom {
 				auto baseTexturePath = this->GetPublicVarValue("TextureNormal");
 				auto path = GetEnginePublicPath(baseTexturePath, true);
 					if (FileExist(path)) {
-					this->renderer->RemoveTexture(this->textureTransparancyGuid);
+					this->engineContent->renderer.RemoveTexture(this->textureTransparancyGuid);
 					this->visualObject->RemoveTexture(this->textureTransparency);
-					this->textureTransparency = this->renderer->AddTexture(this->textureTransparancyGuid, path, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+					this->textureTransparency = this->engineContent->renderer.AddTexture(this->textureTransparancyGuid, path, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 					this->visualObject->AddTexture(this->textureTransparency);
 				}
 			}
@@ -81,9 +81,9 @@ namespace Custom {
 				auto baseTexturePath = this->GetPublicVarValue("TextureTransparency");
 				auto path = GetEnginePublicPath(baseTexturePath, true);
 					if (FileExist(path)) {
-					this->renderer->RemoveTexture(this->textureGuid);
+					this->engineContent->renderer.RemoveTexture(this->textureGuid);
 					this->visualObject->RemoveTexture(this->textureTransparency);
-					this->textureTransparency = this->renderer->AddTexture(this->textureGuid, path, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+					this->textureTransparency = this->engineContent->renderer.AddTexture(this->textureGuid, path, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 					this->visualObject->AddTexture(this->textureTransparency);
 				}
 			}
@@ -94,9 +94,9 @@ namespace Custom {
 			if (meshName == "rect") {
 				// Check if the mesh is already loaded
 				if (this->mesh == nullptr) {
-					this->renderer->RemoveMesh(meshGuid);
+					this->engineContent->renderer.RemoveMesh(meshGuid);
 					auto newMesh = CreateRectMesh();
-					this->mesh = this->renderer->AddMesh(meshGuid, newMesh);
+					this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh);
 					this->renderModel.SetMesh(this->mesh);
 					loadMesh = true;
 				}
@@ -105,14 +105,13 @@ namespace Custom {
 			}
 
 			if (loadMesh) {
-				this->renderer->UnRegisterVisualObject(visualObjectGuid);
-				this->renderer->RegisterVisualObject(visualObjectGuid, this->visualObject);
+				this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
+				this->engineContent->renderer.RegisterVisualObject(visualObjectGuid, this->visualObject);
 			}
-
 		}
 
 		void OnDestroy() {
-			this->renderer->UnRegisterVisualObject(visualObjectGuid);
+			this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
 		}
 
 		void OnUpdate() override {

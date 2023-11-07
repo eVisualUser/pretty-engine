@@ -72,7 +72,7 @@ namespace Custom {
 				this->light.opacityFactorEffect = color[3];
 			}
 
-			this->renderer->RegisterLight(this->lightID, &this->light);
+			this->engineContent->renderer.RegisterLight(this->lightID, &this->light);
 		}
 
 		void OnUpdate() {
@@ -80,7 +80,7 @@ namespace Custom {
 		}
 
 		void OnDestroy() {
-			this->renderer->UnRegisterLight(&this->light);
+			this->engineContent->renderer.UnRegisterLight(&this->light);
 		}
 
 	private:

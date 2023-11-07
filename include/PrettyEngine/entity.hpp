@@ -39,9 +39,6 @@ namespace PrettyEngine {
 			return this->_entityGUID;
 		}
 	public:
-		std::shared_ptr<Renderer> renderer;
-		std::shared_ptr<AudioEngine> audioEngine;
-
 		void* engine;
 
 		bool worldFirst = true;

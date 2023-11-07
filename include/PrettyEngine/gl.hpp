@@ -11,6 +11,8 @@
 #include <iostream>
 
 namespace PrettyEngine {
+	#define GLENUM (GLenum)
+
 	enum class DrawMode {
 		Triangles = GL_TRIANGLES,
 		TriangleStrip = GL_TRIANGLE_STRIP,

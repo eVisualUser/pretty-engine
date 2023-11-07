@@ -22,7 +22,6 @@
 #include <Guid.hpp>
 #include <imgui.h>
 
-#include <cstring>
 #include <memory>
 #include <string>
 
@@ -39,43 +38,43 @@ namespace Custom {
 	    this->localizationEditorPtr->localization = this->localization;
 	    this->rigidbody = this->GetComponentAs<Physical>("Physical");
 
-	    this->renderer->GetCurrentCamera()->position.z = -1;
+	    this->engineContent->renderer.GetCurrentCamera()->position.z = -1;
 
 	    this->visualObject = this->GetComponentAs<Render>("Render")->GetVisualObject();
 
 	    keyUp.name = "EditorKeyUp";
 	    keyUp.key = KeyCode::UpArrow;
 	    keyUp.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&keyUp);
+	    this->engineContent->input.AddKeyWatcher(&keyUp);
 	    
 	    keyDown.name = "EditorKeyDown";
 	    keyDown.key = KeyCode::DownArrow;
 	    keyDown.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&keyDown);
+	    this->engineContent->input.AddKeyWatcher(&keyDown);
 
 	    keyLeft.name = "EditorKeyLeft";
 	    keyLeft.key = KeyCode::LeftArrow;
 	    keyLeft.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&keyLeft);
+	    this->engineContent->input.AddKeyWatcher(&keyLeft);
 
 	    keyRight.name = "EditorKeyRight";
 	    keyRight.key = KeyCode::RightArrow;
 	    keyRight.mode = KeyWatcherMode::Press;
-	    this->input->AddKeyWatcher(&keyRight);
+	    this->engineContent->input.AddKeyWatcher(&keyRight);
 	  }
 
 	  void OnDestroy() override {
-	  	this->input->RemoveKeyWatcher(&keyUp);
-	  	this->input->RemoveKeyWatcher(&keyDown);
-	  	this->input->RemoveKeyWatcher(&keyLeft);
-	  	this->input->RemoveKeyWatcher(&keyRight);
+	  	this->engineContent->input.RemoveKeyWatcher(&keyUp);
+	  	this->engineContent->input.RemoveKeyWatcher(&keyDown);
+	  	this->engineContent->input.RemoveKeyWatcher(&keyLeft);
+	  	this->engineContent->input.RemoveKeyWatcher(&keyRight);
 	  }
 
 	  void OnAlwaysUpdate() override {
-	    if (!this->renderer->GetWindowFocus()) {
-	      this->renderer->SetWindowOpacity(0.1f);
+	    if (!this->engineContent->renderer.GetWindowFocus()) {
+	      this->engineContent->renderer.SetWindowOpacity(0.1f);
 	    } else {
-	      this->renderer->SetWindowOpacity(1.0f);
+	      this->engineContent->renderer.SetWindowOpacity(1.0f);
 	    }
 	  }
 
@@ -83,10 +82,10 @@ namespace Custom {
 	  	auto newCamPosition = -this->position;
 	  	newCamPosition.z -= 5;
 	  	
-	  	this->renderer->GetCurrentCamera()->position = newCamPosition;
+	  	this->engineContent->renderer.GetCurrentCamera()->position = newCamPosition;
 
-	  	if (this->input->GetKeyPress(KeyCode::LeftControl) &&
-	        this->input->GetKeyDown(KeyCode::S)) {
+	  	if (this->engineContent->input.GetKeyPress(KeyCode::LeftControl) &&
+	        this->engineContent->input.GetKeyDown(KeyCode::S)) {
 	      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
 	      	this->requests.push_back(Request::SAVE);    	
 	    }
@@ -94,18 +93,18 @@ namespace Custom {
 	    auto moveDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	    if (this->keyUp.state) {
-	  		moveDirection.y += this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.y += this->_speed * this->engineContent->renderer.GetDeltaTime();
 	  	} else if (this->keyDown.state) {
-	  		moveDirection.y -= this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.y -= this->_speed * this->engineContent->renderer.GetDeltaTime();
 	  	}
 
 	  	if (this->keyLeft.state) {
-	  		moveDirection.x -= this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.x -= this->_speed * this->engineContent->renderer.GetDeltaTime();
 	  	} else if (this->keyRight.state) {
-	  		moveDirection.x += this->_speed * this->renderer->GetDeltaTime();
+	  		moveDirection.x += this->_speed * this->engineContent->renderer.GetDeltaTime();
 	  	}
 
-	  	auto collisions = this->physicalSpace->GetCollisions(this->rigidbody->GetCollider());
+	  	auto collisions = this->engineContent->physicalSpace.GetCollisions(this->rigidbody->GetCollider());
 
 	  	if (collisions != nullptr) {
 	 	  	if (!collisions->empty()) {
@@ -117,7 +116,7 @@ namespace Custom {
 
 	  	this->rigidbody->Move(moveDirection);
 
-	  	this->Rotate(this->input->GetMouseWheelDelta() * 500.0f * this->renderer->GetDeltaTime());
+	  	this->Rotate(this->engineContent->input.GetMouseWheelDelta() * 500.0f * this->engineContent->renderer.GetDeltaTime());
 
 	    if (ImGui::Begin(this->localization->Get("Editor Guide").c_str())) {
 	      ImGui::Text(
@@ -142,9 +141,9 @@ namespace Custom {
 	    }
 	    ImGui::End();
 
-	    if (this->input->GetMouseButtonClick(1)) {
+	    if (this->engineContent->input.GetMouseButtonClick(1)) {
 	      actionBox = !actionBox;
-	      auto cursorPosition = this->input->GetCursorPosition();
+	      auto cursorPosition = this->engineContent->input.GetCursorPosition();
 	      actionBoxStartPos = ImVec2(cursorPosition.x, cursorPosition.y);
 	    }
 

@@ -12,15 +12,15 @@
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/editor.hpp>
+#include <PrettyEngine/EngineContent.hpp>
+#include <PrettyEngine/event.hpp>
 
-#include <cstring>
 #include <toml++/toml.h>
 #include <imgui.h>
 #include <implot.h>
 
 #include <memory>
 #include <string>
-#include <cstring>
 
 #define CONSOLE_COMMAND_BUFFER_SIZE 100
 
@@ -31,16 +31,16 @@ namespace PrettyEngine {
 			this->customConfig = toml::parse(config);
 			
 			auto antiAliasing = this->customConfig["engine"]["render"]["antiAliasing"].value_or(8);
-			this->_renderer->GetAntiAliasing();
+			this->engineContent.renderer.GetAntiAliasing();
 
-			this->_renderer->CreateWindow();
-			this->_renderer->Setup();
+			this->engineContent.renderer.CreateWindow();
+			this->engineContent.renderer.Setup();
 
 			std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
 			this->engineDatabase = std::make_shared<DataBase>(engineDataBaseFile);
 
 			auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
-			this->_renderer->SetWindowTitle(windowTitle);
+			this->engineContent.renderer.SetWindowTitle(windowTitle);
 
 			double backgroundColor[4];
 			backgroundColor[0] = this->customConfig["engine"]["render"]["opengl"]["background_color"][0].value_or(0.0f);
@@ -52,27 +52,27 @@ namespace PrettyEngine {
 			bool setDefaultCameraAsMain = this->customConfig["engine"]["render"]["camera"]["set_default_camera_as_main"].value_or(true);
 			
 			if (createDefaultCamera) {
-				auto newCamera = this->_renderer->AddCamera();
+				auto newCamera = this->engineContent.renderer.AddCamera();
 				if (setDefaultCameraAsMain) {
 					newCamera->mainCamera = true;
 				}
 			}
 
-			this->_renderer->SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
+			this->engineContent.renderer.SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 		
 			this->_imPlotContext = ImPlot::CreateContext();
 
 			this->SetWindowIcon("WindowIcon");
 
-			this->_renderer->ShowWindow();
+			this->engineContent.renderer.ShowWindow();
 
-			this->_input = std::make_shared<Input>(this->_renderer->GetWindow());
+			this->engineContent.input.SetWindow(this->engineContent.renderer.GetWindow());
 		}
 		
 		~Engine() {
 			ImPlot::DestroyContext(this->_imPlotContext);
 			this->_worldManager.Clear();
-			this->_renderer->Clear();
+			this->engineContent.renderer.Clear();
 		}
 		
 		void Exit() {
@@ -84,35 +84,34 @@ namespace PrettyEngine {
 		}
 		
 		void Run() {
-			while(this->_renderer->Valid() && !*this->GetExit()) {
+			while(this->engineContent.renderer.Valid() && !*this->GetExit()) {
 				this->Update();
 			}
 		}
 
 		void UpdateDebugUI() {
-			if (this->_input->GetKeyDown(KeyCode::F3)) {
+			if (this->engineContent.input.GetKeyDown(KeyCode::F3)) {
 				this->showDebugUI = !showDebugUI;
 			}
 			
 			if (this->showDebugUI) {
-				this->editor.Update(&this->_worldManager, this->_input.get(), this->_renderer.get(), &this->_physicalSpace, &this->frameRateLogs);
+				this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->frameRateLogs);
 			}
 		}
 
 		void UpdateUtilShortcut() {
-			if (this->_input->GetKeyDown(KeyCode::F11)) {
-            	this->_renderer->SetFullscreen(!this->_renderer->GetFullscreen());
+			if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
+            	this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
         	}
 		}
 		
 		void Update() {
 			auto worlds = this->_worldManager.GetWorlds();
-			this->_input->Update();
-			this->_renderer->UpdateIO();
-			if (this->_renderer->WindowActive()) {
+			this->engineContent.input.Update();
+			this->engineContent.renderer.UpdateIO();
+			if (this->engineContent.renderer.WindowActive()) {
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
-						
 						#if ENGINE_EDITOR
 						if(!engineEditor)
 						#endif 
@@ -121,35 +120,36 @@ namespace PrettyEngine {
 						}
 						currentWorld->Update();
 						
-						currentWorld->simulationCollider.position = this->_renderer->GetCurrentCamera()->position;
+						currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
 						currentWorld->EditorUpdate();
 					}
 				}
 
-				this->_renderer->StartUIRendering();
+				this->engineContent.renderer.StartUIRendering();
 				#if ENGINE_EDITOR
 					this->UpdateDebugUI();
 				#endif
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
 						currentWorld->CallRenderFunctions();
+						currentWorld->PrePhysics();
 					}
 				}
 
-				double currentTime = this->_renderer->GetTime();
+				double currentTime = this->engineContent.renderer.GetTime();
 				if (lastRenderClearTime + renderClearCoolDown < currentTime) {
-					this->_renderer->Clear();
+					this->engineContent.renderer.Clear();
 				}
 
 				if (lastFrameRateLog + frameRateCoolDown < currentTime && !this->showFrameRateGraph) {
-					this->frameRateLogs.push_back(this->_renderer->GetFPS());
+					this->frameRateLogs.push_back(this->engineContent.renderer.GetFPS());
 					this->frameRateTimeLogs.push_back(currentTime);
 				}
 				
-				this->_physicalSpace.Update(this->_renderer->GetDeltaTime());
+				this->engineContent.physicalSpace.Update(this->engineContent.renderer.GetDeltaTime());
 				
-				this->_renderer->Draw();
-				this->_renderer->Show();
+				this->engineContent.renderer.Draw();
+				this->engineContent.renderer.Show();
 			}
 			for (auto & currentWorld: worlds) {
 				if (currentWorld != nullptr) {
@@ -167,22 +167,11 @@ namespace PrettyEngine {
 				}
 			}
 		}
-		
-		std::shared_ptr<AudioEngine> GetAudioEngine() {
-			return this->_audioEngine;
-		}
-
-		std::shared_ptr<Renderer> GetRenderer() {
-			return this->_renderer;
-		}
 
 		void SetupWorlds() {
 			auto worlds = this->_worldManager.GetWorlds();
 			for (auto & currentWorld: worlds) {
-				currentWorld->audioEngine = this->_audioEngine;
-				currentWorld->renderer = this->_renderer; 
-				currentWorld->physicalSpace = &this->_physicalSpace;
-				currentWorld->input = _input;
+				currentWorld->engineContent = &this->engineContent;
 
 				currentWorld->UpdateLinks();
 			}
@@ -222,7 +211,7 @@ namespace PrettyEngine {
 				}
  
 				if (dbImageName[index] == name) {
-					texture = this->GetRenderer()->AddTextureFromData(
+					texture = this->engineContent.renderer.AddTextureFromData(
 						dbImageName[index],
 						rawData.data(),
 						imgWidth,
@@ -271,7 +260,7 @@ namespace PrettyEngine {
 
 					auto decoded = DecodeImage(&img.data, img.bytes, &imgHeight, &imgWidth, &imgChannels);
 
-					this->_renderer->SetWindowIcon(decoded.data(), imgWidth, imgHeight);
+					this->engineContent.renderer.SetWindowIcon(decoded.data(), imgWidth, imgHeight);
 
 					return;
 				}
@@ -284,6 +273,8 @@ namespace PrettyEngine {
 		}
 		
 	private:
+		EventManager eventManager;
+
 		std::shared_ptr<DataBase> engineDatabase;
 
 		PrettyEngine::WorldManager _worldManager;
@@ -294,11 +285,7 @@ namespace PrettyEngine {
 
 		bool _physicsEnabled = true;
 
-		std::shared_ptr<AudioEngine> _audioEngine = std::make_shared<AudioEngine>();
-		std::shared_ptr<Renderer> _renderer = std::make_shared<Renderer>();
-		std::shared_ptr<Input> _input = nullptr;
-
-		PhysicalSpace _physicalSpace = PhysicalSpace();
+		EngineContent engineContent;
 
 		toml::parse_result customConfig;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/transform.hpp>
@@ -127,6 +128,17 @@ namespace PrettyEngine {
 			}
 		}
 
+		void PrePhysics() {
+			for (auto & entity: this->entities) {
+				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+					entity.second->OnPrePhysics(); 
+					for (auto & component: entity.second->components) {
+						component->OnPrePhysics();
+					}
+				}
+			}
+		}
+
 		void AlwaysEndUpdate() {
 			for (auto & entity: this->entities) {
 				if (entity.second != nullptr) {
@@ -187,16 +199,10 @@ namespace PrettyEngine {
 
 		void UpdateLinks() {
 			for (auto & entity: this->entities) {
-				entity.second->audioEngine = this->audioEngine;
-				entity.second->renderer = this->renderer;
-				entity.second->input = this->input;
-				entity.second->physicalSpace = this->physicalSpace;
+				entity.second->engineContent = this->engineContent;
 
 				for(auto & component: entity.second->components) {
-					component->audioEngine = this->audioEngine;
-					component->renderer = this->renderer;
-					component->input = this->input;
-					component->physicalSpace = this->physicalSpace;
+					component->engineContent = this->engineContent;
 				}
 			}
 		}
@@ -274,7 +280,6 @@ namespace PrettyEngine {
 		
 		void Clear() {
 			for(auto & entity: this->entities) {
-				entity.second->Clear();
 				entity.second->OnDestroy();
 			}
 			this->entities.clear();
@@ -293,10 +298,7 @@ namespace PrettyEngine {
 
 		std::string lastEntityRegistred;
 
-		std::shared_ptr<AudioEngine> audioEngine = nullptr;
-		std::shared_ptr<Renderer> renderer = nullptr;
-		std::shared_ptr<Input> input = nullptr;
-		PhysicalSpace* physicalSpace = nullptr;
+		EngineContent* engineContent;
 
 		std::unordered_map<std::string, void*> sharedData;
 

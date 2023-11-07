@@ -144,7 +144,7 @@ namespace PrettyEngine {
 								if (ImGui::Begin(this->selectedEntity->entityName.c_str())) {
 									ImGui::Text("Object: %s", this->selectedEntity->object.c_str());
 									ImGui::Separator();
-
+									
 									ImGui::InputFloat("Pos X", &this->selectedEntity->position.x);
 									ImGui::InputFloat("Pos Y", &this->selectedEntity->position.y);
 									ImGui::InputFloat("Pos Z", &this->selectedEntity->position.z);

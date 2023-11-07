@@ -66,6 +66,8 @@ namespace PrettyEngine {
 			this->SetWindow(window);
 		}
 
+		Input() {}
+
 		void SetWindow(GLFWwindow* window) {
 			this->_window = window;
 

@@ -34,23 +34,21 @@ namespace Custom {
 		}
 
 		void OnStart() override {
-
 			this->_ownerEntity = dynamic_cast<PrettyEngine::Entity*>(this->owner);
-
-			this->physicalSpace->AddCollider(this->layer, &this->_colliderA);
+			this->engineContent->physicalSpace.AddCollider(this->layer, &this->_colliderA);
 		}
 
-		void OnEndUpdate() override {
+		void OnUpdate() override {
 			this->_ownerEntity->position = this->_colliderA.position;
 			if (this->_colliderA.colliderModel == PrettyEngine::ColliderModel::Sphere) {
 				this->_colliderA.radius = this->_ownerEntity->halfScale.x;
 			}
 			this->_colliderA.SetScale(this->_ownerEntity->scale);
-			this->_colliderA.rotation =  this->_ownerEntity->scale;
+			this->_ownerEntity->rotation = this->_colliderA.rotation;
 		}
 
 		void OnDestroy() override {
-			this->physicalSpace->RemoveCollider(this->layer, &this->_colliderA);
+			this->engineContent->physicalSpace.RemoveCollider(this->layer, &this->_colliderA);
 		}
 
 		void Move(glm::vec3 direction) {
