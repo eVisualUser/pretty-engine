@@ -24,6 +24,7 @@ namespace PrettyEngine {
 
 	class Mesh: public GCObject {
 	public:
+		/// Convert to an array buffer
 		std::vector<float> CreateBuffer() {
 			std::vector<float> data;
 

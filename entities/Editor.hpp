@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Physical.hpp"
+#include <Physical.hpp>
+#include <PrettyEngine/camera.hpp>
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/shaders.hpp>
@@ -61,6 +62,13 @@ namespace Custom {
 	    keyRight.key = KeyCode::RightArrow;
 	    keyRight.mode = KeyWatcherMode::Press;
 	    this->engineContent->input.AddKeyWatcher(&keyRight);
+
+	    // this->secondCamera = this->engineContent->renderer.AddCamera();
+	    // this->secondCamera->active = true;
+	    // this->secondCamera->SetRenderToTexture(false);
+
+	   	//this->visualObject->textures.clear();
+	    // this->visualObject->AddTexture(this->secondCamera->GetTexture());
 	  }
 
 	  void OnDestroy() override {
@@ -90,6 +98,7 @@ namespace Custom {
 	      	this->requests.push_back(Request::SAVE);    	
 	    }
 
+	    // Update the position
 	    auto moveDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	    if (this->keyUp.state) {
@@ -182,5 +191,7 @@ namespace Custom {
 
 	  Physical* rigidbody;
 	  VisualObject* visualObject;
+
+	  Camera* secondCamera = nullptr;
 	};
 }

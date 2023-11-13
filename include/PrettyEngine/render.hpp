@@ -265,7 +265,7 @@ namespace PrettyEngine {
 
 		Camera* GetCurrentCamera() {
 			for (auto & cam: this->cameraList) {
-				if (cam.mainCamera)
+				if (cam.active)
 					return &cam;
 			}
 			return nullptr;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PrettyEngine/KeyCode.hpp"
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -54,7 +55,7 @@ namespace PrettyEngine {
 			if (createDefaultCamera) {
 				auto newCamera = this->engineContent.renderer.AddCamera();
 				if (setDefaultCameraAsMain) {
-					newCamera->mainCamera = true;
+					newCamera->active = true;
 				}
 			}
 
@@ -108,6 +109,12 @@ namespace PrettyEngine {
 		void Update() {
 			auto worlds = this->_worldManager.GetWorlds();
 			this->engineContent.input.Update();
+
+			// Builtin fullscreen support
+			if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
+				this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
+			}
+
 			this->engineContent.renderer.UpdateIO();
 			if (this->engineContent.renderer.WindowActive()) {
 				for (auto & currentWorld: worlds) {

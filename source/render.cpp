@@ -4,6 +4,7 @@
 #include <PrettyEngine/camera.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/Graphics.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
 
 #include <PrettyEngine/mesh.hpp>
@@ -56,10 +57,12 @@ namespace PrettyEngine {
     }
 
     Mesh* Renderer::AddMesh(std::string name, Mesh mesh, MeshDrawType meshDrawType) {
+        // Vertex Array Object
         unsigned int vao;
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
+        // Vertex Array Buffer
         unsigned int vbo;
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -68,6 +71,7 @@ namespace PrettyEngine {
 
         glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), (GLenum)meshDrawType);
 
+        // Element Array Buffer
         unsigned int ebo;
         glGenBuffers(1, &ebo);
 
@@ -110,6 +114,7 @@ namespace PrettyEngine {
         glAttachShader(shaderProgram, this->glShaders[vertexShaderName]);
         glAttachShader(shaderProgram, this->glShaders[fragmentShaderName]);
 
+        // Attack all bonus shaders
         for (auto & shader: otherShaders) {
             glAttachShader(shaderProgram, this->glShaders[shader]);
         }
@@ -388,11 +393,15 @@ namespace PrettyEngine {
 
             float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
+            // Render for each camera
             for (auto & camera: this->cameraList) {
-                if (camera.mainCamera) {
+                if (camera.active) {
                     auto currentCameraMatrix = camera.GetTransformMatrix();
                     auto cameraProjection = camera.projection;
                     this->renderCube.position = camera.position;
+
+                    camera.Render();
+                    GL_CHECK_ERROR();
 
                     int layerId;
                     for (auto & layer: this->visualObjects) {
@@ -440,7 +449,7 @@ namespace PrettyEngine {
                                                 uniformMaker(object.get(), &camera);
                                             }
 
-                                            glUniformMatrix4fv(shaderProgram->uniforms["Model"], 1, GL_FALSE, glm::value_ptr(modelTransform));
+                                            Graphics::BindVariable(shaderProgram->uniforms["Model"], modelTransform);
 
                                             glm::mat4 view = currentCameraMatrix;
                                             glm::mat4 projection = proj;
@@ -450,30 +459,28 @@ namespace PrettyEngine {
                                                 projection = glm::identity<glm::mat4>();
                                             }
 
-                                            glUniformMatrix4fv(shaderProgram->uniforms["View"], 1, GL_FALSE, glm::value_ptr(view));
-                                            glUniformMatrix4fv(shaderProgram->uniforms["Projection"], 1, GL_FALSE, glm::value_ptr(projection));
-                                            
-                                            glUniform1f(shaderProgram->uniforms["Time"], currentTime);
-
-                                            glUniform3fv(shaderProgram->uniforms["BaseColor"], 1, glm::value_ptr(object->baseColor));
-                                            glUniform3fv(shaderProgram->uniforms["ColorFilter"], 1, glm::value_ptr(camera.colorFilter));
+                                            Graphics::BindVariable(shaderProgram->uniforms["View"], view);
+                                            Graphics::BindVariable(shaderProgram->uniforms["Projection"], projection);
+                                            Graphics::BindVariable(shaderProgram->uniforms["Time"], currentTime);
+                                            Graphics::BindVariable(shaderProgram->uniforms["BaseColor"], object->baseColor);
+                                            Graphics::BindVariable(shaderProgram->uniforms["ColorFilter"], camera.colorFilter);
 
                                             auto baseTexture = object->GetTexture(TextureType::Base);
-                                            glUniform1i(shaderProgram->uniforms["UseTexture"], baseTexture != nullptr);
+                                            Graphics::BindVariable(shaderProgram->uniforms["UseTexture"], baseTexture != nullptr);
                                             auto transparencyTexture = object->GetTexture(TextureType::Transparency);
-                                            glUniform1i(shaderProgram->uniforms["UseTransparencyTexture"], transparencyTexture != nullptr);
+                                            Graphics::BindVariable(shaderProgram->uniforms["UseTransparencyTexture"], transparencyTexture != nullptr);
                                             auto normalTexture = object->GetTexture(TextureType::Normal);
-                                            glUniform1i(shaderProgram->uniforms["UseNormal"], normalTexture != nullptr);
+                                            Graphics::BindVariable(shaderProgram->uniforms["UseNormal"], normalTexture != nullptr);
 
-                                            glUniform1i(shaderProgram->uniforms["Layer"], object->renderLayer);
-                                            glUniform1i(shaderProgram->uniforms["MainLayer"], this->mainLayer);
+                                            Graphics::BindVariable(shaderProgram->uniforms["Layer"], object->renderLayer);
+                                            Graphics::BindVariable(shaderProgram->uniforms["MainLayer"], this->mainLayer);
 
-                                            glUniform1f(shaderProgram->uniforms["Opacity"], object->opacity);
+                                            Graphics::BindVariable(shaderProgram->uniforms["Opacity"], object->opacity);
 
-                                            glUniform1i(shaderProgram->uniforms["UseSunLight"], object->sunLight);
+                                            Graphics::BindVariable(shaderProgram->uniforms["UseSunLight"], object->sunLight);
                                             if (object->sunLight) {
-                                                glUniform3fv(shaderProgram->uniforms["SunLightColor"], 1, glm::value_ptr(this->sunColor));
-                                                glUniform1f(shaderProgram->uniforms["SunLightFactor"], this->sunLightFactor);
+                                                Graphics::BindVariable(shaderProgram->uniforms["SunLightColor"], this->sunColor);
+                                                Graphics::BindVariable(shaderProgram->uniforms["SunLightFactor"], this->sunLightFactor);
                                             }
 
                                             for(auto & renderFeature: this->_renderFeatures) {
@@ -530,6 +537,7 @@ namespace PrettyEngine {
                             }
                         }
                     }
+                    camera.ResetRender();
                 }
             }
         }
@@ -543,10 +551,8 @@ namespace PrettyEngine {
         this->Show();
     }
 
-    void Renderer::Show() {    	
-        glFlush();
-
-        GLFWmonitor* monitor;
+    void Renderer::Show() {
+        GLFWmonitor* monitor = nullptr;
 
         if (this->GetFullscreen()) {
             monitor = glfwGetWindowMonitor(this->_window);
@@ -556,14 +562,7 @@ namespace PrettyEngine {
 
         const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
 
-        if (this->_targetFrameRate == 0) {
-            this->_targetFrameRate = videoMode->refreshRate;
-        }
-
-        int interval = videoMode->refreshRate / this->_targetFrameRate;
-
-        glfwSwapInterval(interval);
-
         glfwSwapBuffers(this->_window);
+        glFlush();
     }
 }
