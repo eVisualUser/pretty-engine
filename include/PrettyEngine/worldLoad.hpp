@@ -83,7 +83,7 @@ namespace PrettyEngine {
 					base["meta"].as_table()->insert_or_assign("name", world->worldName);
 					if (base["meta"]["editor_only"].value_or(false) == true) {
 						#if ENGINE_EDITOR
-
+						
 						#else
 						continue;
 						#endif

@@ -288,7 +288,7 @@ namespace PrettyEngine {
 		std::unordered_map<std::string, std::shared_ptr<Entity>>* GetEntities() {
 			return &this->entities;
 		}
-		
+
 	public:
 		std::thread* updateMT = nullptr;
 		bool update = false;

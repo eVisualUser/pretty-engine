@@ -3,7 +3,6 @@
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/camera.hpp>
 #include <PrettyEngine/render.hpp>
-#include <PrettyEngine/gl.hpp>
 #include <PrettyEngine/Graphics.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
 

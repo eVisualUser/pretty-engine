@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PrettyEngine/debug.hpp"
+#include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/utils.hpp>
 
@@ -74,7 +74,7 @@ namespace PrettyEngine {
 	            case GL_OUT_OF_MEMORY:                 error = "GL_OUT_OF_MEMORY"; break;
 	            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "GL_INVALID_FRAMEBUFFER_OPERATION"; break;
 	        }
-	        std::cout << "OpenGL Error (" << error << "): " << file << ":" << line << std::endl;
+	        DebugLog(LOG_DEBUG, "OpenGL Error (" << error << "): " << file << ":" << line, true);
 	    }
 	}
 

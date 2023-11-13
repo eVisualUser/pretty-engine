@@ -3,7 +3,6 @@
 #include <PrettyEngine/RenderFeature.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/light.hpp>
-#include <PrettyEngine/Graphics.hpp>
 
 namespace Custom {
 	class RF_Light: public PrettyEngine::RenderFeature {

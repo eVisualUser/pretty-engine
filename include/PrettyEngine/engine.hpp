@@ -96,7 +96,7 @@ namespace PrettyEngine {
 			}
 			
 			if (this->showDebugUI) {
-				this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->frameRateLogs);
+				this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->frameRateLogs, &this->frameRateTimeLogs);
 			}
 		}
 
@@ -119,12 +119,7 @@ namespace PrettyEngine {
 			if (this->engineContent.renderer.WindowActive()) {
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
-						#if ENGINE_EDITOR
-						if(!engineEditor)
-						#endif 
-						{
-							currentWorld->CallFunctionProcesses();
-						}
+						currentWorld->CallFunctionProcesses();
 						currentWorld->Update();
 						
 						currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
@@ -148,9 +143,10 @@ namespace PrettyEngine {
 					this->engineContent.renderer.Clear();
 				}
 
-				if (lastFrameRateLog + frameRateCoolDown < currentTime && !this->showFrameRateGraph) {
+				if (this->lastFrameRateLog + this->frameRateCoolDown < currentTime && !this->showFrameRateGraph) {
 					this->frameRateLogs.push_back(this->engineContent.renderer.GetFPS());
 					this->frameRateTimeLogs.push_back(currentTime);
+					this->lastFrameRateLog = currentTime;
 				}
 				
 				this->engineContent.physicalSpace.Update(this->engineContent.renderer.GetDeltaTime());
@@ -297,21 +293,15 @@ namespace PrettyEngine {
 		toml::parse_result customConfig;
 
 		double lastRenderClearTime = 0.0f;
-		double renderClearCoolDown = 5.0f;
+		double renderClearCoolDown = 10.0f;
 
 		bool showFrameRateGraph = false;
-		double frameRateCoolDown = 5.0f;
+		double frameRateCoolDown = 0.5f;
 		double lastFrameRateLog = 0.0f;
 		std::vector<int> frameRateLogs;
 		std::vector<int> frameRateTimeLogs;
 
 		ImPlotContext* _imPlotContext;
-
-		#if ENGINE_EDITOR
-			bool engineEditor = true;
-		#else
-			bool engineEditor = false;
-		#endif
 
 		Editor editor;
 	};

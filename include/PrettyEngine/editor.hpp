@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GLFW/glfw3.h"
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/worldLoad.hpp>
@@ -22,7 +23,7 @@ namespace PrettyEngine {
 			this->debugLocalization.Save();
 		}
 
-		void Update(WorldManager* worldManager, Input* input, Renderer* renderer, PhysicalSpace* physicalSpace, std::vector<int>* frameRateLogs) {
+		void Update(WorldManager* worldManager, Input* input, Renderer* renderer, PhysicalSpace* physicalSpace, std::vector<int>* frameRateLogs, std::vector<int>* frameRateTimeLogs) {
 			if (ImGui::Begin("Input Debugger")) {
 				ImGui::Text("Mouse scroll delta: %f", input->GetMouseWheelDelta());
 
@@ -66,7 +67,8 @@ namespace PrettyEngine {
 			if(ImGui::Begin("Console")) {
 				int index = 0;
 				for (auto & line: logs) {
-					ImGui::Text("%i - %s", index, line.c_str());
+					ImGui::Text("%i: %s", index, line.c_str());
+					index++;
 				}
 			}
 			ImGui::End();
@@ -89,6 +91,7 @@ namespace PrettyEngine {
 				auto lights = this->debugLocalization.Get("Lights: ");
 				ImGui::Text("%s%i", lights.c_str(), renderer->GetLightCount());
 				
+				auto currentRenderTime = glfwGetTime();
 				if (!frameRateLogs->empty()) {
 					auto frameRate = this->debugLocalization.Get("Frame rate: ");
 					ImGui::Text("%s%i", frameRate.c_str(), frameRateLogs->back());
@@ -104,9 +107,14 @@ namespace PrettyEngine {
 						auto data = this->debugLocalization.Get("Frame per second");
 
 					    if (ImPlot::BeginPlot(graphName.c_str(), x.c_str(), y.c_str())) {
-						    ImPlot::PlotBars(data.c_str(), frameRateLogs->data(), frameRateLogs->size());
+						    ImPlot::PlotBars(data.c_str(), frameRateLogs->data(), frameRateLogs->size(), 0.1f);
 						    ImPlot::EndPlot();
 						}
+					}
+
+					if (frameRateLogs->size() > 10000) {
+						frameRateLogs->clear();
+						frameRateTimeLogs->clear();
 					}
 				}
 			}

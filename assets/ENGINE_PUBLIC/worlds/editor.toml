@@ -8,16 +8,16 @@ components = [
         'cpp_logo.png',
         'Mesh',
         'rect',
-        'UseTextureNormal',
-        'true',
-        'UseLight',
-        'true',
         'TextureBaseGUID',
         '31fddb7b-2891-48d0-a635-414bcc4e851d',
-        'SunLight',
-        'false',
+        'UseLight',
+        'true',
+        'UseTextureNormal',
+        'true',
         'TextureTransparencyGUID',
         'a7c119e4-f6c7-4bf6-a813-8d12231e38ce',
+        'SunLight',
+        'false',
         'TextureTransparency',
         '',
         'TextureNormal',
@@ -88,16 +88,16 @@ components = [
         'c#.png',
         'Mesh',
         'rect',
-        'UseTextureNormal',
-        'false',
-        'UseLight',
-        'false',
         'TextureBaseGUID',
         '639b3521-35c1-4f1f-bfc6-76f9cd631082',
-        'SunLight',
+        'UseLight',
+        'false',
+        'UseTextureNormal',
         'false',
         'TextureTransparencyGUID',
         '58aa741d-70e7-44b9-bb00-49280f5b8c4f',
+        'SunLight',
+        'false',
         'TextureTransparency',
         '',
         'TextureNormal',
@@ -136,7 +136,7 @@ public_map = []
 
     [entities.otherCollider.transform]
     position = [ 0.0, 0.0, 0.0 ]
-    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
+    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]
