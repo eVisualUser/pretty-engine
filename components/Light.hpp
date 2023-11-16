@@ -9,7 +9,7 @@
 namespace Custom {
 	class Light: public PrettyEngine::Component {
 	public:
-		void OnStart() {
+		void OnStart() override {
 			this->CreatePublicVar("Color");
 			this->CreatePublicVar("LightFactor");
 			this->CreatePublicVar("DeferredFactor");
@@ -75,11 +75,11 @@ namespace Custom {
 			this->engineContent->renderer.RegisterLight(this->lightID, &this->light);
 		}
 
-		void OnUpdate() {
+		void OnUpdate() override {
 			this->light.position = dynamic_cast<PrettyEngine::Transform*>(this->owner)->position;
 		}
 
-		void OnDestroy() {
+		void OnDestroy() override {
 			this->engineContent->renderer.UnRegisterLight(&this->light);
 		}
 

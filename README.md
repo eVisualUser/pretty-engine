@@ -4,12 +4,13 @@
 
 ## Features
 
-| Feature | State |
-|---------|-------|
-| 2D      | WIP   |
-| 3D      | WIP   |
-| Audio   | WIP   |
-| Editor  | WIP   |
+| Feature       | State |
+|---------------|-------|
+| 2D            | WIP   |
+| 3D            | WIP   |
+| 3D/2D Physics | WIP   |
+| Audio         | WIP   |
+| Editor        | WIP   |
 
 ## Platform support
 

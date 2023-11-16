@@ -5,7 +5,7 @@
 #include "PrettyEngine/shaders.hpp"
 #include "PrettyEngine/texture.hpp"
 #include "PrettyEngine/utils.hpp"
-#include "PrettyEngine/visualObject.hpp"
+#include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/mesh.hpp>
 #include <memory>
@@ -15,7 +15,7 @@ using namespace PrettyEngine;
 namespace Custom {
 	class Render: public PrettyEngine::Component {
 	public:
-		void OnStart() {
+		void OnStart() override {
 			this->CreatePublicVar("UseTexture", "false");
 
 			this->CreatePublicVar("UseTextureBase", "false");
@@ -110,7 +110,7 @@ namespace Custom {
 			}
 		}
 
-		void OnDestroy() {
+		void OnDestroy() override {
 			this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
 		}
 

@@ -10,12 +10,10 @@
 #include <PrettyEngine/camera.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/light.hpp>
-#include <PrettyEngine/KeyCode.hpp>
 #include <PrettyEngine/RenderFeature.hpp>
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -25,7 +23,6 @@
 
 #include <memory>
 #include <utility>
-#include <vcruntime.h>
 #include <vector>
 #include <unordered_map>
 #include <string>

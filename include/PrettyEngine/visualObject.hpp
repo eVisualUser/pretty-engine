@@ -1,5 +1,6 @@
 #pragma once	
 
+#include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/transform.hpp>
@@ -7,6 +8,7 @@
 #include <PrettyEngine/camera.hpp>
 
 #include <string>
+#include <unordered_map>
 
 #define GET_RENDERER(ptr) (PrettyEngine::Renderer*)ptr
 
@@ -29,6 +31,12 @@ namespace PrettyEngine {
 		Projection* projection = nullptr;
 		bool useTexture = false;
 		bool overrideProjection = false;
+	};
+
+	class VisualDataPack: Tagged {
+	public:
+		std::string name;
+		void* content;
 	};
 	
 	class VisualObject: virtual public Transform {
@@ -106,6 +114,19 @@ namespace PrettyEngine {
 			this->d3 = value;
 		}
 
+		void RegisterDataPack(VisualDataPack* dataPack) {
+			this->sharedData.push_back(dataPack);
+		}
+
+		void UnRegisterDataPack(VisualDataPack* dataPack) {
+			for(int i = 0; i < this->sharedData.size(); i++) {
+				if (this->sharedData[i]->name == dataPack->name) {
+					this->sharedData.erase(this->sharedData.begin() + i);
+					return;
+				}
+			}
+		}
+
 	public:
 		bool render = true;
 		bool active = true;
@@ -132,5 +153,8 @@ namespace PrettyEngine {
 		bool useLight = true;
 
 		bool screenObject = false;
+
+		/// A map of any kind of data
+		std::vector<VisualDataPack*> sharedData;
 	};
 }

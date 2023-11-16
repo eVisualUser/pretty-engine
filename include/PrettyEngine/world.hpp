@@ -1,22 +1,17 @@
 #pragma once
 
 #include <PrettyEngine/EngineContent.hpp>
-#include <PrettyEngine/PhysicalSpace.hpp>
-#include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/visualObject.hpp>
-#include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/data.hpp>
 
-#include <Guid.hpp>
-#include <toml++/toml.h>
 #include <glm/vec3.hpp>
 
 #include <unordered_map>
 #include <memory>
+#include <thread>
 
 namespace PrettyEngine {
 	class World;

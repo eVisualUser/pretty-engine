@@ -1,13 +1,12 @@
 #pragma once
 
-#include "PrettyEngine/KeyCode.hpp"
+#include <PrettyEngine/KeyCode.hpp>
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/render.hpp>
-#include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/Input.hpp>
@@ -17,7 +16,6 @@
 #include <PrettyEngine/event.hpp>
 
 #include <toml++/toml.h>
-#include <imgui.h>
 #include <implot.h>
 
 #include <memory>
@@ -48,7 +46,7 @@ namespace PrettyEngine {
 			backgroundColor[1] = this->customConfig["engine"]["render"]["opengl"]["background_color"][1].value_or(0.0f);
 			backgroundColor[2] = this->customConfig["engine"]["render"]["opengl"]["background_color"][2].value_or(0.0f);
 			backgroundColor[3] = this->customConfig["engine"]["render"]["opengl"]["background_color"][3].value_or(0.0f);
-			
+
 			bool createDefaultCamera = this->customConfig["engine"]["render"]["camera"]["create_default_camera"].value_or(false);
 			bool setDefaultCameraAsMain = this->customConfig["engine"]["render"]["camera"]["set_default_camera_as_main"].value_or(true);
 			
@@ -100,12 +98,6 @@ namespace PrettyEngine {
 			}
 		}
 
-		void UpdateUtilShortcut() {
-			if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
-            	this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
-        	}
-		}
-		
 		void Update() {
 			auto worlds = this->_worldManager.GetWorlds();
 			this->engineContent.input.Update();

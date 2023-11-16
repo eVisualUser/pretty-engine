@@ -1,6 +1,7 @@
 #pragma once
 
 // Pretty Engine
+#include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -20,6 +21,8 @@ namespace PrettyEngine {
 		AABB,
 		/// Simple Sphere collision detection
 		Sphere,
+		/// Mesh based collisions
+		GJK,
 	};
 
 	class Collider: public Transform, public virtual Tagged {
@@ -99,5 +102,7 @@ namespace PrettyEngine {
 		glm::vec3 gravity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		glm::vec3 velocity;
+
+		Mesh* mesh;
 	};
 }

@@ -11,9 +11,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-single-bit-bitfield-constant-conversion -Wno-deprecated-declarations")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-drectve-section -Wno-attributes -ffast-math -Wno-deprecated-non-prototype -Wc++20-attribute-extensions -Wno-inconsistent-missing-override")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -ffast-math -Wno-deprecated-non-prototype -Wno-old-style-cast")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-single-bit-bitfield-constant-conversion -Wno-deprecated-declarations")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-function-declaration -Wno-microsoft-drectve-section -Wno-attributes -ffast-math -Wno-deprecated-non-prototype -Wno-inconsistent-missing-override")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-function-declaration -Wno-attributes -ffast-math -Wno-deprecated-non-prototype -Wno-old-style-cast")
 
 project(import)
 
@@ -23,9 +23,14 @@ project(pretty C CXX)
 
 include_directories("include")
 
+include_directories("code")
+
+file(GLOB code_sources "${CMAKE_SOURCE_DIR}/code/code/*.c" "${CMAKE_SOURCE_DIR}/code/code/*.cpp")
+
 add_library(pretty
 	"source/render.cpp"
 	"source/assetsManager.cpp"
+	${code_sources}
 )
 
 target_link_libraries(pretty PUBLIC
