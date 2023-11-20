@@ -7,6 +7,10 @@
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/tags.hpp>
 
+// LibCCD
+#include <ccd/ccd.h>
+#include <ccd/quat.h>
+
 // GLM
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -22,9 +26,10 @@ namespace PrettyEngine {
 		/// Simple Sphere collision detection
 		Sphere,
 		/// Mesh based collisions
-		GJK,
+		Convex,
 	};
 
+	/// Repsesent an object in a world that react/affect the physics
 	class Collider: public Transform, public virtual Tagged {
 	public:
 		bool PointIn(glm::vec3 point) { 
@@ -42,6 +47,12 @@ namespace PrettyEngine {
 		
 		bool OtherIn(Collider* other) { 
 			if (this->colliderModel == ColliderModel::AABB) {
+				if (other->colliderModel == ColliderModel::AABB) {
+					auto basePoints = (this->PointIn(other->GetMin()) || this->PointIn(other->GetMax()) || this->PointIn(other->position));
+					auto inversePoints = (this->PointIn(other->GetInverseMin(true)) || this->PointIn(other->GetInverseMax(true)));
+
+					return (basePoints | inversePoints);
+				}
 				return false;
 			} else if (this->colliderModel == ColliderModel::Sphere) {
 				if (other->colliderModel == ColliderModel::Sphere) {
@@ -56,18 +67,50 @@ namespace PrettyEngine {
 			return this->BadSetup();
 		}
 
+		/// Return the minimum position
 		glm::vec3 GetMin() {
 			return (this->position) - this->scale;
 		}
 
+		glm::vec3 GetInverseMin(bool halfScale = false) {
+			auto scale = this->scale;
+
+			if (halfScale) {
+				scale = this->halfScale;
+			}
+
+			auto result = (this->position) - scale;
+
+			result.x += scale.x * 2;
+
+			return result;
+		}
+
+		/// Return the minimum position based on half of the scale
 		glm::vec3 GetMinHalf() {
 			return (this->position) - this->halfScale;
 		}
 
+		/// Return the maximum position
 		glm::vec3 GetMax() {
 			return (this->position) + this->scale;
 		}
 
+		glm::vec3 GetInverseMax(bool halfScale = false) {
+			auto scale = this->scale;
+
+			if (halfScale) {
+				scale = this->halfScale;
+			}
+
+			auto result = (this->position) + scale;
+
+			result.x -= scale.x * 2;
+
+			return result;
+		}
+
+		/// Return the maxime position based on half of the scale
 		glm::vec3 GetMaxHalf() {
 			return (this->position) + this->halfScale;
 		}
@@ -80,6 +123,17 @@ namespace PrettyEngine {
 			this->velocity += direction;
 		}
 		
+	// LibCCD specific
+	public:
+
+	// Function required by LibCCD
+	void Support(const void* obj, const ccd_vec3_t *dir, ccd_vec3_t *vec) {
+
+		Collider* collider = (Collider*)obj;
+
+      	
+	}
+
 	private:
 		bool BadSetup() {
 			DebugLog(LOG_ERROR, "Collider: " << this->name << " have no detection model set", true);
@@ -104,5 +158,9 @@ namespace PrettyEngine {
 		glm::vec3 velocity;
 
 		Mesh* mesh;
+
+		bool reverseDelta = false;
+
+		bool fixed = false;
 	};
 }

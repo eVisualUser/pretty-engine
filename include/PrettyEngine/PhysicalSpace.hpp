@@ -71,11 +71,23 @@ namespace PrettyEngine {
 			return out;
 		}
 
-		void RigidbodyApplyVelocity(std::vector<Collision>* collisions, Collider* collider) {
+		void UpdateRigidbodyPosition(std::vector<Collision>* collisions, Collider* collider, float deltaTime) {
 			collider->velocity += collider->gravity;
 
 			auto startPosition = collider->position;
 			collider->position += collider->velocity;
+
+			if (!collider->fixed) {
+				for(auto & collision: *collisions) {
+					auto delta = collider->position - collision.colliderOther->position;
+
+					if (collider->reverseDelta) {
+						delta = -delta;
+					}
+
+					collider->position += delta * deltaTime * 100.0f;
+				}
+			}
 
 			collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
@@ -86,7 +98,7 @@ namespace PrettyEngine {
 				for(auto & collider: layer.second) {
 					auto collisions = this->FindCollisions(collider);
 					this->UpdateRigidBody(collider, &collisions, deltaTime);
-					this->RigidbodyApplyVelocity(&collisions, collider);
+					this->UpdateRigidbodyPosition(&collisions, collider, deltaTime);
 					this->_collisions.insert(std::make_pair(collider, collisions));
 				}
 			}
@@ -95,7 +107,7 @@ namespace PrettyEngine {
 		void UpdateRigidBody(Collider* collider, std::vector<Collision>* collisions, float deltaTime) {
 			if (collider->isRigidBody) {
 				for(auto & collision: *collisions) {
-					this->RigidbodyApplyVelocity(collisions, collider);
+					this->UpdateRigidbodyPosition(collisions, collider, deltaTime);
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
+#include "PrettyEngine/debug.hpp"
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/worldLoad.hpp>
@@ -13,6 +13,7 @@
 #include <implot.h>
 
 namespace PrettyEngine {
+	/// Builtin editor
 	class Editor {
 	public:
 		Editor() {
@@ -67,7 +68,19 @@ namespace PrettyEngine {
 			if(ImGui::Begin("Console")) {
 				int index = 0;
 				for (auto & line: logs) {
-					ImGui::Text("%i: %s", index, line.c_str());
+					ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+					if (line.type == LOG_DEBUG) {
+						color = ImVec4(2.29f, 2.04f, 0.16f, 1.0f);
+					} else if (line.type == LOG_WARNING) {
+						color = ImVec4(2.47f, 1.42f, 4.0f, 1.0f);
+					} else if (line.type == LOG_ERROR) {
+						color = ImVec4(2.52f, 0.58f, 0.58f, 1.0f);
+					} else if (line.type == LOG_INFO) {
+						color = ImVec4(0.10f, 0.78f, 2.52f, 1.0f);
+					}
+
+					ImGui::TextColored(color, "%i: %s", index, line.log.c_str());
 					index++;
 				}
 			}

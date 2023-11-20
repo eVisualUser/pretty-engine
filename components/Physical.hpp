@@ -16,6 +16,13 @@ namespace Custom {
 			this->CreatePublicVar("layer", "Default");
 			this->CreatePublicVar("name", xg::newGuid());
 			this->CreatePublicVar("mass", "1");
+			this->CreatePublicVar("fixed", "false");
+
+			if (this->GetPublicVarValue("fixed") == "false") {
+				this->_colliderA.fixed = false;
+			} else {
+				this->_colliderA.fixed = true;
+			}
 
 			if (this->GetPublicVarValue("model") == "Sphere") {
 				this->_colliderA.colliderModel = PrettyEngine::ColliderModel::Sphere;
@@ -36,6 +43,8 @@ namespace Custom {
 		void OnStart() override {
 			this->_ownerEntity = dynamic_cast<PrettyEngine::Entity*>(this->owner);
 			this->engineContent->physicalSpace.AddCollider(this->layer, &this->_colliderA);
+
+			this->_colliderA.position = this->GetTransform()->position;
 		}
 
 		void OnUpdate() override {

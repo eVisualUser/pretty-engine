@@ -121,6 +121,10 @@ namespace PrettyEngine {
 			return glm::eulerAngles(this->rotation);
 		}
 
+		float GetAverageScale() {
+			return (this->scale.x + this->scale.y + this->scale.z) / 3;
+		}
+
 	public:
 		glm::vec3 position = glm::zero<glm::vec3>();
 		glm::quat rotation = glm::identity<glm::quat>();

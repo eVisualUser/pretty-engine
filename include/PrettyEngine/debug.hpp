@@ -8,7 +8,13 @@
 #include <chrono>
 
 namespace PrettyEngine {
-	static std::vector<std::string> logs;
+	struct Log {
+	public:
+		std::string type;
+		std::string log;
+	};
+
+	static std::vector<Log> logs;
 	static bool printDebugMessage = true;
 }
 
@@ -19,10 +25,10 @@ static std::string GetFileName(const char* name) {
     return fileName;
 }
 
-#define LOG_ERROR "ERROR" 
-#define LOG_DEBUG "DEBUG" 
-#define LOG_INFO "INFO" 
-#define LOG_WARNING "WARNING" 
+const std::string LOG_ERROR = "ERROR"; 
+const std::string LOG_DEBUG = "DEBUG"; 
+const std::string LOG_INFO = "INFO"; 
+const std::string LOG_WARNING = "WARNING";
 
 static void ShowMessageBox(std::string type, std::string message) {
 	auto style = boxer::Style::Info;
@@ -30,6 +36,8 @@ static void ShowMessageBox(std::string type, std::string message) {
 		style = boxer::Style::Error;
 	} else if (type == LOG_WARNING) {
 		style = boxer::Style::Warning;
+	} else if (type == LOG_INFO) {
+		style = boxer::Style::Info;
 	}
 
 	boxer::show(message.c_str(), type.c_str(), style, boxer::Buttons::OK);
@@ -37,13 +45,17 @@ static void ShowMessageBox(std::string type, std::string message) {
 
 static bool RepeatedLog(std::string newLog) {
 	if (!PrettyEngine::logs.empty()) {
-		return newLog == PrettyEngine::logs.back();
+		return newLog == PrettyEngine::logs.back().log;
 	}
 	return false;
 }
 
-static void AddLog(std::string newLog) {
-	PrettyEngine::logs.push_back(newLog);
+static void AddLog(std::string newLog, std::string type) {
+	PrettyEngine::Log result;
+	result.type = type;
+	result.log = newLog;
+
+	PrettyEngine::logs.push_back(result);
 }
 
 static std::string GetTimeAsString() {
@@ -63,7 +75,7 @@ static std::string GetTimeAsString() {
 	text << "Time: " << GetTimeAsString() << std::endl << GetFileName(__FILE__) << std::endl << "Line: " << __LINE__ << std::endl << "Function: " << __FUNCTION__ << std::endl; \
 	text << msg << std::endl; \
 	if (!RepeatedLog(text.str())) { \
-	AddLog(text.str()); \
+	AddLog(text.str(), type); \
     if (msgBox) { \
     	ShowMessageBox(type, text.str()); \
     }  \

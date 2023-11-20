@@ -23,6 +23,11 @@ namespace PrettyEngine {
 		virtual void OnUpdate() {}
 		virtual void OnDestroy() {}
 
+		Transform* GetTransform() {
+			return dynamic_cast<Transform*>(this->owner);
+		}
+
+	public:
 		DynamicObject* owner;
 
 		bool worldFirst = true;

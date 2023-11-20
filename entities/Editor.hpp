@@ -32,6 +32,8 @@ namespace Custom {
 	class Editor : public virtual Entity {
 	public:
 	  void OnStart() override {
+	  	DebugLog(LOG_WARNING, "Engine launched as Editor", true);
+
 	    this->localization = std::make_shared<Localization>();
 	    this->localization->LoadFile(GetEnginePublicPath("editor.csv", true));
 
