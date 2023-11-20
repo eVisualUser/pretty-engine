@@ -96,6 +96,10 @@ set(LIBTYPE STATIC)
 set(ALSOFT_INSTALL ON)
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/openal-soft")
 
+message("--LibCCD")
+include_directories("${CMAKE_SOURCE_DIR}/external/libccd/src")
+add_subdirectory("${CMAKE_SOURCE_DIR}/external/libccd")
+
 project(external)
 
 add_library(external SHARED "${CMAKE_SOURCE_DIR}/source/external.cpp")
@@ -110,4 +114,5 @@ target_link_libraries(external PUBLIC
  	OpenAL
  	sqlite3
  	implot
+ 	ccd
 )

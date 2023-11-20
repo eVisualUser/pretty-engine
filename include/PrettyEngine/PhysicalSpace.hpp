@@ -3,8 +3,6 @@
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/Collision.hpp>
 
-#include <openGJK/openGJK.h>
-
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -108,8 +106,6 @@ namespace PrettyEngine {
 					return &collisions.second;
 				}
 			}
-
-			gkSimplex simplex;
 
 			return nullptr;
 		}
