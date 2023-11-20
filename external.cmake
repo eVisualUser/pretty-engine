@@ -110,5 +110,4 @@ target_link_libraries(external PUBLIC
  	OpenAL
  	sqlite3
  	implot
- 	freetype
 )
