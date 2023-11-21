@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_PHYSICAL_SPACE
+#define H_PHYSICAL_SPACE
 
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/Collision.hpp>
@@ -128,3 +129,5 @@ namespace PrettyEngine {
 		std::unordered_map<Collider*, std::vector<Collision>> _collisions;
 	};
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_LIGHT
+#define H_LIGHT
 
 #include "glm/trigonometric.hpp"
 #include <PrettyEngine/texture.hpp>
@@ -41,3 +42,5 @@ namespace PrettyEngine {
 		float opacityFactorEffect = 1.0f;
 	};
 }
+
+#endif

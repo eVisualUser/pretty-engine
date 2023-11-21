@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_UTILS
+#define H_UTILS
 
 #include <PrettyEngine/debug.hpp>
 
@@ -176,3 +177,5 @@ namespace PrettyEngine {
 		#define PUBLIC_ASSET(fileName) "./public/" + fileName
 	#endif
 }
+
+#endif

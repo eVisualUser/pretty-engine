@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_SERIAL
+#define H_SERIAL
 
 #include <PrettyEngine/debug.hpp>
 
@@ -104,3 +105,5 @@ namespace PrettyEngine {
 		std::unordered_map<std::string, std::string> serialFields;
 	};
 }
+
+#endif

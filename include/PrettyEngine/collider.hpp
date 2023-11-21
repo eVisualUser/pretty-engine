@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_COLLIDER
+#define H_COLLIDER
 
 // Pretty Engine
 #include <PrettyEngine/mesh.hpp>
@@ -164,3 +165,5 @@ namespace PrettyEngine {
 		bool fixed = false;
 	};
 }
+
+#endif

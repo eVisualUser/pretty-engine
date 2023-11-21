@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_GC
+#define H_GC
 
 namespace PrettyEngine {
 	class GCObject {
@@ -7,3 +8,5 @@ namespace PrettyEngine {
 		bool useGC = true;
 	};
 }
+
+#endif

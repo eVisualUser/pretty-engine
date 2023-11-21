@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_RENDER
+#define H_RENDER
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -559,3 +560,5 @@ namespace PrettyEngine {
 		int _targetFrameRate = 0;
 	};
 }
+
+#endif

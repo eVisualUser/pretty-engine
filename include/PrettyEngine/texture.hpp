@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_TEXTURE
+#define H_TEXTURE
 
 #include <PrettyEngine/gc.hpp>
 
@@ -50,3 +51,5 @@ namespace PrettyEngine {
 		TextureType textureType;
 	};
 }
+
+#endif

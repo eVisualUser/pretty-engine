@@ -2,7 +2,6 @@
 #define H_ENGINE
 
 #include <PrettyEngine/KeyCode.hpp>
-#include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/debug.hpp>
@@ -14,6 +13,7 @@
 #include <PrettyEngine/editor.hpp>
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/event.hpp>
+#include <PrettyEngine/worldLoad.hpp>
 
 #include <toml++/toml.h>
 #include <implot.h>

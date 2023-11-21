@@ -1,4 +1,5 @@
-#pragma once	
+#ifndef H_VISUAL_OBJECT
+#define H_VISUAL_OBJECT
 
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/mesh.hpp>
@@ -158,3 +159,5 @@ namespace PrettyEngine {
 		std::vector<VisualDataPack*> sharedData;
 	};
 }
+
+#endif

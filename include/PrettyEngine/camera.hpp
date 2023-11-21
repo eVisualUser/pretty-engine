@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_CAMERA
+#define H_CAMERA
 
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/debug.hpp>
@@ -113,3 +114,5 @@ namespace PrettyEngine {
 		unsigned int glFrameBufferID;
 	};
 }
+
+#endif

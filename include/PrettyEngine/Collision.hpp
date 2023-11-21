@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_COLLISION
+#define H_COLLISION
 
 #include <PrettyEngine/collider.hpp>
 
@@ -11,3 +12,5 @@ namespace PrettyEngine {
 		bool hit = false;
 	};
 }
+
+#endif

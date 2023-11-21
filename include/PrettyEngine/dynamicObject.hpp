@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_DYNAMIC_OBJECT
+#define H_DYNAMIC_OBJECT
 
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
@@ -82,3 +83,5 @@ namespace PrettyEngine {
 		std::string object;
 	};
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_ENTITY
+#define H_ENTITY
 
 #include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/debug.hpp>
@@ -81,3 +82,5 @@ namespace PrettyEngine {
 		std::string _entityGUID = xg::newGuid();
 	};
 };
+
+#endif

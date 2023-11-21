@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_AUDIO
+#define H_AUDIO
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
@@ -465,3 +466,5 @@ namespace PrettyEngine {
 		ALCint attributes[10];
 	};
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_TRANSFORM
+#define H_TRANSFORM
 
 #include <PrettyEngine/serial.hpp>
 
@@ -132,3 +133,5 @@ namespace PrettyEngine {
 		glm::vec3 halfScale = glm::zero<glm::vec3>();
 	};
 }
+
+#endif

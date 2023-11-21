@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_KEYCODE
+#define H_KEYCODE
 
 #include <GLFW/glfw3.h>
 
@@ -127,3 +128,5 @@ namespace PrettyEngine {
 	    Menu = GLFW_KEY_MENU
 	};
 }
+
+#endif

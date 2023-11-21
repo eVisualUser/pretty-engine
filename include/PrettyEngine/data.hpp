@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_DATA
+#define H_DATA
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -172,3 +173,5 @@ namespace PrettyEngine {
 		sqlite3* db;
 	};
 }
+
+#endif

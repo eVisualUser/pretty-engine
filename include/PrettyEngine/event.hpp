@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_EVENT
+#define H_EVENT
 
 #include <string>
 #include <vector>
@@ -47,3 +48,5 @@ namespace PrettyEngine {
 		std::vector<EventListener*> _eventListeners;
 	};
 }
+
+#endif

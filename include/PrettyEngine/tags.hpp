@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_TAGS
+#define H_TAGS
 
 #include <string>
 #include <vector>
@@ -48,3 +49,5 @@ namespace PrettyEngine {
 		static std::vector<std::string> longTermTags;
 	};
 }
+
+#endif

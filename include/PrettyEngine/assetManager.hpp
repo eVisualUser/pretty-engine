@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_ASSET_MANAGER
+#define H_ASSET_MANAGER
 
 #include <PrettyEngine/data.hpp>
 
@@ -13,3 +14,5 @@ namespace PrettyEngine {
 		static void SetBinary(std::string directory, std::string assetName, std::vector<unsigned char> binary);
 	};
 }
+
+#endif

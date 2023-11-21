@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_GRAPHICS
+#define H_GRAPHICS
 
 #include <PrettyEngine/gl.hpp>
 
@@ -41,3 +42,5 @@ namespace PrettyEngine {
 		}
 	};
 }
+
+#endif

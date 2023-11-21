@@ -1,6 +1,7 @@
-#pragma once
+#ifndef H_INTERN_EDITOR
+#define H_INTERN_EDITOR
 
-#include "PrettyEngine/debug.hpp"
+#include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/worldLoad.hpp>
@@ -140,3 +141,5 @@ namespace PrettyEngine {
 		Entity* selectedEntity = nullptr;
 	};
 }
+
+#endif

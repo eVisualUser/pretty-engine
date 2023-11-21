@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_INPUT
+#define H_INPUT
 
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/KeyCode.hpp>
@@ -187,7 +188,7 @@ namespace PrettyEngine {
 		GLFWwindow* _window;
 
 		std::string _savePath = GetEnginePublicPath("input.pe", true);
-
-		toml::table _fileData;
 	};
 }
+
+#endif

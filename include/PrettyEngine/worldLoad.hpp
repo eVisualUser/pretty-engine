@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_WORLD_LOAD
+#define H_WORLD_LOAD
 
 #include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/collider.hpp>
@@ -284,3 +285,5 @@ namespace PrettyEngine {
 		std::vector<std::shared_ptr<World>> _worldsInstances;
 	};
 }
+
+#endif

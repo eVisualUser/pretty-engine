@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_MESH
+#define H_MESH
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/gc.hpp>
@@ -115,3 +116,5 @@ namespace PrettyEngine {
 		return out;
 	} 
 }
+
+#endif

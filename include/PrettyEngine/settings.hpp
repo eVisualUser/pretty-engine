@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_SETTINGS
+#define H_SETTINGS
 
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -64,3 +65,5 @@ namespace PrettyEngine {
 		toml::table tomlTable;
 	};
 }
+
+#endif

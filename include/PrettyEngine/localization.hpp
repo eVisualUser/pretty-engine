@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_LOCALIZATION
+#define H_LOCALIZATION
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -184,3 +185,5 @@ namespace PrettyEngine {
 		std::string filePath;
 	};
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_RENDER_FEATURE
+#define H_RENDER_FEATURE
 
 #include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/light.hpp>
@@ -17,3 +18,5 @@ namespace PrettyEngine {
 		std::vector<Light*>* lights;
 	};
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_ENGINE_CONTENT
+#define H_ENGINE_CONTENT
 
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render.hpp>
@@ -16,3 +17,5 @@ namespace PrettyEngine {
 		EventManager eventManager = EventManager();
 	};
 }
+
+#endif
