@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_DEBUG
+#define H_DEBUG
 
 #include <boxer/boxer.h>
 
@@ -103,3 +104,5 @@ namespace PrettyEngine {
 		}
 	}
 }
+
+#endif

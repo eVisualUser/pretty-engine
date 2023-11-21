@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_PRETTY_GL
+#define H_PRETTY_GL
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/localization.hpp>
@@ -81,3 +82,5 @@ namespace PrettyEngine {
 	// Place this macro after each significant OpenGL function call
 	#define GL_CHECK_ERROR() PrettyEngine::CheckOpenGLError(__FILE__, __LINE__)
 }
+
+#endif

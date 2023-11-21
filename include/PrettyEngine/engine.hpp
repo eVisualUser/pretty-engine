@@ -1,7 +1,7 @@
-#pragma once
+#ifndef H_ENGINE
+#define H_ENGINE
 
 #include <PrettyEngine/KeyCode.hpp>
-#include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/audio.hpp>
@@ -298,3 +298,5 @@ namespace PrettyEngine {
 		Editor editor;
 	};
 };
+
+#endif

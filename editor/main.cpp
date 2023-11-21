@@ -16,18 +16,19 @@ bool worldFilter(std::string name) {
 
 int main() {
 	auto engine = PrettyEngine::Engine(ASSET_BUILTIN_EDITOR_CONFIG);
-	
-	engine.GetWorldManager()
-		->AddWorldFile(GetEnginePublicPath("worlds/editor.toml", true));
-	
-	engine.GetWorldManager()
-		->FilterWorldList(worldFilter)
-		->ParseWorldsFiles()
-		->CreateWorldsInstances()
-		->LoadWorlds();
+	engine.GetWorldManager()->AddWorldFile(GetEnginePublicPath("worlds/editor.toml", true));
+	engine.GetWorldManager()->FilterWorldList(worldFilter);
+	engine.GetWorldManager()->ParseWorldsFiles();
+	engine.GetWorldManager()->CreateWorldsInstances();
+
+	for(auto & error: engine.GetWorldManager()->FindErrors()) {
+		DebugLog(LOG_ERROR, error, true);
+	}
+
+	engine.GetWorldManager()->LoadWorlds();
 
 	engine.SetupWorlds();
-
+	
 	engine.Run();
 
 	return 0;	

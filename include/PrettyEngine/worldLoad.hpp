@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace PrettyEngine {
 	class WorldManager {
@@ -67,6 +68,22 @@ namespace PrettyEngine {
 				this->_worldsInstances.push_back(std::make_shared<World>());
 			}
 			return this;
+		}
+
+		std::vector<std::string> FindErrors() {
+			std::vector<std::string> result;
+
+			for(auto & path: this->_worldsFiles) {
+				if (!FileExist(path)) {
+					result.push_back("World file not found: " + path);
+				}
+			}
+
+			if (this->_worldsInstances.size() < this->_worldsFiles.size()) {
+				result.push_back("Missing world instances");
+			}
+
+			return result;
 		}
 
 		void SaveWorlds() {
@@ -164,6 +181,10 @@ namespace PrettyEngine {
 								int publicMapStartOffset = 2; // Skip the component name and unique
 								std::pair<std::string, std::string> pairBuffer;
 
+								if (array->size() % 2 != 0) {
+									DebugLog(LOG_ERROR, componentUnique << " Odd public variables count", true);
+								}
+
 								for (int i = publicMapStartOffset; i < array->size(); i++) {
 									if (i % 2) { // Value
 										pairBuffer.second = array->get(i)->value_or("Null");
@@ -174,7 +195,6 @@ namespace PrettyEngine {
 								}
 
 								auto newComponent = GetCustomComponent(componentName);
-
 								if (newComponent == nullptr) {
 									DebugLog(LOG_ERROR, "Mising component: " << componentName, true);
 								} else {

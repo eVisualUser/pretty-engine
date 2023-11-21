@@ -5,7 +5,7 @@
 			"config": "Debug",
 			"env":
 			{
-				"path": "C:\\Program Files\\Lapce\\;C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\VulkanSDK\\1.3.231.1\\Bin;C:\\Program Files\\dotnet\\;C:\\ProgramData\\chocolatey\\bin;C:\\Program Files\\LLVM\\bin;C:\\Program Files (x86)\\Lua\\5.1;C:\\Program Files (x86)\\Lua\\5.1\\clibs;C:\\Users\\sylva\\.cargo\\bin;C:\\Users\\sylva\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\sylva\\.dotnet\\tools;C:\\tools\\neovim\\nvim-win64\\bin;C:\\Program Files\\CMake\\bin;C:\\Users\\sylva\\AppData\\Local\\JetBrains\\Toolbox\\scripts;C:\\Windows\\System32\\WindowsPowerShell\\v1.0;C:\\Program Files\\NVIDIA Corporation\\NVIDIA NvDLISR;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\GtkSharp\\2.12\\bin;C:\\Program Files\\Meson\\;C;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\nodejs\\;C:\\Users\\sylva\\AppData\\Local\\Programs\\Python\\Launcher\\;C:\\Users\\sylva\\AppData\\Local\\emsdk;C:\\Users\\sylva\\AppData\\Local\\emsdk\\node\\14.18.2_64bit\\bin;C:\\Users\\sylva\\AppData\\Local\\emsdk\\upstream\\emscripten;D:\\Tools\\emsdk;D:\\Tools\\emsdk\\node\\14.18.2_64bit\\bin;D:\\Tools\\emsdk\\upstream\\emscripten;C:\\Users\\sylva\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\;C:\\Users\\sylva\\AppData\\Local\\Programs\\Python\\Python311\\;C:\\Users\\sylva\\.cargo\\bin;C:\\Users\\sylva\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\sylva\\.dotnet\\tools;C:\\tools\\neovim\\nvim-win64\\bin;C:\\Users\\sylva\\AppData\\Local\\JetBrains\\Toolbox\\scripts;C:\\Users\\sylva\\.dotnet\\tools;C:\\ProgramData\\chocolatey\\bin\\ninja.exe;;C:\\Users\\sylva\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\sylva\\xmake;C:\\Program Files\\OpenSSL-Win64\\bin;C:\\Users\\sylva\\AppData\\Roaming\\npm",
+				"path": "C:\\Program Files\\Lapce\\;C:\\VulkanSDK\\1.3.261.1\\Bin;C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\Program Files\\dotnet\\;C:\\ProgramData\\chocolatey\\bin;C:\\Program Files\\LLVM\\bin;C:\\Program Files (x86)\\Lua\\5.1;C:\\Program Files (x86)\\Lua\\5.1\\clibs;C:\\Users\\sylva\\.cargo\\bin;C:\\Users\\sylva\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\sylva\\.dotnet\\tools;C:\\tools\\neovim\\nvim-win64\\bin;C:\\Program Files\\CMake\\bin;C:\\Users\\sylva\\AppData\\Local\\JetBrains\\Toolbox\\scripts;C:\\Windows\\System32\\WindowsPowerShell\\v1.0;C:\\Program Files\\NVIDIA Corporation\\NVIDIA NvDLISR;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\GtkSharp\\2.12\\bin;C:\\Program Files\\Meson\\;C;C:\\Program Files\\Git\\cmd;C:\\Program Files\\nodejs\\;C:\\Program Files\\PowerShell\\7\\;C:\\Users\\sylva\\AppData\\Local\\Programs\\Python\\Launcher\\;C:\\Users\\sylva\\AppData\\Local\\emsdk;C:\\Users\\sylva\\AppData\\Local\\emsdk\\node\\14.18.2_64bit\\bin;C:\\Users\\sylva\\AppData\\Local\\emsdk\\upstream\\emscripten;D:\\Tools\\emsdk;D:\\Tools\\emsdk\\node\\14.18.2_64bit\\bin;D:\\Tools\\emsdk\\upstream\\emscripten;C:\\Users\\sylva\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\;C:\\Users\\sylva\\AppData\\Local\\Programs\\Python\\Python311\\;C:\\Users\\sylva\\.cargo\\bin;C:\\Users\\sylva\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\sylva\\.dotnet\\tools;C:\\tools\\neovim\\nvim-win64\\bin;C:\\Users\\sylva\\AppData\\Local\\JetBrains\\Toolbox\\scripts;C:\\Users\\sylva\\.dotnet\\tools;C:\\ProgramData\\chocolatey\\bin\\ninja.exe;;C:\\Users\\sylva\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\sylva\\xmake;C:\\Program Files\\OpenSSL-Win64\\bin;C:\\Users\\sylva\\AppData\\Roaming\\npm",
 			},
 			"generator": "Ninja",
 			"name": "Debug",
@@ -13,98 +13,120 @@
 			"variants":
 			[
 				{
-					"build_target": "App_obj2sdf",
-					"name": "App_obj2sdf",
-				},
-				{
-					"artifact": "external/bullet3/Extras/obj2sdf/App_obj2sdf.exe",
-					"build_target": "App_obj2sdf",
-					"name": "Run: App_obj2sdf",
-					"target": "cmake_run",
-				},
-				{
 					"build_target": "Boxer",
 					"name": "Boxer",
 				},
 				{
-					"build_target": "Bullet2FileLoader",
-					"name": "Bullet2FileLoader",
+					"build_target": "Continuous",
+					"name": "Continuous",
 				},
 				{
-					"build_target": "Bullet3Collision",
-					"name": "Bullet3Collision",
+					"build_target": "ContinuousBuild",
+					"name": "ContinuousBuild",
 				},
 				{
-					"build_target": "Bullet3Common",
-					"name": "Bullet3Common",
+					"build_target": "ContinuousConfigure",
+					"name": "ContinuousConfigure",
 				},
 				{
-					"build_target": "Bullet3Dynamics",
-					"name": "Bullet3Dynamics",
+					"build_target": "ContinuousCoverage",
+					"name": "ContinuousCoverage",
 				},
 				{
-					"build_target": "Bullet3Geometry",
-					"name": "Bullet3Geometry",
+					"build_target": "ContinuousMemCheck",
+					"name": "ContinuousMemCheck",
 				},
 				{
-					"build_target": "Bullet3OpenCL_clew",
-					"name": "Bullet3OpenCL_clew",
+					"build_target": "ContinuousStart",
+					"name": "ContinuousStart",
 				},
 				{
-					"build_target": "BulletCollision",
-					"name": "BulletCollision",
+					"build_target": "ContinuousSubmit",
+					"name": "ContinuousSubmit",
 				},
 				{
-					"build_target": "BulletDynamics",
-					"name": "BulletDynamics",
+					"build_target": "ContinuousTest",
+					"name": "ContinuousTest",
 				},
 				{
-					"build_target": "BulletFileLoader",
-					"name": "BulletFileLoader",
+					"build_target": "ContinuousUpdate",
+					"name": "ContinuousUpdate",
 				},
 				{
-					"build_target": "BulletInverseDynamics",
-					"name": "BulletInverseDynamics",
+					"build_target": "Experimental",
+					"name": "Experimental",
 				},
 				{
-					"build_target": "BulletInverseDynamicsUtils",
-					"name": "BulletInverseDynamicsUtils",
+					"build_target": "ExperimentalBuild",
+					"name": "ExperimentalBuild",
 				},
 				{
-					"build_target": "BulletRobotics",
-					"name": "BulletRobotics",
+					"build_target": "ExperimentalConfigure",
+					"name": "ExperimentalConfigure",
 				},
 				{
-					"build_target": "BulletRoboticsGUI",
-					"name": "BulletRoboticsGUI",
+					"build_target": "ExperimentalCoverage",
+					"name": "ExperimentalCoverage",
 				},
 				{
-					"build_target": "BulletSoftBody",
-					"name": "BulletSoftBody",
+					"build_target": "ExperimentalMemCheck",
+					"name": "ExperimentalMemCheck",
 				},
 				{
-					"build_target": "BulletWorldImporter",
-					"name": "BulletWorldImporter",
+					"build_target": "ExperimentalStart",
+					"name": "ExperimentalStart",
 				},
 				{
-					"build_target": "BulletXmlWorldImporter",
-					"name": "BulletXmlWorldImporter",
+					"build_target": "ExperimentalSubmit",
+					"name": "ExperimentalSubmit",
 				},
 				{
-					"build_target": "ConvexDecomposition",
-					"name": "ConvexDecomposition",
+					"build_target": "ExperimentalTest",
+					"name": "ExperimentalTest",
 				},
 				{
-					"build_target": "GIMPACTUtils",
-					"name": "GIMPACTUtils",
+					"build_target": "ExperimentalUpdate",
+					"name": "ExperimentalUpdate",
 				},
 				{
-					"build_target": "HACD",
-					"name": "HACD",
+					"build_target": "Nightly",
+					"name": "Nightly",
 				},
 				{
-					"build_target": "LinearMath",
-					"name": "LinearMath",
+					"build_target": "NightlyBuild",
+					"name": "NightlyBuild",
+				},
+				{
+					"build_target": "NightlyConfigure",
+					"name": "NightlyConfigure",
+				},
+				{
+					"build_target": "NightlyCoverage",
+					"name": "NightlyCoverage",
+				},
+				{
+					"build_target": "NightlyMemCheck",
+					"name": "NightlyMemCheck",
+				},
+				{
+					"build_target": "NightlyMemoryCheck",
+					"name": "NightlyMemoryCheck",
+				},
+				{
+					"build_target": "NightlyStart",
+					"name": "NightlyStart",
+				},
+				{
+					"build_target": "NightlySubmit",
+					"name": "NightlySubmit",
+				},
+				{
+					"build_target": "NightlyTest",
+					"name": "NightlyTest",
+				},
+				{
+					"build_target": "NightlyUpdate",
+					"name": "NightlyUpdate",
 				},
 				{
 					"build_target": "OpenAL",
@@ -139,10 +161,14 @@
 					"name": "assimp_cmd",
 				},
 				{
-					"artifact": "external/assimp/bin/assimp_Debug.exe",
+					"artifact": "external/assimp/bin/assimpd.exe",
 					"build_target": "assimp_cmd",
 					"name": "Run: assimp_cmd",
 					"target": "cmake_run",
+				},
+				{
+					"build_target": "ccd",
+					"name": "ccd",
 				},
 				{
 					"build_target": "common",
@@ -235,6 +261,10 @@
 					"name": "pretty",
 				},
 				{
+					"build_target": "renderFeatures",
+					"name": "renderFeatures",
+				},
+				{
 					"build_target": "sofa-info",
 					"name": "sofa-info",
 				},
@@ -294,5 +324,13 @@
 	],
 	"debugger_configurations":
 	[
+		{
+			"type": "gdb",
+			"request": "launch",
+			"name": "Launch Program",
+			"target": "editor.exe",
+			"cwd": "${folder}",
+			"valuesFormatting": "parseText",
+		},
 	],
 }

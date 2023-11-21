@@ -24,68 +24,7 @@ namespace PrettyEngine {
 			this->debugLocalization.Save();
 		}
 
-		void Update(WorldManager* worldManager, Input* input, Renderer* renderer, PhysicalSpace* physicalSpace, std::vector<int>* frameRateLogs, std::vector<int>* frameRateTimeLogs) {
-			if (ImGui::Begin("Input Debugger")) {
-				ImGui::Text("Mouse scroll delta: %f", input->GetMouseWheelDelta());
-
-				auto keyWatchers = input->GetKeyWatchers();
-				if (ImGui::BeginTable("Key Stats", 3) && !keyWatchers->empty()) {
-					ImGui::TableSetupColumn("Name");
-					ImGui::TableSetupColumn("Mode");
-					ImGui::TableSetupColumn("State");
-					
-					ImGui::TableHeadersRow();
-					
-					for (auto & key: *keyWatchers) {
-						ImGui::TableNextRow();
-						ImGui::TableNextColumn();
-
-						auto keyName = key->name;
-
-						ImGui::Text("%s", keyName.c_str());
-						
-						ImGui::TableNextColumn();
-						std::string keyMode = KeyWatcherModeToString(key->mode);
-
-						if (ImGui::Button(keyMode.c_str())) {
-							if (keyMode == "Down") {
-								key->mode = KeyWatcherMode::Press;
-							} else if (keyMode == "Press") {
-								key->mode = KeyWatcherMode::Up;
-							} else if (keyMode == "Up") {
-								key->mode = KeyWatcherMode::Down;
-							}
-						}
-
-						ImGui::TableNextColumn();
-						ImGui::Checkbox((keyName + " State").c_str(), &key->state);
-					}
-				}
-				ImGui::EndTable();
-			}
-			ImGui::End();
-			
-			if(ImGui::Begin("Console")) {
-				int index = 0;
-				for (auto & line: logs) {
-					ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-					if (line.type == LOG_DEBUG) {
-						color = ImVec4(2.29f, 2.04f, 0.16f, 1.0f);
-					} else if (line.type == LOG_WARNING) {
-						color = ImVec4(2.47f, 1.42f, 4.0f, 1.0f);
-					} else if (line.type == LOG_ERROR) {
-						color = ImVec4(2.52f, 0.58f, 0.58f, 1.0f);
-					} else if (line.type == LOG_INFO) {
-						color = ImVec4(0.10f, 0.78f, 2.52f, 1.0f);
-					}
-
-					ImGui::TextColored(color, "%i: %s", index, line.log.c_str());
-					index++;
-				}
-			}
-			ImGui::End();
-			
+		void Update(WorldManager* worldManager, Input* input, Renderer* renderer, PhysicalSpace* physicalSpace, std::vector<int>* frameRateLogs, std::vector<int>* frameRateTimeLogs) {			
 			if (ImGui::Begin(this->debugLocalization.Get("Debug Tools").c_str(),
 				NULL,
 				ImGuiWindowFlags_MenuBar |

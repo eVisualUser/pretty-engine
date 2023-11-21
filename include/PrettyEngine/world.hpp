@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_WORLD
+#define H_WORLD
 
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/transform.hpp>
@@ -310,3 +311,5 @@ namespace PrettyEngine {
 		DataBase* data = nullptr;
 	};
 }
+
+#endif
