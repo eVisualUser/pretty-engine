@@ -3,19 +3,13 @@
 
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/gc.hpp>
+#include <PrettyEngine/PrettyGL.hpp>
 
 #include <glm/glm.hpp>
-#include <glad/glad.h>
 
 #include <vector>
 
 namespace PrettyEngine {
-	enum class MeshDrawType {
-		Dynamic = GL_DYNAMIC_DRAW,
-		Static = GL_STATIC_DRAW,
-		Stream = GL_STREAM_DRAW,
-	};
-
 	struct Vertex {
 	public:
 		glm::vec3 position;

@@ -1,84 +1,12 @@
 [entities.entityA]
-components = [
-    [ 'LocalizationEditor', 'LocalizationEditor' ],
-    [
-        'Render',
-        'Render',
-        'TextureBase',
-        'cpp_logo.png',
-        'Mesh',
-        'rect',
-        'TextureBaseGUID',
-        '31fddb7b-2891-48d0-a635-414bcc4e851d',
-        'UseLight',
-        'true',
-        'UseTextureNormal',
-        'true',
-        'TextureTransparencyGUID',
-        'a7c119e4-f6c7-4bf6-a813-8d12231e38ce',
-        'SunLight',
-        'false',
-        'TextureTransparency',
-        '',
-        'TextureNormal',
-        'c#.png',
-        'UseTextureBase',
-        'true',
-        'TextureNormalGUID',
-        '50120765-9599-4ea3-a28d-5f91860ca514',
-        'MeshGUID',
-        'fb3058da-a860-45e8-aa31-f91d12ec6d09',
-        'UseTexture',
-        'true',
-        'UseTextureTransparency',
-        'false',
-        'ScreenObject',
-        'false'
-    ],
-    [
-        'Light',
-        'Light',
-        'LightLayer',
-        '0',
-        'LightFactor',
-        '2.0',
-        'Color',
-        '1;1;1;1;',
-        'Type',
-        '',
-        'DeferredFactor',
-        '1.0',
-        'Radius',
-        '5.0',
-        'SpotDirection',
-        '',
-        'SpotLightCutOff',
-        ''
-    ],
-    [
-        'Physical',
-        'Physical',
-        'rigidbody',
-        'true',
-        'model',
-        'AABB',
-        'name',
-        '8479fe4c-453c-45bd-b2f0-4016d4c3debf',
-        'layer',
-        'Default',
-        'fixed',
-        'false',
-        'mass',
-        '1'
-    ]
-]
+components = [ [ 'LocalizationEditor', 'LocalizationEditor' ] ]
 name = 'Editor'
 object = 'Editor'
 public_map = []
 
     [entities.entityA.transform]
     position = [ 1.0, 1.0, 0.0 ]
-    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [entities.otherCollider]
@@ -129,7 +57,7 @@ components = [
         'layer',
         'Default',
         'fixed',
-        'true',
+        'false',
         'mass',
         '1'
     ]
@@ -140,7 +68,7 @@ public_map = []
 
     [entities.otherCollider.transform]
     position = [ 0.0, 0.0, 0.0 ]
-    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]

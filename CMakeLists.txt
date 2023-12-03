@@ -10,9 +10,9 @@ file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "./public/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-single-bit-bitfield-constant-conversion -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-macro-redefined -Wno-single-bit-bitfield-constant-conversion -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -ffast-math -Wno-deprecated-non-prototype -Wno-old-style-cast")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-single-bit-bitfield-constant-conversion -Wno-deprecated-declarations")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-macro-redefined -Wno-single-bit-bitfield-constant-conversion -Wno-deprecated-declarations")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-function-declaration -Wno-attributes -ffast-math -Wno-deprecated-non-prototype -Wno-old-style-cast")
 
 project(import)

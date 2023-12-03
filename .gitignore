@@ -3,3 +3,6 @@
 **/.vs
 **/.idea
 **/cmake-build-debug
+
+**/__pycache__
+**/.scriptcs_cache

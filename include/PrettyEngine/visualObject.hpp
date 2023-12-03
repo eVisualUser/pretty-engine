@@ -5,11 +5,10 @@
 #include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/PrettyGL.hpp>
 #include <PrettyEngine/camera.hpp>
 
 #include <string>
-#include <unordered_map>
 
 #define GET_RENDERER(ptr) (PrettyEngine::Renderer*)ptr
 

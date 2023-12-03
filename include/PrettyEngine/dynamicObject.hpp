@@ -27,6 +27,8 @@ namespace PrettyEngine {
 		virtual void OnUpdatePublicVariables() {}
 		/// Called before the first frame.
 		virtual void OnStart() {}
+		/// Called before the first frame in the editor only.
+		virtual void OnEditorStart() {}
 		/// Called each frame.
 		virtual void OnUpdate() {}
 		/// Called each update if the editor its in the editor.

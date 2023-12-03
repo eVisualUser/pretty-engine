@@ -1,6 +1,8 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
+#include "PrettyEngine/localization.hpp"
+#include "components.hpp"
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -12,6 +14,7 @@
 
 #include <imgui.h>
 #include <implot.h>
+#include <string>
 
 namespace PrettyEngine {
 	/// Builtin editor
@@ -19,6 +22,13 @@ namespace PrettyEngine {
 	public:
 		Editor() {
 			this->debugLocalization.LoadFile(GetEnginePublicPath("debug_localization.csv", true));
+
+			// Load the list of all components
+			auto componentListFile = GetEnginePublicPath("../../components/list.csv");
+			if (FileExist(componentListFile)) {
+				auto fileContent = ReadFileToString(componentListFile);
+				this->existingComponents = ParseCSVLine(fileContent);
+			}
 		}
 
 		~Editor() {
@@ -65,7 +75,7 @@ namespace PrettyEngine {
 						}
 					}
 
-					if (frameRateLogs->size() > 10000) {
+					if (frameRateLogs->size() > 1000) {
 						frameRateLogs->clear();
 						frameRateTimeLogs->clear();
 					}
@@ -96,31 +106,104 @@ namespace PrettyEngine {
 									ImGui::TableNextColumn();
 									std::string buttonName = "Select " + entity.second->entityName;
 									if (ImGui::Button(buttonName.c_str())) {
-										this->selectedEntity = entity.second.get();
+										this->selectedEntities.push_back(entity.second.get());
 									}
 								}
 							}
 							ImGui::EndTable();
-							if (this->selectedEntity != nullptr) {
-								if (ImGui::Begin(this->selectedEntity->entityName.c_str())) {
-									ImGui::Text("Object: %s", this->selectedEntity->object.c_str());
+							for(auto & selectedEntity: this->selectedEntities) {
+								int index = 0;
+								if (ImGui::Begin(selectedEntity->entityName.c_str(), NULL, ImGuiWindowFlags_MenuBar)) {
+									if (ImGui::BeginMenuBar()) {
+										if (ImGui::Button("Close")) {
+											this->selectedEntities.erase(this->selectedEntities.begin() + index);
+											ImGui::EndMenuBar();
+											ImGui::End();
+											break;
+										}
+									}
+									ImGui::EndMenuBar();
+
+									ImGui::Text("Object: %s", selectedEntity->object.c_str());
 									ImGui::Separator();
 									
-									ImGui::InputFloat("Pos X", &this->selectedEntity->position.x);
-									ImGui::InputFloat("Pos Y", &this->selectedEntity->position.y);
-									ImGui::InputFloat("Pos Z", &this->selectedEntity->position.z);
+									ImGui::InputFloat("Pos X", &selectedEntity->position.x);
+									ImGui::InputFloat("Pos Y", &selectedEntity->position.y);
+									ImGui::InputFloat("Pos Z", &selectedEntity->position.z);
 
-									auto rotationEuler = this->selectedEntity->GetEulerRotation();
+									auto rotationEuler = selectedEntity->GetEulerRotation();
 									ImGui::InputFloat("Rot X", &rotationEuler.x);
 									ImGui::InputFloat("Rot Y", &rotationEuler.y);
 									ImGui::InputFloat("Rot Z", &rotationEuler.z);
-									this->selectedEntity->SetRotationUsingEuler(rotationEuler);
+									selectedEntity->SetRotationUsingEuler(rotationEuler);
 
-									ImGui::InputFloat("Scale X", &this->selectedEntity->scale.x);
-									ImGui::InputFloat("Scale Y", &this->selectedEntity->scale.y);
-									ImGui::InputFloat("Scale Z", &this->selectedEntity->scale.z);
+									glm::vec3 scale = selectedEntity->scale;
+									ImGui::InputFloat("Scale X", &scale.x);
+									ImGui::InputFloat("Scale Y", &scale.y);
+									ImGui::InputFloat("Scale Z", &scale.z);
+									selectedEntity->SetScale(scale);
+
+									int componentIndex = 0;
+									for(auto & component: selectedEntity->components) {
+										ImGui::LabelText("", "%s", component->unique.c_str());
+
+										if (ImGui::Button("Remove")) {
+											selectedEntity->components.erase(selectedEntity->components.begin() + componentIndex);
+											break;
+										}
+
+										if (ImGui::Button("Call OnStart")) {
+											component->OnStart();
+										} else if (ImGui::Button("Call OnUpdate")) {
+											component->OnUpdate();
+										} else if (ImGui::Button("Call OnRender")) {
+											component->OnRender();
+										}
+
+										for(auto & publicElement: component->publicMap) {
+											publicElement.second.resize(100);
+											ImGui::InputText(publicElement.first.c_str(), publicElement.second.data(), 100);
+											while(publicElement.second.back() == '\u0000') {
+												publicElement.second.pop_back();
+											}
+										}
+										ImGui::Separator();
+										componentIndex++;
+									}
+
+									if (ImGui::Button("Add Component")) {
+										this->createComponent = !this->createComponent;
+									}
+
+									if (this->createComponent) {
+										for(auto & componentName: this->existingComponents) {
+											std::string buttonText = "Add " + componentName;
+											if (ImGui::Button(buttonText.c_str())) {
+												int componentNameCount = 0;
+
+												std::string newComponentName = componentName;
+
+												for(auto & component: selectedEntity->components) {
+													if (component->unique.starts_with(componentName)) {
+														componentNameCount++;
+													}
+												}
+
+												if (componentNameCount > 0) {
+													newComponentName += "(" + std::to_string(componentNameCount) + ")";
+												}
+
+												auto customComponent = GetCustomComponent(componentName);
+												customComponent->unique = newComponentName;
+												customComponent->OnUpdatePublicVariables();
+
+												selectedEntity->components.push_back(customComponent);
+											}
+										}
+									}
 								}
 								ImGui::End();
+								index++;
 							}
 						}
 						ImGui::EndTabItem();
@@ -138,7 +221,11 @@ namespace PrettyEngine {
 
 		bool showFrameRateGraph = false;
 
-		Entity* selectedEntity = nullptr;
+		std::vector<Entity*> selectedEntities;
+
+		std::vector<std::string> existingComponents;
+
+		bool createComponent = false;
 	};
 }
 

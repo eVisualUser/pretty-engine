@@ -45,14 +45,16 @@ namespace PrettyEngine {
 
 			return this->BadSetup();
 		}
-		
+
 		bool OtherIn(Collider* other) { 
 			if (this->colliderModel == ColliderModel::AABB) {
-				if (other->colliderModel == ColliderModel::AABB) {
-					auto basePoints = (this->PointIn(other->GetMin()) || this->PointIn(other->GetMax()) || this->PointIn(other->position));
-					auto inversePoints = (this->PointIn(other->GetInverseMin(true)) || this->PointIn(other->GetInverseMax(true)));
+				if (other->colliderModel == ColliderModel::AABB && other->layer == this->layer) {
+					if (this->fixed || (!this->fixed && !other->fixedCollisionOnly)) {
+						auto basePoints = (this->PointIn(other->GetMinHalf()) || this->PointIn(other->GetMaxHalf()) || this->PointIn(other->position));
+						auto inversePoints = (this->PointIn(other->GetInverseMin(true)) || this->PointIn(other->GetInverseMax(true)) || other->PointIn(this->position));
 
-					return (basePoints | inversePoints);
+						return (basePoints || inversePoints);
+					}
 				}
 				return false;
 			} else if (this->colliderModel == ColliderModel::Sphere) {
@@ -126,14 +128,10 @@ namespace PrettyEngine {
 		
 	// LibCCD specific
 	public:
-
-	// Function required by LibCCD
-	void Support(const void* obj, const ccd_vec3_t *dir, ccd_vec3_t *vec) {
-
-		Collider* collider = (Collider*)obj;
-
-      	
-	}
+		// Function required by LibCCD
+		void Support(const void* obj, const ccd_vec3_t *dir, ccd_vec3_t *vec) {
+			Collider* collider = (Collider*)obj;
+		}
 
 	private:
 		bool BadSetup() {
@@ -158,11 +156,14 @@ namespace PrettyEngine {
 
 		glm::vec3 velocity;
 
-		Mesh* mesh;
-
 		bool reverseDelta = false;
 
 		bool fixed = false;
+
+		/// Collide only with objects that are fixed
+		bool fixedCollisionOnly = false;
+
+		std::string layer = "Default";
 	};
 }
 

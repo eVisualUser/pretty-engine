@@ -4,9 +4,9 @@
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/render.hpp>
-#include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/data.hpp>
+#include <PrettyEngine/entity.hpp>
 
 #include <glm/vec3.hpp>
 
@@ -76,6 +76,24 @@ namespace PrettyEngine {
 			}
 		}
 
+		void EditorStart() {
+			for (auto & entity: this->entities) {
+				if (entity.second != nullptr) {
+					this->UpdateLinks();
+					if (entity.second->worldFirst) {
+						entity.second->OnEditorStart(); 
+						entity.second->worldFirst = false;
+					}
+					for (auto & component: entity.second->components) {
+						if (component->worldFirst) {
+							component->OnEditorStart();
+							component->worldFirst = false;
+						}
+					}
+				}
+			}
+		}
+
 		void Update() {
 			this->Start();
 			for (auto & entity: this->entities) {
@@ -90,6 +108,7 @@ namespace PrettyEngine {
 
 		void EditorUpdate() {
 			#if ENGINE_EDITOR
+				this->EditorStart();
 				for (auto & entity: this->entities) {
 					if (entity.second.get() != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
 						entity.second->OnEditorUpdate();

@@ -111,8 +111,10 @@ namespace PrettyEngine {
 			if (this->engineContent.renderer.WindowActive()) {
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
-						currentWorld->CallFunctionProcesses();
-						currentWorld->Update();
+						if (!this->isEditor) {
+							currentWorld->CallFunctionProcesses();
+							currentWorld->Update();
+						}
 						
 						currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
 						currentWorld->EditorUpdate();
@@ -126,7 +128,9 @@ namespace PrettyEngine {
 				for (auto & currentWorld: worlds) {
 					if (currentWorld != nullptr) {
 						currentWorld->CallRenderFunctions();
-						currentWorld->PrePhysics();
+						if (!this->isEditor) {
+							currentWorld->PrePhysics();
+						}
 					}
 				}
 
@@ -149,7 +153,9 @@ namespace PrettyEngine {
 			for (auto & currentWorld: worlds) {
 				if (currentWorld != nullptr) {
 					currentWorld->AlwayUpdate();
-					currentWorld->EndUpdate();
+					if (!this->isEditor) {
+						currentWorld->EndUpdate();
+					}
 				}
 			}
 
@@ -276,7 +282,7 @@ namespace PrettyEngine {
 
 		bool exit = false;
 
-		bool showDebugUI = false;
+		bool showDebugUI = true;
 
 		bool _physicsEnabled = true;
 
@@ -296,6 +302,12 @@ namespace PrettyEngine {
 		ImPlotContext* _imPlotContext;
 
 		Editor editor;
+
+		#if ENGINE_EDITOR
+		bool isEditor = true;
+		#else
+		bool isEditor = false;
+		#endif
 	};
 };
 

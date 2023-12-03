@@ -1,6 +1,7 @@
 #ifndef H_PHYSICAL_SPACE
 #define H_PHYSICAL_SPACE
 
+#include "glm/geometric.hpp"
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/Collision.hpp>
 
@@ -80,13 +81,17 @@ namespace PrettyEngine {
 
 			if (!collider->fixed) {
 				for(auto & collision: *collisions) {
+					float force = 100.0f;
+
 					auto delta = collider->position - collision.colliderOther->position;
+
+					delta = glm::normalize(delta);
 
 					if (collider->reverseDelta) {
 						delta = -delta;
 					}
 
-					collider->position += delta * deltaTime * 100.0f;
+					collider->position += delta * deltaTime;
 				}
 			}
 

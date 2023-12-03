@@ -6,7 +6,7 @@
 #include <PrettyEngine/mesh.hpp>
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/PrettyGL.hpp>
 #include <PrettyEngine/visualObject.hpp>
 #include <PrettyEngine/camera.hpp>
 #include <PrettyEngine/collider.hpp>
@@ -15,10 +15,6 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <imgui.h>
 
@@ -311,29 +307,6 @@ namespace PrettyEngine {
 			return this->_window;
 		}
 
-		std::pair<std::vector<Texture>, std::vector<Mesh>> LoadModel(std::string filePath, std::string id) {
-			Assimp::Importer importer;
-
-			unsigned int flags = aiProcess_Triangulate         // Triangulate faces if not already done
-                       | aiProcess_JoinIdenticalVertices // Join identical vertices
-                       | aiProcess_GenSmoothNormals     // Generate smooth normals if no normals are present
-                       | aiProcess_FixInfacingNormals   // Fix normals facing inward
-                       | aiProcess_FindInvalidData      // Find and remove invalid data
-                       | aiProcess_ValidateDataStructure; // Validate the imported data structure
-
-			const aiScene* scene = importer.ReadFile(filePath, flags);
-			
-			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        		DebugLog(LOG_ERROR, "Error loading model: " << importer.GetErrorString(), true);
-        		std::exit(-1);
-        	}
-
-        	std::pair<std::vector<Texture>, std::vector<Mesh>> buffer;
-        	this->AIProcessNode(scene->mRootNode, scene, &buffer);
-		
-        	return buffer;
-		}
-
 		/// Activate features to get a better 3D rendering, but will break 2D rendering features
 		void SwitchTo3D() {
 			glEnable(GL_DEPTH_TEST);
@@ -427,74 +400,6 @@ namespace PrettyEngine {
 
 	private:
 		std::vector<GLFWimage> _glfwIcons;
-
-		std::pair<Texture, Mesh> AIProcessMesh(aiMesh* mesh, const aiScene* scene) {
-			std::pair<Texture, Mesh> out;
-
-		    if (mesh->HasFaces()) {
-				for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-					aiFace face = mesh->mFaces[i];
-			    	for (unsigned int j = 0; j < face.mNumIndices; j++) {
-			        	out.second.indices.push_back(face.mIndices[j]);
-			    	}
-				}
-			}
-			
-		    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-		        Vertex vertex;
-		        
-		        // Process position
-		        if (mesh->HasPositions()) {
-		        	vertex.position.x = mesh->mVertices[i].x;
-		        	vertex.position.y = mesh->mVertices[i].y;
-		        	vertex.position.z = mesh->mVertices[i].z;
-		    	}
-
-		        if (mesh->HasVertexColors(i)) {
-		        	vertex.color.r = mesh->mColors[i]->r;
-		        	vertex.color.g = mesh->mColors[i]->g;
-		        	vertex.color.b = mesh->mColors[i]->b;
-		        	vertex.color.a = mesh->mColors[i]->a;
-		        }
-
-		        // Process texture coordinates (if available)
-		        if (mesh->HasTextureCoords(0)) {
-		            vertex.textureCoord.x = mesh->mTextureCoords[0][i].x;
-		            vertex.textureCoord.y = mesh->mTextureCoords[0][i].y;
-		        } else {
-		            vertex.textureCoord = glm::vec2(0.0f, 0.0f);
-		        }
-
-		        out.second.vertices.push_back(vertex);
-		    }
-
-		    out.second.vertexCount = mesh->mNumVertices;
-
-		    auto material = scene->mMaterials[mesh->mMaterialIndex];
-		    if (material && mesh->mMaterialIndex < scene->mNumMaterials) {
-		    	aiString path;
-		    	aiReturn out = material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &path);
-
-		    	if (out == AI_SUCCESS) {
-		    		// Todo
-		    	}
-		    }
-
-		    return out;
-		}
-
-		void AIProcessNode(aiNode* node, const aiScene* scene, std::pair<std::vector<Texture>, std::vector<Mesh>>* buffer) {
-	    	// Process all the meshes in the current node
-	    	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-	        	aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-	        	buffer->second.push_back(AIProcessMesh(mesh, scene).second);
-	    	}
-
-	    	// Process all the children nodes recursively
-	    	for (unsigned int i = 0; i < node->mNumChildren; i++) {
-	        	AIProcessNode(node->mChildren[i], scene, buffer);
-	    	}
-		}
 
 		void SetFrameRate(int frameRate) {
 			this->_targetFrameRate = frameRate;

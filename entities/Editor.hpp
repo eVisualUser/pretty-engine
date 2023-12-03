@@ -13,7 +13,7 @@
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/render.hpp>
 #include <PrettyEngine/utils.hpp>
-#include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/PrettyGL.hpp>
 #include <PrettyEngine/KeyCode.hpp>
 
 #include <Render.hpp>
@@ -22,27 +22,29 @@
 #include <LocalizationEditor.hpp>
 
 #include <Guid.hpp>
+#include <cstring>
 #include <imgui.h>
+#include <toml++/toml.h>
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 using namespace PrettyEngine;
 
 namespace Custom {
 	class Editor : public virtual Entity {
 	public:
-		void OnStart() override {
+		void OnEditorStart() override {
 		    this->localization = std::make_shared<Localization>();
 		    this->localization->LoadFile(GetEnginePublicPath("editor.csv", true));
 
 		    this->localizationEditorPtr = this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
 		    this->localizationEditorPtr->localization = this->localization;
-		    this->rigidbody = this->GetComponentAs<Physical>("Physical");
 
-		    this->engineContent->renderer.GetCurrentCamera()->position.z = -1;
-
-		    this->visualObject = this->GetComponentAs<Render>("Render")->GetVisualObject();
+		    // Default camera position (to be able to see the render)
+		    this->engineContent->renderer.GetCurrentCamera()->position.z = -1.0f;
 
 		    keyUp.name = "EditorKeyUp";
 		    keyUp.key = KeyCode::UpArrow;
@@ -64,11 +66,12 @@ namespace Custom {
 		    keyRight.mode = KeyWatcherMode::Press;
 		    this->engineContent->input.AddKeyWatcher(&keyRight);
 
+		    // Render to texture
 		    // this->secondCamera = this->engineContent->renderer.AddCamera();
 		    // this->secondCamera->active = true;
 		    // this->secondCamera->SetRenderToTexture(false);
 
-		   	//this->visualObject->textures.clear();
+		   	// this->visualObject->textures.clear();
 		    // this->visualObject->AddTexture(this->secondCamera->GetTexture());
 	  	}
 
@@ -81,7 +84,7 @@ namespace Custom {
 
 	  	void OnAlwaysUpdate() override {
 		    if (!this->engineContent->renderer.GetWindowFocus()) {
-		      this->engineContent->renderer.SetWindowOpacity(0.1f);
+		      this->engineContent->renderer.SetWindowOpacity(0.5f);
 		    } else {
 		      this->engineContent->renderer.SetWindowOpacity(1.0f);
 		    }
@@ -100,67 +103,127 @@ namespace Custom {
 		  		if (ImGui::Button("Help")) {
 		  			this->editorGuide = !this->editorGuide;
 		  		}
+
+		  		if (ImGui::Button("To-Do")) {
+		  			this->todoEditor = !this->todoEditor;
+		  		}
 		  	}
 		  	ImGui::EndMainMenuBar();
 	  	}
 
 	  	void OnRender() override {
-		  	//this->MenuBar();
-		  	auto newCamPosition = -this->position;
-		  	newCamPosition.z -= 5;
-		  	
-		  	this->engineContent->renderer.GetCurrentCamera()->position = newCamPosition;
+		  	this->MenuBar();
 
+		  	this->cameraZ += this->engineContent->input.GetMouseWheelDelta() * this->engineContent->renderer.GetDeltaTime() * 200.0f;
+
+		  	this->engineContent->renderer.GetCurrentCamera()->position.z = this->cameraZ;
+		  	this->engineContent->renderer.GetCurrentCamera()->position.x = -this->position.x;
+		  	this->engineContent->renderer.GetCurrentCamera()->position.y = -this->position.y;
+
+		  	if (this->todoEditor) {
+		  		if (ImGui::Begin("To-Do")) {
+		  			ImGui::InputText("File: ", this->toDoFile, 100);
+		  			ImGui::SameLine();
+		  			auto realPath = GetEnginePublicPath(this->toDoFile, true);
+		  			if (FileExist(realPath) && ImGui::Button("Load")) {
+		  				this->todoList.clear();
+		  				auto parsed = toml::parse_file(realPath);
+		  				if (parsed["todo"] != NULL) {
+		  					for(auto & element: *parsed["todo"].as_table()) {
+		  						std::string idName = element.first.str().data();
+		  						bool value = element.second.value_or(false);
+		  						this->todoList.insert_or_assign(idName, value);
+		  					}
+		  				}
+		  			} else if (!FileExist(realPath) && ImGui::Button("Create")) {
+		  				CreateFile(realPath);
+		  			}
+		  			if (FileExist(realPath) && ImGui::Button("Save")) {
+		  				auto parsed = toml::parse_file(realPath);
+		  				if (!parsed.contains("todo")) {
+		  					toml::table newTable;
+		  					parsed.insert("todo", newTable);
+		  				}
+		  				auto table = parsed["todo"].as_table();
+		  				table->clear();
+		  				for(auto & element: this->todoList) {
+		  					table->insert_or_assign(element.first, element.second);
+		  				}
+		  				std::ofstream out;
+		  				out.open(realPath);
+		  				if (out.is_open()) {
+		  					out << parsed;
+		  					out.flush();
+		  				} else {
+		  					DebugLog(LOG_ERROR, "Failed to open: " << this->toDoFile, true);
+		  				}
+		  				out.close();
+		  			}
+
+					if (!this->todoList.empty()) {
+			  			if (ImGui::BeginTable("ToDoEditor", 2)) {
+			  				ImGui::TableSetupColumn("Name");
+							ImGui::TableSetupColumn("State");
+							ImGui::TableHeadersRow();
+
+							for(auto & element: this->todoList) {
+								ImGui::TableNextRow();
+								ImGui::TableNextColumn();
+								ImGui::LabelText("", "%s", element.first.c_str());
+								ImGui::SameLine();
+								if (ImGui::Button("Remove")) {
+									this->todoList.erase(element.first);
+									break;
+								}
+								ImGui::TableNextColumn();
+								ImGui::Checkbox("", &element.second);
+							}
+						}
+						ImGui::EndTable();
+					}
+					ImGui::InputText("New Element", this->toDoAdd, 100);
+	  				if (!this->todoList.contains(this->toDoAdd) && ImGui::Button("Add")) {
+	  					this->todoList.insert(std::make_pair(this->toDoAdd, false));
+	  				}
+		  		}
+		  		ImGui::End();
+			}
+		  	
 		  	if (this->engineContent->input.GetKeyPress(KeyCode::LeftControl) &&
 		        this->engineContent->input.GetKeyDown(KeyCode::S)) {
 		      	DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);	  
 		      	this->requests.push_back(Request::SAVE);    	
 		    }
 
-		    // Update the position
-		    auto moveDirection = glm::vec3(0.0f, 0.0f, 0.0f);
-
 		    if (this->keyUp.state) {
-		  		moveDirection.y += this->_speed * this->engineContent->renderer.GetDeltaTime();
+		  		this->position.y += this->_speed * this->engineContent->renderer.GetDeltaTime();
 		  	} else if (this->keyDown.state) {
-		  		moveDirection.y -= this->_speed * this->engineContent->renderer.GetDeltaTime();
+		  		this->position.y -= this->_speed * this->engineContent->renderer.GetDeltaTime();
 		  	}
 
 		  	if (this->keyLeft.state) {
-		  		moveDirection.x -= this->_speed * this->engineContent->renderer.GetDeltaTime();
+		  		this->position.x -= this->_speed * this->engineContent->renderer.GetDeltaTime();
 		  	} else if (this->keyRight.state) {
-		  		moveDirection.x += this->_speed * this->engineContent->renderer.GetDeltaTime();
+		  		this->position.x += this->_speed * this->engineContent->renderer.GetDeltaTime();
 		  	}
 
-		  	auto collisions = this->engineContent->physicalSpace.GetCollisions(this->rigidbody->GetCollider());
+		    if (this->editorGuide) {
+		    	if (ImGui::Begin(this->localization->Get("Editor Guide").c_str())) {
+			        ImGui::Text("%s", this->localization->Get("Welcome to the PrettyEditor !").c_str());
+			        ImGui::Separator();
+			        ImGui::Text("%s", this->localization->Get("Some shortcut: ").c_str());
+			        ImGui::BulletText("%s", this->localization->Get("Press F3 to show debug informations.").c_str());
+			        ImGui::BulletText("%s", this->localization->Get("Press F11 to toggle fullscreen.").c_str());
+			        ImGui::BulletText("%s", this->localization->Get("Press Ctr + S to save.").c_str());
 
-		  	if (collisions != nullptr) {
-		 	  	if (!collisions->empty()) {
-			  		this->visualObject->baseColor = glm::vec3(0.67, 0.22, 0.17);
-			  	} else {
-			  		this->visualObject->baseColor = glm::vec3(1.0f, 1.0f, 1.0f);
-			  	}
-		  	}
-
-		  	this->rigidbody->Move(moveDirection);
-
-		  	this->Rotate(this->engineContent->input.GetMouseWheelDelta() * 500.0f * this->engineContent->renderer.GetDeltaTime());
-
-		    if (this->editorGuide && ImGui::Begin(this->localization->Get("Editor Guide").c_str())) {
-		        ImGui::Text("%s", this->localization->Get("Welcome to the PrettyEditor !").c_str());
-		        ImGui::Separator();
-		        ImGui::Text("%s", this->localization->Get("Some shortcut: ").c_str());
-		        ImGui::BulletText("%s", this->localization->Get("Press F3 to show debug informations.").c_str());
-		        ImGui::BulletText("%s", this->localization->Get("Press F11 to toggle fullscreen.").c_str());
-		        ImGui::BulletText("%s", this->localization->Get("Press Ctr + S to save.").c_str());
-
-		        ImGui::Separator();
-		        ImGui::Text("Tools");
-		        if (ImGui::Button("Localization Editor")) {
-		        	this->localizationEditorPtr->Toggle();
-		        }
+			        ImGui::Separator();
+			        ImGui::Text("Tools");
+			        if (ImGui::Button("Localization Editor")) {
+			        	this->localizationEditorPtr->Toggle();
+			        }
+		    	}
+		    	ImGui::End();
 		    }
-		    ImGui::End();
 
 		    if (this->engineContent->input.GetMouseButtonClick(1)) {
 		      actionBox = !actionBox;
@@ -271,9 +334,6 @@ namespace Custom {
 	  KeyWatcher keyLeft;
 	  KeyWatcher keyRight;
 
-	  Physical* rigidbody;
-	  VisualObject* visualObject;
-
 	  Camera* secondCamera = nullptr;
 
 	  bool showConsole = false;
@@ -282,6 +342,14 @@ namespace Custom {
 	  bool inputDebugger = false;
 
 	  bool editorGuide = true;
+
+	  float cameraZ = 0.0f;
+
+	  bool todoEditor = false;
+
+	  char toDoFile[100];
+	  char toDoAdd[100];
+	  std::unordered_map<std::string, bool> todoList;
 	};
 }
 

@@ -4,7 +4,7 @@
 #include <PrettyEngine/texture.hpp>
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/gl.hpp>
+#include <PrettyEngine/PrettyGL.hpp>
 
 #include <glm/glm.hpp>
 #include <string>

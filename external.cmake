@@ -69,22 +69,8 @@ target_link_libraries(implot PRIVATE imgui)
 
 include_directories("${CMAKE_SOURCE_DIR}/external/implot")
 
-# ASSIMP
-
-message("-- Assimp")
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_TESTS OFF)
-set(ASSIMP_BUILD_ZLIB ON)
-set(ASSIMP_NO_EXPORT ON)
-set(ASSIMP_INSTALL OFF)
-set(ASSIMP_BUILD_ASSIMP_TOOLS ON)
-add_subdirectory("${CMAKE_SOURCE_DIR}/external/assimp")
-include_directories("${CMAKE_SOURCE_DIR}/external/assimp/include")
-
 set(BUILD_TESTS OFF)
 set(BUILD_SHARED_LIBS OFF)
-set(MYSOFA_LIBRARY "${CMAKE_SOURCE_DIR}/external/libmysofa")
-set(MYSOFA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/libmysofa/src")
 
 set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/external/zlib")
 set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/zlib")
@@ -109,7 +95,6 @@ target_link_libraries(external PUBLIC
  	glad
  	glm
  	xg
- 	assimp
  	imgui
  	OpenAL
  	sqlite3

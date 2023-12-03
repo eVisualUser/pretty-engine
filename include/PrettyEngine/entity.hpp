@@ -74,6 +74,7 @@ namespace PrettyEngine {
 					return dynamic_cast<T*>(component.get());
 				}
 			}
+			DebugLog(LOG_ERROR, this->entityName << " Component not found: " << unique, true);
 			return nullptr;
 		}
 

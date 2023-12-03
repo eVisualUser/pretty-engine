@@ -39,8 +39,8 @@ public:
 	    this->CreatePublicVar("ScreenObject", "false");
 	}
 
-  	void OnStart() override {
-	    this->visualObject->screenObject = (this->GetPublicVarValue("ScreenObject") == "true");
+	  	void Init() {
+  		this->visualObject->screenObject = (this->GetPublicVarValue("ScreenObject") == "true");
 
 	    this->meshGuid = this->GetPublicVarValue("MeshGUID");
 	    this->textureGuid = this->GetPublicVarValue("TextureBaseGUID");
@@ -123,14 +123,17 @@ public:
 	        loadMesh = true;
 	      }
 	    } else {
-	      DebugLog(LOG_WARNING, "Missing mesh for: " << this->unique, false);
+	      	DebugLog(LOG_WARNING, "Missing mesh for: " << this->unique, false);
 	    }
 
 	    if (loadMesh) {
-	      this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
-	      this->engineContent->renderer.RegisterVisualObject(visualObjectGuid,
-	                                                         this->visualObject);
+	      	this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
+	      	this->engineContent->renderer.RegisterVisualObject(visualObjectGuid, this->visualObject);
 	    }
+  	}
+
+  	void OnStart() override {
+	    this->Init();
   	}
 
   	void OnDestroy() override {
@@ -138,10 +141,8 @@ public:
   	}
 
   	void OnUpdate() override {
-	    this->visualObject->position =
-	        dynamic_cast<Entity *>(this->owner)->position;
-	    this->visualObject->rotation =
-	        dynamic_cast<Entity *>(this->owner)->rotation;
+  		this->visualObject->position = dynamic_cast<Entity *>(this->owner)->position;
+	    this->visualObject->rotation = dynamic_cast<Entity *>(this->owner)->rotation;
 	    this->visualObject->scale = dynamic_cast<Entity *>(this->owner)->scale;
   	}
 

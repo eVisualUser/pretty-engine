@@ -9,7 +9,7 @@
 namespace Custom {
 	class Light: public PrettyEngine::Component {
 	public:
-		void OnStart() override {
+		void OnUpdatePublicVariables() override {
 			this->CreatePublicVar("Color");
 			this->CreatePublicVar("LightFactor");
 			this->CreatePublicVar("DeferredFactor");
@@ -18,7 +18,9 @@ namespace Custom {
 			this->CreatePublicVar("Type");
 			this->CreatePublicVar("SpotLightCutOff");
 			this->CreatePublicVar("SpotDirection");
+		}
 
+		void OnStart() override {
 			auto radius = this->GetPublicVarValue("Radius");
 			if (!radius.empty()) {
 				this->light.radius = stof(radius);
