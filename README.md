@@ -2,6 +2,10 @@
 
 2D game engine written in CC++.
 
+## Requirement
+
+- GO Lang installation
+
 ## Features
 
 | Feature       | State |
