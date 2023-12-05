@@ -22,6 +22,17 @@
 namespace PrettyEngine {
 	class WorldManager {
 	public:
+		void RemoveWorld(std::string worldName) {
+			int index = 0;
+			for(auto & world: this->_worldsInstances) {
+				if (world->worldName == worldName) {
+					this->_worldsInstances.erase(this->_worldsInstances.begin() + index);
+					return;
+				}
+				index++;
+			}
+		}
+
 		void AddWorldFile(std::string fileName) {
 			this->_worldsFiles.push_back(fileName);
 		}
@@ -52,7 +63,7 @@ namespace PrettyEngine {
 			}
 			this->_worldsFilesToLoad.clear();
 			return this;
-		}	
+		}
 
 		std::shared_ptr<World> GetWorldByName(std::string worldName) {
 			for(auto & world: this->_worldsInstances) {
@@ -160,13 +171,14 @@ namespace PrettyEngine {
 			for(auto & world: this->_worldsFilesParsed) {
 				if (!world.empty()) {
 					auto target = this->_worldsInstances[index];
-					target->worldName = world["meta"]["name"].value_or("World");
+					if (!target->loaded) {
+						target->worldName = world["meta"]["name"].value_or("World");
 
-					if (world["entities"].is_table()) {
+						if (world["entities"].is_table()) {
 						for(auto & entity: *world["entities"].as_table()) {
 							std::string newEntity = (*entity.second.as_table())["object"].value_or("undefined");
 							std::string newEntityName = (*entity.second.as_table())["name"].value_or("undefined");
-							
+
 							CreateCustomEntity(newEntity, target);
 
 							auto lastEntity = target->GetLastEntityRegistred();
@@ -174,57 +186,59 @@ namespace PrettyEngine {
 
 							auto components = (*entity.second.as_table())["components"].as_array();
 							for(auto & component: *components) {
-								auto array = component.as_array();
-								std::string componentName = array->get(0)->value_or("Null");
-								std::string componentUnique = array->get(1)->value_or("Null");
+							auto array = component.as_array();
+							std::string componentName = array->get(0)->value_or("Null");
+							std::string componentUnique = array->get(1)->value_or("Null");
 
-								std::unordered_map<std::string, std::string> publicMap;
-								int publicMapStartOffset = 2; // Skip the component name and unique
-								std::pair<std::string, std::string> pairBuffer;
+							std::unordered_map<std::string, std::string> publicMap;
+							int publicMapStartOffset = 2; // Skip the component name and unique
+							std::pair<std::string, std::string> pairBuffer;
 
-								if (array->size() % 2 != 0) {
-									DebugLog(LOG_ERROR, componentUnique << " Odd public variables count", true);
-								}
-
-								for (int i = publicMapStartOffset; i < array->size(); i++) {
-									if (i % 2) { // Value
-										pairBuffer.second = array->get(i)->value_or("Null");
-										publicMap.insert(pairBuffer);
-									} else { // Name
-										pairBuffer.first = array->get(i)->value_or("Null");
-									}
-								}
-
-								auto newComponent = GetCustomComponent(componentName);
-								if (newComponent == nullptr) {
-									DebugLog(LOG_ERROR, "Mising component: " << componentName, true);
-								} else {
-									newComponent->publicMap = publicMap;
-									newComponent->owner = dynamic_cast<DynamicObject*>(lastEntity.get());
-									newComponent->object = componentName;
-									newComponent->unique = componentUnique;
-									newComponent->OnUpdatePublicVariables();
-									lastEntity->components.push_back(newComponent);
-								}
-							}
-							
-							auto publicMap = (*entity.second.as_table())["public_map"].as_array();
-							for(auto & pair: *publicMap) {
-								std::string pairName = pair.as_array()->get_as<std::string>(0)->value_or("Unknown");
-								std::string pairValue = pair.as_array()->get_as<std::string>(1)->value_or("");
-
-								lastEntity->publicMap.insert(std::make_pair(pairName, pairValue));
+							if (array->size() % 2 != 0) {
+								DebugLog(LOG_ERROR, componentUnique << " Odd public variables count", true);
 							}
 
-							lastEntity->unique = entity.first;
-							lastEntity->object = newEntity;
-							lastEntity->OnUpdatePublicVariables();
-							
-							auto transform = (*entity.second.as_table())["transform"];
-							if (transform.is_table() && target->GetLastEntityRegistred() != nullptr) {
-								lastEntity->FromToml(transform.as_table());
+							for (int i = publicMapStartOffset; i < array->size(); i++) {
+								if (i % 2) { // Value
+									pairBuffer.second = array->get(i)->value_or("Null");
+									publicMap.insert(pairBuffer);
+								} else { // Name
+									pairBuffer.first = array->get(i)->value_or("Null");
+								}
+							}
+
+							auto newComponent = GetCustomComponent(componentName);
+							if (newComponent == nullptr) {
+								DebugLog(LOG_ERROR, "Mising component: " << componentName, true);
+							} else {
+								newComponent->publicMap = publicMap;
+								newComponent->owner = dynamic_cast<DynamicObject*>(lastEntity.get());
+								newComponent->object = componentName;
+								newComponent->unique = componentUnique;
+								newComponent->OnUpdatePublicVariables();
+								lastEntity->components.push_back(newComponent);
 							}
 						}
+
+						auto publicMap = (*entity.second.as_table())["public_map"].as_array();
+						for(auto & pair: *publicMap) {
+							std::string pairName = pair.as_array()->get_as<std::string>(0)->value_or("Unknown");
+							std::string pairValue = pair.as_array()->get_as<std::string>(1)->value_or("");
+
+							lastEntity->publicMap.insert(std::make_pair(pairName, pairValue));
+						}
+
+						lastEntity->unique = entity.first;
+						lastEntity->object = newEntity;
+						lastEntity->OnUpdatePublicVariables();
+
+						auto transform = (*entity.second.as_table())["transform"];
+						if (transform.is_table() && target->GetLastEntityRegistred() != nullptr) {
+							lastEntity->FromToml(transform.as_table());
+								}
+							}
+						}
+						target->loaded = true;
 					}
 				}
 				index++;

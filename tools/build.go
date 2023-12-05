@@ -18,16 +18,23 @@ const (
 
 func main() {
 	if RequiredToolsInstalled() {
-		Build();
+		Build()
 	}
 }
 
 func RequiredToolsInstalled() bool {
-	
+	// todo
 	return true
 }
 
-func Build() {	
+func Build() {
+	log.Print("Clear temporary files")
+	clearErr := os.RemoveAll("../Build/public")
+
+	if clearErr != nil {
+		log.Fatal(clearErr)
+	}
+
 	log.Print("Run CMake")
 	cmakeCommand := exec.Command("cmake", "-S", "../", "-G", "Ninja", "-B", "../Build")
 	cmakeCommand.Stdout = os.Stdout
@@ -44,31 +51,31 @@ func Build() {
 	ninjaCommand := exec.Command("ninja", "-C", "../Build")
 	ninjaCommand.Stdout = os.Stdout
 	ninjaCommand.Stderr = os.Stderr
-	ninjaErr := ninjaCommand.Run();
+	ninjaErr := ninjaCommand.Run()
 
 	if ninjaErr != nil {
 		log.Fatal(ninjaErr)
 	} else {
-		log.Print(NoticeColor, "Ninja succeed", ResetColor);
+		log.Print(NoticeColor, "Ninja succeed", ResetColor)
 	}
-	
-	targetDirectory := "../build" 
-	
+
+	targetDirectory := "../build"
+
 	buildFiles, err := os.ReadDir(targetDirectory)
-	
+
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		log.Print("Executable files: ")
 		for _, buildFile := range buildFiles {
-			
+
 			ext := filepath.Ext(buildFile.Name())
-			
+
 			if ext == ".exe" || ext == ".bin" || ext == ".run" || ext == ".out" {
 				fileStat, err := os.Stat(filepath.Join(targetDirectory, buildFile.Name()))
-				
-				if err == nil{
-					
+
+				if err == nil {
+
 					log.Print(NoticeColor, "- ", buildFile.Name(), " modified the ", fileStat.ModTime(), ResetColor)
 				} else {
 					log.Print("- ", buildFile.Name())

@@ -39,7 +39,7 @@ public:
 	    this->CreatePublicVar("ScreenObject", "false");
 	}
 
-	  	void Init() {
+	void Init() {
   		this->visualObject->screenObject = (this->GetPublicVarValue("ScreenObject") == "true");
 
 	    this->meshGuid = this->GetPublicVarValue("MeshGUID");
@@ -54,9 +54,9 @@ public:
 	        (this->GetPublicVarValue("SunLight") == "true");
 
 	    this->engineContent->renderer.AddShader("DefaultVertex", ShaderType::Vertex,
-	                                            SHADER_VERTEX);
+	                                            SHADER_VERTEX_VERTEX);
 	    this->engineContent->renderer.AddShader(
-	        "DefaultFragment", ShaderType::Fragment, SHADER_FRAGMENT);
+	        "DefaultFragment", ShaderType::Fragment, SHADER_FRAGMENT_FRAGMENT);
 	    auto shader = this->engineContent->renderer.AddShaderProgram(
 	        "Default", "DefaultVertex", "DefaultFragment");
 

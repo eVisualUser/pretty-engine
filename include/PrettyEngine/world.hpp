@@ -323,6 +323,8 @@ namespace PrettyEngine {
 
 		std::string worldName = "DefaultWorldName";
 
+		bool loaded = false;
+
 	public:
 		Collider simulationCollider = Collider();
 

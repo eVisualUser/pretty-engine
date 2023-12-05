@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 20)
 
 include("${CMAKE_SOURCE_DIR}/assets.cmake")
-include("${CMAKE_SOURCE_DIR}/shaders.cmake")
 
 file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "./public/")
 

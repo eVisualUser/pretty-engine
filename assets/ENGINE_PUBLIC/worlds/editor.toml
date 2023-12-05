@@ -1,73 +1,11 @@
-[entities.entityA]
+[entities.editorEntity]
 components = [ [ 'LocalizationEditor', 'LocalizationEditor' ] ]
 name = 'Editor'
 object = 'Editor'
 public_map = []
 
-    [entities.entityA.transform]
-    position = [ 1.0, 1.0, 0.0 ]
-    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
-    scale = [ 0.5, 0.5, 0.5 ]
-
-[entities.otherCollider]
-components = [
-    [
-        'Render',
-        'Render',
-        'TextureBase',
-        'c#.png',
-        'Mesh',
-        'rect',
-        'TextureBaseGUID',
-        '639b3521-35c1-4f1f-bfc6-76f9cd631082',
-        'UseLight',
-        'false',
-        'UseTextureNormal',
-        'false',
-        'TextureTransparencyGUID',
-        '58aa741d-70e7-44b9-bb00-49280f5b8c4f',
-        'SunLight',
-        'false',
-        'TextureTransparency',
-        '',
-        'TextureNormal',
-        '',
-        'UseTextureBase',
-        'true',
-        'TextureNormalGUID',
-        'd23a39ac-dff9-428e-976d-6f89a8433092',
-        'MeshGUID',
-        '7c1cc3c4-8caa-4cfe-a3d3-c7c5972656fb',
-        'UseTexture',
-        'true',
-        'UseTextureTransparency',
-        'false',
-        'ScreenObject',
-        'false'
-    ],
-    [
-        'Physical',
-        'Physical',
-        'rigidbody',
-        'true',
-        'model',
-        'AABB',
-        'name',
-        '66ec23e4-099f-4c77-9429-7e343b2882b3',
-        'layer',
-        'Default',
-        'fixed',
-        'false',
-        'mass',
-        '1'
-    ]
-]
-name = 'PhysicalObject'
-object = 'Empty'
-public_map = []
-
-    [entities.otherCollider.transform]
-    position = [ 0.0, 0.0, 0.0 ]
+    [entities.editorEntity.transform]
+    position = [ 0.64004707336425781, 1.0, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 

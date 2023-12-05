@@ -1,232 +1,256 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
-#include "PrettyEngine/localization.hpp"
-#include "components.hpp"
-#include <PrettyEngine/debug.hpp>
-#include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/utils.hpp>
-#include <PrettyEngine/worldLoad.hpp>
-#include <PrettyEngine/world.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
+#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/render.hpp>
+#include <PrettyEngine/transform.hpp>
+#include <PrettyEngine/utils.hpp>
+#include <PrettyEngine/world.hpp>
+#include <PrettyEngine/worldLoad.hpp>
+#include <components.hpp>
+#include <custom.hpp>
 
 #include <imgui.h>
 #include <implot.h>
+#include <memory>
 #include <string>
 
 namespace PrettyEngine {
-	/// Builtin editor
-	class Editor {
-	public:
-		Editor() {
-			this->debugLocalization.LoadFile(GetEnginePublicPath("debug_localization.csv", true));
+/// Builtin editor
+class Editor {
+public:
+  Editor() {
+    this->debugLocalization.LoadFile(
+        GetEnginePublicPath("debug_localization.csv", true));
 
-			// Load the list of all components
-			auto componentListFile = GetEnginePublicPath("../../components/list.csv");
-			if (FileExist(componentListFile)) {
-				auto fileContent = ReadFileToString(componentListFile);
-				this->existingComponents = ParseCSVLine(fileContent);
-			}
-		}
+    // Load the list of all components
+    auto componentListFile = GetEnginePublicPath("../../components/list.csv");
+    if (FileExist(componentListFile)) {
+      auto fileContent = ReadFileToString(componentListFile);
+      this->existingComponents = ParseCSVLine(fileContent);
+    }
 
-		~Editor() {
-			this->debugLocalization.Save();
-		}
+    // Load the list of all entities
+    auto entitiesListFile = GetEnginePublicPath("../../entities/list.csv");
+    if (FileExist(entitiesListFile)) {
+      auto fileContent = ReadFileToString(entitiesListFile);
+      this->existingEntities = ParseCSVLine(fileContent);
+    }
+  }
 
-		void Update(WorldManager* worldManager, Input* input, Renderer* renderer, PhysicalSpace* physicalSpace, std::vector<int>* frameRateLogs, std::vector<int>* frameRateTimeLogs) {			
-			if (ImGui::Begin(this->debugLocalization.Get("Debug Tools").c_str(),
-				NULL,
-				ImGuiWindowFlags_MenuBar |
-				ImGuiWindowFlags_NoSavedSettings
-			)) {
-				ImGui::BeginMenuBar();
-					for (std::string language: *this->debugLocalization.GetAllLanguages()) {
-						if (ImGui::Button(language.c_str())) {
-							this->debugLocalization.GetLangIndex(language.c_str());
-						}
-					}
-				ImGui::EndMenuBar();
-				
-				auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
-				ImGui::Text("%s%i", visualObjects.c_str(), renderer->GetVisualObjectsCount());
-				auto lights = this->debugLocalization.Get("Lights: ");
-				ImGui::Text("%s%i", lights.c_str(), renderer->GetLightCount());
-				
-				auto currentRenderTime = glfwGetTime();
-				if (!frameRateLogs->empty()) {
-					auto frameRate = this->debugLocalization.Get("Frame rate: ");
-					ImGui::Text("%s%i", frameRate.c_str(), frameRateLogs->back());
+  ~Editor() { this->debugLocalization.Save(); }
 
-					if (ImGui::Button(this->debugLocalization.Get("Frame Rate Graph").c_str())) {
-						this->showFrameRateGraph = !this->showFrameRateGraph;
-					}
+  void ShowWorldDebugInfo(Renderer *renderer) {
+    if (ImGui::Begin(this->debugLocalization.Get("Debug Tools").c_str(), NULL,
+                     ImGuiWindowFlags_MenuBar |
+                         ImGuiWindowFlags_NoSavedSettings)) {
+      ImGui::BeginMenuBar();
+      for (std::string language : *this->debugLocalization.GetAllLanguages()) {
+        if (ImGui::Button(language.c_str())) {
+          this->debugLocalization.GetLangIndex(language.c_str());
+        }
+      }
+      ImGui::EndMenuBar();
 
-					if (this->showFrameRateGraph) {
-						auto graphName = this->debugLocalization.Get("Frame Rate Graph");
-						auto x = this->debugLocalization.Get("Time");
-						auto y = this->debugLocalization.Get("Frame Rate");
-						auto data = this->debugLocalization.Get("Frame per second");
+      auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
+      ImGui::Text("%s%i", visualObjects.c_str(),
+                  renderer->GetVisualObjectsCount());
+      auto lights = this->debugLocalization.Get("Lights: ");
+      ImGui::Text("%s%i", lights.c_str(), renderer->GetLightCount());
+    }
+    ImGui::End();
+  }
 
-					    if (ImPlot::BeginPlot(graphName.c_str(), x.c_str(), y.c_str())) {
-						    ImPlot::PlotBars(data.c_str(), frameRateLogs->data(), frameRateLogs->size(), 0.1f);
-						    ImPlot::EndPlot();
-						}
-					}
+  void ShowTransform(Transform *transform) {
+    ImGui::InputFloat("Pos X", &transform->position.x);
+    ImGui::InputFloat("Pos Y", &transform->position.y);
+    ImGui::InputFloat("Pos Z", &transform->position.z);
 
-					if (frameRateLogs->size() > 1000) {
-						frameRateLogs->clear();
-						frameRateTimeLogs->clear();
-					}
-				}
-			}
-			ImGui::End();
+    auto rotationEuler = transform->GetEulerRotation();
+    ImGui::InputFloat("Rot X", &rotationEuler.x);
+    ImGui::InputFloat("Rot Y", &rotationEuler.y);
+    ImGui::InputFloat("Rot Z", &rotationEuler.z);
+    transform->SetRotationUsingEuler(rotationEuler);
 
-			if (ImGui::Begin("World Editor")) {
-				if (ImGui::BeginTabBar("Worlds")) {
-					for(auto & world: worldManager->GetWorlds()) {
-						if (ImGui::BeginTabItem(world->worldName.c_str())) {
-							ImGui::Text("Entities: %lli", world->entities.size());
-							if (ImGui::BeginTable("Entities", 4)) {
-								ImGui::TableSetupColumn("Name");
-								ImGui::TableSetupColumn("Object");
-								ImGui::TableSetupColumn("Components");
-								ImGui::TableSetupColumn("Select");
-								ImGui::TableHeadersRow();
+    glm::vec3 scale = transform->scale;
+    ImGui::InputFloat("Scale X", &scale.x);
+    ImGui::InputFloat("Scale Y", &scale.y);
+    ImGui::InputFloat("Scale Z", &scale.z);
+    transform->SetScale(scale);
+  }
 
-								for(auto & entity: world->entities) {
-									ImGui::TableNextRow();
-									ImGui::TableNextColumn();
-									ImGui::Text("%s", entity.second->entityName.c_str());
-									ImGui::TableNextColumn();
-									ImGui::Text("%s", entity.second->object.c_str());
-									ImGui::TableNextColumn();
-									ImGui::Text("%lli", entity.second->components.size());
-									ImGui::TableNextColumn();
-									std::string buttonName = "Select " + entity.second->entityName;
-									if (ImGui::Button(buttonName.c_str())) {
-										this->selectedEntities.push_back(entity.second.get());
-									}
-								}
-							}
-							ImGui::EndTable();
-							for(auto & selectedEntity: this->selectedEntities) {
-								int index = 0;
-								if (ImGui::Begin(selectedEntity->entityName.c_str(), NULL, ImGuiWindowFlags_MenuBar)) {
-									if (ImGui::BeginMenuBar()) {
-										if (ImGui::Button("Close")) {
-											this->selectedEntities.erase(this->selectedEntities.begin() + index);
-											ImGui::EndMenuBar();
-											ImGui::End();
-											break;
-										}
-									}
-									ImGui::EndMenuBar();
+  void ShowManualFunctionsCalls(DynamicObject *dynamicObject) {
+    if (ImGui::Button("Call OnStart")) {
+      dynamicObject->OnStart();
+    } else if (ImGui::Button("Call OnUpdate")) {
+      dynamicObject->OnUpdate();
+    } else if (ImGui::Button("Call OnRender")) {
+      dynamicObject->OnRender();
+    }
+  }
 
-									ImGui::Text("Object: %s", selectedEntity->object.c_str());
-									ImGui::Separator();
-									
-									ImGui::InputFloat("Pos X", &selectedEntity->position.x);
-									ImGui::InputFloat("Pos Y", &selectedEntity->position.y);
-									ImGui::InputFloat("Pos Z", &selectedEntity->position.z);
+  void ShowCreateNewEntity(std::shared_ptr<World> world) {
+    for (auto &entity : this->existingEntities) {
+      std::string buttonName = "Add Entity: ";
+      buttonName += entity;
+      if (ImGui::Button(buttonName.c_str())) {
+        CreateCustomEntity(entity, world);
+      }
+    }
+  }
 
-									auto rotationEuler = selectedEntity->GetEulerRotation();
-									ImGui::InputFloat("Rot X", &rotationEuler.x);
-									ImGui::InputFloat("Rot Y", &rotationEuler.y);
-									ImGui::InputFloat("Rot Z", &rotationEuler.z);
-									selectedEntity->SetRotationUsingEuler(rotationEuler);
+  void ShowSelectedEntities() {
+    for (auto &selectedEntity : this->selectedEntities) {
+      int index = 0;
+      if (ImGui::Begin(selectedEntity->entityName.c_str(), NULL,
+                       ImGuiWindowFlags_MenuBar)) {
+        if (ImGui::BeginMenuBar()) {
+          if (ImGui::Button("Close")) {
+            this->selectedEntities.erase(this->selectedEntities.begin() +
+                                         index);
+            ImGui::EndMenuBar();
+            ImGui::End();
+            break;
+          }
+        }
+        ImGui::EndMenuBar();
 
-									glm::vec3 scale = selectedEntity->scale;
-									ImGui::InputFloat("Scale X", &scale.x);
-									ImGui::InputFloat("Scale Y", &scale.y);
-									ImGui::InputFloat("Scale Z", &scale.z);
-									selectedEntity->SetScale(scale);
+        ImGui::Text("Object: %s", selectedEntity->object.c_str());
+        ImGui::Separator();
 
-									int componentIndex = 0;
-									for(auto & component: selectedEntity->components) {
-										ImGui::LabelText("", "%s", component->unique.c_str());
+        this->ShowTransform(selectedEntity);
 
-										if (ImGui::Button("Remove")) {
-											selectedEntity->components.erase(selectedEntity->components.begin() + componentIndex);
-											break;
-										}
+        int componentIndex = 0;
+        for (auto &component : selectedEntity->components) {
+          ImGui::LabelText("", "%s", component->unique.c_str());
 
-										if (ImGui::Button("Call OnStart")) {
-											component->OnStart();
-										} else if (ImGui::Button("Call OnUpdate")) {
-											component->OnUpdate();
-										} else if (ImGui::Button("Call OnRender")) {
-											component->OnRender();
-										}
+          if (ImGui::Button("Remove")) {
+            selectedEntity->components.erase(
+                selectedEntity->components.begin() + componentIndex);
+            break;
+          }
 
-										for(auto & publicElement: component->publicMap) {
-											publicElement.second.resize(100);
-											ImGui::InputText(publicElement.first.c_str(), publicElement.second.data(), 100);
-											while(publicElement.second.back() == '\u0000') {
-												publicElement.second.pop_back();
-											}
-										}
-										ImGui::Separator();
-										componentIndex++;
-									}
+          this->ShowManualFunctionsCalls(selectedEntity);
 
-									if (ImGui::Button("Add Component")) {
-										this->createComponent = !this->createComponent;
-									}
+          for (auto &publicElement : component->publicMap) {
+            publicElement.second.resize(100);
+            ImGui::InputText(publicElement.first.c_str(),
+                             publicElement.second.data(), 100);
+            // Remove bad chars generated by string resize
+            while (!publicElement.second.empty() &&
+                   publicElement.second.back() == '\u0000') {
+              publicElement.second.pop_back();
+            }
+          }
+          ImGui::Separator();
+          componentIndex++;
+        }
 
-									if (this->createComponent) {
-										for(auto & componentName: this->existingComponents) {
-											std::string buttonText = "Add " + componentName;
-											if (ImGui::Button(buttonText.c_str())) {
-												int componentNameCount = 0;
+        if (ImGui::Button("Add Component")) {
+          this->createComponent = !this->createComponent;
+        }
 
-												std::string newComponentName = componentName;
+        if (this->createComponent) {
+          for (auto &componentName : this->existingComponents) {
+            std::string buttonText = "Add " + componentName;
+            if (ImGui::Button(buttonText.c_str())) {
+              int componentNameCount = 0;
+              std::string newComponentName = componentName;
 
-												for(auto & component: selectedEntity->components) {
-													if (component->unique.starts_with(componentName)) {
-														componentNameCount++;
-													}
-												}
+              for (auto &component : selectedEntity->components) {
+                if (!component->unique.empty() &&
+                    component->unique.starts_with(componentName)) {
+                  componentNameCount++;
+                }
+              }
 
-												if (componentNameCount > 0) {
-													newComponentName += "(" + std::to_string(componentNameCount) + ")";
-												}
+              if (componentNameCount > 0) {
+                newComponentName +=
+                    "(" + std::to_string(componentNameCount) + ")";
+              }
 
-												auto customComponent = GetCustomComponent(componentName);
-												customComponent->unique = newComponentName;
-												customComponent->OnUpdatePublicVariables();
+              auto customComponent = GetCustomComponent(componentName);
+              if (customComponent == nullptr) {
+                DebugLog(LOG_ERROR, "Failed to get custom component: " << componentName, true);
+              } else {
+                customComponent->unique = newComponentName;
+                customComponent->OnUpdatePublicVariables();
 
-												selectedEntity->components.push_back(customComponent);
-											}
-										}
-									}
-								}
-								ImGui::End();
-								index++;
-							}
-						}
-						ImGui::EndTabItem();
-					}
-				}
-				ImGui::EndTabBar();
-			}
-			ImGui::End();
-		}
+                selectedEntity->components.push_back(customComponent);
+              }
+            }
+          }
+        }
+      }
+      ImGui::End();
+      index++;
+    }
+  }
 
-	private:
-		char textInputworldToLoad[100];
+  void ShowWorldEditor(WorldManager *worldManager) {
+    if (ImGui::Begin("World Editor")) {
+      if (ImGui::BeginTabBar("Worlds")) {
+        // Iterate the worlds in the world manager
+        for (auto &world : worldManager->GetWorlds()) {
+          // Show enities table
+          if (ImGui::BeginTabItem(world->worldName.c_str())) {
+            this->ShowCreateNewEntity(world);
+            ImGui::NewLine();
+            ImGui::Text("Entities: %lli", world->entities.size());
+            if (ImGui::BeginTable("Entities", 4)) {
+              ImGui::TableSetupColumn("Name");
+              ImGui::TableSetupColumn("Object");
+              ImGui::TableSetupColumn("Components");
+              ImGui::TableSetupColumn("Select");
+              ImGui::TableHeadersRow();
 
-		Localization debugLocalization;
+              // Show entities infos
+              for (auto &entity : world->entities) {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("%s", entity.second->entityName.c_str());
+                ImGui::TableNextColumn();
+                ImGui::Text("%s", entity.second->object.c_str());
+                ImGui::TableNextColumn();
+                ImGui::Text("%lli", entity.second->components.size());
+                ImGui::TableNextColumn();
+                std::string buttonName = "Select " + entity.second->entityName;
+                if (ImGui::Button(buttonName.c_str())) {
+                  this->selectedEntities.push_back(entity.second.get());
+                }
+              }
+            }
+            ImGui::EndTable();
+          }
+          ImGui::EndTabItem();
+        }
+      }
+      ImGui::EndTabBar();
+    }
+    ImGui::End();
+  }
 
-		bool showFrameRateGraph = false;
+  void Update(WorldManager *worldManager, Input *input, Renderer *renderer, PhysicalSpace *physicalSpace) {
+    this->ShowWorldDebugInfo(renderer);
+    this->ShowWorldEditor(worldManager);
+    this->ShowSelectedEntities();
+  }
 
-		std::vector<Entity*> selectedEntities;
+private:
+  char textInputworldToLoad[100];
 
-		std::vector<std::string> existingComponents;
+  Localization debugLocalization;
 
-		bool createComponent = false;
-	};
-}
+  std::vector<Entity *> selectedEntities;
+
+  std::vector<std::string> existingComponents;
+  std::vector<std::string> existingEntities;
+
+  bool createComponent = false;
+};
+} // namespace PrettyEngine
 
 #endif
