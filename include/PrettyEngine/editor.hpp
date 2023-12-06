@@ -13,12 +13,14 @@
 #include <components.hpp>
 #include <custom.hpp>
 
+#include <functional>
 #include <imgui.h>
 #include <implot.h>
 #include <memory>
 #include <string>
 
 namespace PrettyEngine {
+
 /// Builtin editor
 class Editor {
 public:
@@ -100,6 +102,26 @@ public:
         CreateCustomEntity(entity, world);
       }
     }
+  }
+
+  void ShowRenderDebugger(Renderer* renderer) {
+    if (ImGui::Begin("Render Debugger")) {
+      if (ImGui::CollapsingHeader("Camera Debugger")) {
+        for (auto & camera: renderer->cameraList) {
+          ImGui::Text("Camera: %lli", camera.id);
+          ImGui::Text("Position: %f;%f;%f", camera.position.x, camera.position.y, camera.position.z);
+          ImGui::Text("Rotation: %f;%f;%f", camera.rotation.x, camera.rotation.y, camera.rotation.z);
+          std::string renderToTexture = std::to_string(camera.id);
+          renderToTexture += " Render to texture state";
+          ImGui::Checkbox(renderToTexture.c_str(), &camera.renderToTexture);
+          std::string active = std::to_string(camera.id);
+          active += " Active State";
+          ImGui::Checkbox(active.c_str(), &camera.active);
+          ImGui::Separator();
+        }
+      }
+    }
+    ImGui::End();
   }
 
   void ShowSelectedEntities() {
@@ -237,6 +259,7 @@ public:
     this->ShowWorldDebugInfo(renderer);
     this->ShowWorldEditor(worldManager);
     this->ShowSelectedEntities();
+    this->ShowRenderDebugger(renderer);
   }
 
 private:

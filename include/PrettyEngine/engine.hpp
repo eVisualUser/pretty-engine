@@ -21,8 +21,6 @@
 #include <memory>
 #include <string>
 
-#define CONSOLE_COMMAND_BUFFER_SIZE 100
-
 namespace PrettyEngine {
 class Engine {
 public:

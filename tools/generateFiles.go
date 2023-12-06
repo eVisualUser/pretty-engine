@@ -57,6 +57,8 @@ func GenerateShadersHeader() {
 
 		output += "#pragma once\n\n"
 
+		output += "namespace Shaders {\n\n"
+
 		for shaderName, shaderContent := range shadersMap {
 			cleanShaderName := strings.ReplaceAll(shaderName, ".", "_")
 			log.Print("Generate: " + cleanShaderName)
@@ -64,12 +66,14 @@ func GenerateShadersHeader() {
 			output += "\n\n"
 		}
 
+		output += "\n} // Shaders"
+
 		err := os.WriteFile("../include/PrettyEngine/shaders.hpp", []byte(output), 'w')
 
 		if err != nil {
 			log.Fatal(err)
 		} else {
-			log.Print("Succeed to write file")
+			log.Print("Succeed to generate header: shaders.hpp")
 		}
 	}
 }

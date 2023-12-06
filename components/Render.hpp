@@ -54,9 +54,9 @@ public:
 	        (this->GetPublicVarValue("SunLight") == "true");
 
 	    this->engineContent->renderer.AddShader("DefaultVertex", ShaderType::Vertex,
-	                                            SHADER_VERTEX_VERTEX);
+	                                            Shaders::SHADER_VERTEX_VERTEX);
 	    this->engineContent->renderer.AddShader(
-	        "DefaultFragment", ShaderType::Fragment, SHADER_FRAGMENT_FRAGMENT);
+	        "DefaultFragment", ShaderType::Fragment, Shaders::SHADER_FRAGMENT_FRAGMENT);
 	    auto shader = this->engineContent->renderer.AddShaderProgram(
 	        "Default", "DefaultVertex", "DefaultFragment");
 
