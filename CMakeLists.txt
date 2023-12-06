@@ -9,18 +9,6 @@ file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "./public/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
 
-if(MSVC)
-    add_definitions(/wd4005)
-    add_definitions(/wd4201)
-    add_definitions(/wd4996)
-    add_definitions(/wd4214)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast")
-else()
-    add_definitions(-Wno-macro-redefined)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-endif()
-
 project(import)
 
 include("${CMAKE_SOURCE_DIR}/external.cmake")
