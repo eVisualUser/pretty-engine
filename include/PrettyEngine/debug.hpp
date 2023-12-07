@@ -68,6 +68,15 @@ static std::string GetTimeAsString() {
 	return out;
 }
 
+static void PrintLog(std::string type, std::string time, std::string fileName, const char* function, std::string message, int line) {
+ 	#if !ENGINE_EDITOR
+	if (type != LOG_DEBUG)
+ 	#endif
+ {
+  std::cout << '[' << type << " Time: " << time << ' ' << fileName << " Line: " << line << " Function: " << function << ']' << ' ' << message << std::endl;
+ }
+}
+
 #define WaitCout() std::cout.flush();
 
 #define DebugLog(type, msg, msgBox) \
@@ -80,8 +89,11 @@ static std::string GetTimeAsString() {
     if (msgBox) { \
     	ShowMessageBox(type, text.str()); \
     }  \
-	std::cout << '[' << type << " Time: " << GetTimeAsString() << ' ' << GetFileName(__FILE__) << " Line: " << __LINE__ << " Function: " << __FUNCTION__ << ']' << ' ' << msg << std::endl; \
-	}}
+	if (true) { \
+	std::stringstream message;  \
+	message << msg; \
+	PrintLog(type, GetTimeAsString(), GetFileName(__FILE__), __FUNCTION__, message.str(), __LINE__); \
+	}}}
 
 namespace PrettyEngine {
 	namespace Debug {

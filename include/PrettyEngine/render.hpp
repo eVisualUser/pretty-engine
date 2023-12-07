@@ -1,6 +1,7 @@
 #ifndef H_RENDER
 #define H_RENDER
 
+#include "PrettyEngine/debug.hpp"
 #include <PrettyEngine/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/mesh.hpp>
@@ -205,6 +206,7 @@ namespace PrettyEngine {
 			for (auto & element: this->glTextures) {
 				auto texture = &element.second;
 				if (texture->userCount <= 0 && texture->useGC) {
+     				DebugLog(LOG_WARNING, "Unused texture: " << texture->name, false);
 					this->RemoveTexture(texture->name);
 					this->Clear();
 					return;
@@ -214,6 +216,7 @@ namespace PrettyEngine {
 			for (auto & element: this->glMeshList) {
 				auto mesh = &element.second;
 				if (mesh->userCount <= 0 && mesh->useGC) {
+     				DebugLog(LOG_WARNING, "Unused mesh: " << mesh->name, false);
 					this->RemoveMesh(element.first);
 					this->Clear();
 					return;

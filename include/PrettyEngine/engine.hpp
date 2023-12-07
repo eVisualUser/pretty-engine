@@ -1,6 +1,7 @@
 #ifndef H_ENGINE
 #define H_ENGINE
 
+#include <PrettyEngine/DebugDust.hpp>
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/KeyCode.hpp>
@@ -135,9 +136,12 @@ public:
         }
       }
 
+      // Engine cleanup
       double currentTime = this->engineContent.renderer.GetTime();
-      if (lastRenderClearTime + renderClearCoolDown < currentTime) {
+      if (this->lastEngineCleanUp + this->engineCleanup < currentTime) {
         this->engineContent.renderer.Clear();
+        DebugDust::GenerateLogFile("logs.log");
+        this->lastEngineCleanUp = currentTime;
       }
 
       this->engineContent.physicalSpace.Update(
@@ -278,8 +282,8 @@ private:
 
   toml::parse_result customConfig;
 
-  double lastRenderClearTime = 0.0f;
-  double renderClearCoolDown = 10.0f;
+  double lastEngineCleanUp = 0.0f;
+  double engineCleanup = 5.0f;
 
   ImPlotContext *_imPlotContext;
 
