@@ -1,12 +1,48 @@
 [entities.editorEntity]
-components = [ [ 'LocalizationEditor', 'LocalizationEditor' ] ]
+components = [
+    [ 'LocalizationEditor', 'LocalizationEditor' ],
+    [
+        'Render',
+        'Render',
+        'UseTexture',
+        'true',
+        'TextureTransparency',
+        '',
+        'TextureNormalGUID',
+        '3017c07f-9174-489b-b634-7ca9a3f031bd',
+        'UseTextureBase',
+        'false',
+        'UseTextureTransparency',
+        'false',
+        'TextureBase',
+        'c#.png',
+        'UseLight',
+        '',
+        'UseTextureNormal',
+        'false',
+        'TextureBaseGUID',
+        'b166c7ac-44b5-432b-b1c6-91109568ca3f',
+        'TextureTransparencyGUID',
+        '558c98ee-37bd-4b94-9d37-2f3903868d81',
+        'TextureNormal',
+        '',
+        'Mesh',
+        'rect',
+        'MeshGUID',
+        '6912f526-0da3-4b4b-bb34-5a4878d776cc',
+        'SunLight',
+        '',
+        'ScreenObject',
+        'false'
+    ]
+]
 name = 'Editor'
 object = 'Editor'
 public_map = []
 
     [entities.editorEntity.transform]
-    position = [ 0.64004707336425781, 1.0, 0.0 ]
-    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
+    position = [ 0.0, 0.0, 0.0 ]
+    rotation = [ 0.0, 7.640509466000367e-06, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]

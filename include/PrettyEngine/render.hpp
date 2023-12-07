@@ -431,6 +431,11 @@ namespace PrettyEngine {
 		float sunLightFactor = 1.0f;
 		glm::vec3 sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
+  		/// Store the VAO and VBO of each mesh
+		std::unordered_map<std::string, Mesh> glMeshList;
+
+		std::unordered_map<std::string, Texture> glTextures;
+
 	private:
 		std::vector<std::shared_ptr<RenderFeature>> _renderFeatures;
 
@@ -440,11 +445,6 @@ namespace PrettyEngine {
 
 		/// Store the index of each shaders
 		std::unordered_map<std::string, unsigned int> glShaders;
-
-		/// Store the VAO and VBO of each mesh
-		std::unordered_map<std::string, Mesh> glMeshList;
-
-		std::unordered_map<std::string, Texture> glTextures;
 
 		Collider renderCube = Collider();
 

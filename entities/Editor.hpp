@@ -273,8 +273,9 @@ class Editor : public virtual Entity {
                     ImGui::TextColored(color, "%i: %s", index, line.log.c_str());
                     index++;
                 }
-                ImGui::InputText("", this->consoleCommandBuffer, 100);
+                ImGui::InputText("Command", this->consoleCommandBuffer, 100);
                 if (ImGui::Button("Execute")) {
+                    DebugLog(LOG_WARNING, "Console commands not yet implemented.", true);
                 }
             }
             ImGui::End();

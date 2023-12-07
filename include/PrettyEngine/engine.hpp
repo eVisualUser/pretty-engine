@@ -94,7 +94,7 @@ public:
     }
 
     if (this->showDebugUI) {
-      this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace);
+      this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->isEditor);
     }
   }
 

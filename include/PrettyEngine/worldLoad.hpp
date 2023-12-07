@@ -48,6 +48,12 @@ namespace PrettyEngine {
 			}
 		}
 
+  		void ActiveAllWorldsFiles() {
+   			for(auto & worldFile: this->_worldsFiles) {
+    			this->_worldsFilesToLoad.push_back(&worldFile);
+   			}
+   		}
+
 		WorldManager* FilterWorldList(bool (*filter)(std::string)) {
 			for(auto & worldFile: this->_worldsFiles) {
 				if (filter(worldFile)) {
@@ -165,13 +171,18 @@ namespace PrettyEngine {
 				index++;
 			}
 		}
-		
-		void LoadWorlds() {
+
+  		void ClearWorldInstances() {
+   			this->_worldsInstances.clear();
+  		}
+
+		void LoadWorlds(bool forceLoad = false) {
 			int index = 0;
 			for(auto & world: this->_worldsFilesParsed) {
 				if (!world.empty()) {
 					auto target = this->_worldsInstances[index];
-					if (!target->loaded) {
+					if (!target->loaded || forceLoad) {
+      					target->Clear();
 						target->worldName = world["meta"]["name"].value_or("World");
 
 						if (world["entities"].is_table()) {
