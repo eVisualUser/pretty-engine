@@ -13,6 +13,8 @@ project(import)
 
 include("${CMAKE_SOURCE_DIR}/external.cmake")
 
+include("${CMAKE_SOURCE_DIR}/custom.cmake")
+
 project(pretty C CXX)
 
 include_directories("include")
@@ -31,8 +33,6 @@ target_link_libraries(pretty PUBLIC
  	external
 )
 target_include_directories(pretty PRIVATE "${CMAKE_SOURCE_DIR}/external/openal-soft/include")
-
-include("${CMAKE_SOURCE_DIR}/custom.cmake")
 
 # Debug
 
@@ -64,7 +64,7 @@ if(NOT ${extend} STREQUAL "")
 string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(game pretty custom components ${extend})
+target_link_libraries(game pretty custom components renderFeatures ${extend})
 
 # Editor
 
@@ -87,5 +87,5 @@ if(NOT ${extend} STREQUAL "")
 string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(editor pretty custom components ${extend})
+target_link_libraries(editor pretty custom components renderFeatures ${extend})
 target_compile_definitions(editor PRIVATE ENGINE_EDITOR=1)
