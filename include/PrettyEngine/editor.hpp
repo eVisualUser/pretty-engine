@@ -262,6 +262,12 @@ class Editor {
 								if (ImGui::Button(buttonName.c_str())) {
 									this->selectedEntities.push_back(entity.second.get());
 								}
+        						std::string buttonRemove = "Remove " + entity.second->entityName;
+        						if (ImGui::Button(buttonRemove.c_str())) {
+									world->entities.erase(entity.first);
+         							this->selectedEntities.clear();
+         							break;
+        						}
 							}
 						}
 						ImGui::EndTable();

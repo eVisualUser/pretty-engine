@@ -7,6 +7,7 @@ set(GLFW_BUILD_TESTS OFF)
 set(GLFW_BUILD_EXAMPLES OFF)
 set(GLFW_BUILD_DOCS OFF)
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/glfw")
+
 message("-- GLAD")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/glad")
 message("-- GLM")
@@ -14,10 +15,9 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/external/glm")
 
 include_directories("${CMAKE_SOURCE_DIR}/external/glad/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/glm/include")
-include_directories("${CMAKE_SOURCE_DIR}/external/stb")
 
 # Header-Only
-
+include_directories("${CMAKE_SOURCE_DIR}/external/stb")
 include_directories("${CMAKE_SOURCE_DIR}/external/dr_libs")
 
 # Other
@@ -80,10 +80,8 @@ message("-- OpenAL")
 option(ALSOFT_UTILS "Build utility programs" OFF)
 option(ALSOFT_TESTS "Build test programs" OFF)
 option(ALSOFT_EXAMPLES "Build example programs" OFF)
-option(ALSOFT_INSTALL "Install OpenAL Soft" OFF)
 option(ALSOFT_EMBED_HRTF_DATA "Embed HRTF data in the library" OFF)
-option(ALSOFT_HRTF_DEFS "Build definitions for HRTF data" OFF)
-option(ALSOFT_CONFIG "Build alsoft-config program" OFF)
+option(ALSOFT_INSTALL_HRTF_DATA "Build definitions for HRTF data" OFF)
 
 # Additional options related to 3D audio playback
 option(ALSOFT_NO_CONFIG_UTIL "Disable alsoft-config utility" OFF)
@@ -94,6 +92,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
 set(LIBTYPE STATIC)
 set(ALSOFT_INSTALL ON)
+set(ALSOFT_INSTALL_CONFIG ON)
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/openal-soft")
 
 message("--LibCCD")
