@@ -37,7 +37,7 @@ file(WRITE "${CUSTOM_DIRECTORY}/list.csv" ${customList})
 
 project(custom)
 
-add_library(custom SHARED
+add_library(custom
 	${customFiles}
 	${customSources}
 )
@@ -80,7 +80,7 @@ file(WRITE "${CMAKE_SOURCE_DIR}/components/list.csv" ${componentList})
 
 project(components)
 
-add_library(components SHARED
+add_library(components
 	${customFiles}
 	${customSources}
 )
