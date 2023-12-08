@@ -25,6 +25,7 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 namespace PrettyEngine {
 	#define CHECK_OPENGL_ERROR() std::cout << "OpenGL Error: " << glGetError() << std::endl;

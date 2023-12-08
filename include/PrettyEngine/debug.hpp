@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <sstream>
 
 namespace PrettyEngine {
 	struct Log {
