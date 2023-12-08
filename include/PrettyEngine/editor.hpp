@@ -83,19 +83,13 @@ class Editor {
 	}
 
 	void ShowManualFunctionsCalls(DynamicObject *dynamicObject) {
-		std::string onStartButtonName = "Call OnStart: ";
-		onStartButtonName += dynamicObject->unique;
-		std::string onUpdateButtonName = "Call OnUpdate: ";
-		onUpdateButtonName += dynamicObject->unique;
-		std::string onRenderButtonName = "Call OnRender: ";
-		onRenderButtonName += dynamicObject->unique;
-
-		if (ImGui::Button(onStartButtonName.c_str())) {
-			dynamicObject->OnStart();
-		} else if (ImGui::Button(onUpdateButtonName.c_str())) {
-			dynamicObject->OnUpdate();
-		} else if (ImGui::Button(onRenderButtonName.c_str())) {
-			dynamicObject->OnRender();
+  		for (auto & publicFunction: dynamicObject->publicFuncions) {
+			std::string buttonName = "Call ";
+   			buttonName += publicFunction.first + " for ";
+			buttonName += dynamicObject->unique;
+   			if (ImGui::Button(buttonName.c_str())) {
+				publicFunction.second();
+   			}
 		}
 	}
 

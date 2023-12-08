@@ -23,6 +23,13 @@ namespace PrettyEngine {
 
 	class DynamicObject: public Tagged {
 	public:
+   		DynamicObject() {
+   			this->publicFuncions.insert_or_assign("OnUpdatePublicVariables", [this]() { this->OnUpdatePublicVariables(); });
+			this->publicFuncions.insert_or_assign("OnStart", [this]() { this->OnStart(); });
+			this->publicFuncions.insert_or_assign("OnUpdate", [this]() { this->OnUpdate(); });
+			this->publicFuncions.insert_or_assign("OnRender", [this]() { this->OnRender(); });
+  		}
+
 		/// Called when the components loaded
 		virtual void OnUpdatePublicVariables() {}
 		/// Called before the first frame.
@@ -79,6 +86,8 @@ namespace PrettyEngine {
 		std::unordered_map<std::string, std::string> publicMap;
 
 		std::vector<Request> requests;
+
+  		std::unordered_map<std::string, std::function<void()>> publicFuncions;
 
 	public:
 		std::string unique;
