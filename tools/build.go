@@ -36,7 +36,7 @@ func Build() {
 	}
 
 	log.Print("Run CMake")
-	cmakeCommand := exec.Command("cmake", "-S", "../", "-G", "Ninja", "-B", "../Build")
+	cmakeCommand := exec.Command("cmake", "-S", "../", "-G", "Ninja", "-B", "../Build", "-DCMAKE_BUILD_TYPE=Debug")
 	cmakeCommand.Stdout = os.Stdout
 	cmakeCommand.Stderr = os.Stderr
 	cmakeErr := cmakeCommand.Run()

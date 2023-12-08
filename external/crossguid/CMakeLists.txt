@@ -11,12 +11,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_library(xg Guid.cpp)
 
-if (XG_TESTS)
-	add_executable(xgtest test/TestMain.cpp test/Test.cpp)
-	target_link_libraries(xgtest xg)
-endif()
-
-
 if(WIN32)
 	add_definitions(-DGUID_WINDOWS)
 elseif(APPLE)

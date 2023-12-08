@@ -202,10 +202,10 @@ namespace PrettyEngine {
 			return this->glShaderPrograms[name].shaderProgram;
 		}
 
-		void Clear() {
+		void Clear(bool clearEverything = false) {
 			for (auto & element: this->glTextures) {
 				auto texture = &element.second;
-				if (texture->userCount <= 0 && texture->useGC) {
+				if (texture->userCount <= 0 && texture->useGC || clearEverything) {
      				DebugLog(LOG_WARNING, "Unused texture: " << texture->name, false);
 					this->RemoveTexture(texture->name);
 					this->Clear();
@@ -215,7 +215,7 @@ namespace PrettyEngine {
 
 			for (auto & element: this->glMeshList) {
 				auto mesh = &element.second;
-				if (mesh->userCount <= 0 && mesh->useGC) {
+				if (mesh->userCount <= 0 && mesh->useGC || clearEverything) {
      				DebugLog(LOG_WARNING, "Unused mesh: " << mesh->name, false);
 					this->RemoveMesh(element.first);
 					this->Clear();

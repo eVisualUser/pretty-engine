@@ -24,275 +24,259 @@
 
 namespace PrettyEngine {
 class Engine {
-public:
-  Engine(std::string config) {
-    this->customConfig = toml::parse(config);
+  public:
+	Engine(std::string config) {
+		this->customConfig = toml::parse(config);
 
-    auto antiAliasing = this->customConfig["engine"]["render"]["antiAliasing"].value_or(8);
-    this->engineContent.renderer.GetAntiAliasing();
+		auto antiAliasing = this->customConfig["engine"]["render"]["antiAliasing"].value_or(8);
+		this->engineContent.renderer.GetAntiAliasing();
 
-    this->engineContent.renderer.CreateWindow();
-    this->engineContent.renderer.Setup();
+		this->engineContent.renderer.CreateWindow();
+		this->engineContent.renderer.Setup();
 
-    std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
-    this->engineDatabase = std::make_shared<DataBase>(engineDataBaseFile);
+		std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
+		this->engineDatabase = std::make_shared<DataBase>(engineDataBaseFile);
 
-    auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
-    this->engineContent.renderer.SetWindowTitle(windowTitle);
+		auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
+		this->engineContent.renderer.SetWindowTitle(windowTitle);
 
-    double backgroundColor[4];
-    backgroundColor[0] = this->customConfig["engine"]["render"]["opengl"]["background_color"][0].value_or(0.0f);
-    backgroundColor[1] = this->customConfig["engine"]["render"]["opengl"]["background_color"][1].value_or(0.0f);
-    backgroundColor[2] = this->customConfig["engine"]["render"]["opengl"]["background_color"][2].value_or(0.0f);
-    backgroundColor[3] = this->customConfig["engine"]["render"]["opengl"]["background_color"][3].value_or(0.0f);
+		double backgroundColor[4];
+		backgroundColor[0] = this->customConfig["engine"]["render"]["opengl"]["background_color"][0].value_or(0.0f);
+		backgroundColor[1] = this->customConfig["engine"]["render"]["opengl"]["background_color"][1].value_or(0.0f);
+		backgroundColor[2] = this->customConfig["engine"]["render"]["opengl"]["background_color"][2].value_or(0.0f);
+		backgroundColor[3] = this->customConfig["engine"]["render"]["opengl"]["background_color"][3].value_or(0.0f);
 
-    bool createDefaultCamera = this->customConfig["engine"]["render"]["camera"]
-                                                 ["create_default_camera"]
-                                                     .value_or(false);
-    bool setDefaultCameraAsMain =
-        this->customConfig["engine"]["render"]["camera"]
-                          ["set_default_camera_as_main"]
-                              .value_or(true);
+		bool createDefaultCamera = this->customConfig["engine"]["render"]["camera"]["create_default_camera"].value_or(false);
+		bool setDefaultCameraAsMain = this->customConfig["engine"]["render"]["camera"]["set_default_camera_as_main"].value_or(true);
 
-    if (createDefaultCamera) {
-      auto newCamera = this->engineContent.renderer.AddCamera();
-      if (setDefaultCameraAsMain) {
-        newCamera->active = true;
-      }
-    }
+		if (createDefaultCamera) {
+			auto newCamera = this->engineContent.renderer.AddCamera();
+			if (setDefaultCameraAsMain) {
+				newCamera->active = true;
+			}
+		}
 
-    this->engineContent.renderer.SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
+		this->engineContent.renderer.SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 
-    this->_imPlotContext = ImPlot::CreateContext();
+		this->_imPlotContext = ImPlot::CreateContext();
 
-    this->SetWindowIcon("WindowIcon");
+		this->SetWindowIcon("WindowIcon");
 
-    this->engineContent.renderer.ShowWindow();
+		this->engineContent.renderer.ShowWindow();
 
-    this->engineContent.input.SetWindow(this->engineContent.renderer.GetWindow());
-  }
+		this->engineContent.input.SetWindow(this->engineContent.renderer.GetWindow());
+	}
 
-  ~Engine() {
-    ImPlot::DestroyContext(this->_imPlotContext);
-    this->_worldManager.Clear();
-    this->engineContent.renderer.Clear();
-  }
+	~Engine() {
+		ImPlot::DestroyContext(this->_imPlotContext);
+		this->_worldManager.Clear();
+		this->engineContent.renderer.Clear();
+	}
 
-  void Exit() { this->exit = true; }
+	void Exit() { this->exit = true; }
 
-  bool *GetExit() { return &this->exit; }
+	bool *GetExit() { return &this->exit; }
 
-  void Run() {
-    while (this->engineContent.renderer.Valid() && !*this->GetExit()) {
-      this->Update();
-    }
-  }
+	void Run() {
+		while (this->engineContent.renderer.Valid() && !*this->GetExit()) {
+			this->Update();
+		}
+	}
 
-  void UpdateDebugUI() {
-    if (this->engineContent.input.GetKeyDown(KeyCode::F3)) {
-      this->showDebugUI = !showDebugUI;
-    }
+	void UpdateDebugUI() {
+		if (this->engineContent.input.GetKeyDown(KeyCode::F3)) {
+			this->showDebugUI = !showDebugUI;
+		}
 
-    if (this->showDebugUI) {
-      this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->isEditor);
-    }
-  }
+		if (this->showDebugUI) {
+			this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->isEditor, &this->engineContent.audioEngine);
+		}
+	}
 
-  void Update() {
-    auto worlds = this->_worldManager.GetWorlds();
-    this->engineContent.input.Update();
+	void Update() {
+		auto worlds = this->_worldManager.GetWorlds();
+		this->engineContent.input.Update();
 
-    // Builtin fullscreen support
-    if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
-      this->engineContent.renderer.SetFullscreen(
-          !this->engineContent.renderer.GetFullscreen());
-    }
+		// Builtin fullscreen support
+		if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
+			this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
+		}
 
-    this->engineContent.renderer.UpdateIO();
-    if (this->engineContent.renderer.WindowActive()) {
-      for (auto &currentWorld : worlds) {
-        if (currentWorld != nullptr) {
-          if (!this->isEditor) {
-            currentWorld->CallFunctionProcesses();
-            currentWorld->Update();
-          }
+		this->engineContent.renderer.UpdateIO();
+		if (this->engineContent.renderer.WindowActive()) {
+			for (auto &currentWorld : worlds) {
+				if (currentWorld != nullptr) {
+					if (!this->isEditor) {
+						currentWorld->CallFunctionProcesses();
+						currentWorld->Update();
+					}
 
-          currentWorld->simulationCollider.position =
-              this->engineContent.renderer.GetCurrentCamera()->position;
-          currentWorld->EditorUpdate();
-        }
-      }
+					currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
+					currentWorld->EditorUpdate();
+				}
+			}
 
-      this->engineContent.renderer.StartUIRendering();
+			this->engineContent.renderer.StartUIRendering();
 #if ENGINE_EDITOR
-      this->UpdateDebugUI();
+   			this->UpdateDebugUI();
+   			worlds = this->_worldManager.GetWorlds();
+			this->SetupWorlds();
 #endif
-      for (auto &currentWorld : worlds) {
-        if (currentWorld != nullptr) {
-          currentWorld->CallRenderFunctions();
-          if (!this->isEditor) {
-            currentWorld->PrePhysics();
-          }
-        }
-      }
+			for (auto &currentWorld : worlds) {
+				if (currentWorld != nullptr) {
+					currentWorld->CallRenderFunctions();
+					if (!this->isEditor) {
+						currentWorld->PrePhysics();
+					}
+				}
+			}
 
-      // Engine cleanup
-      double currentTime = this->engineContent.renderer.GetTime();
-      if (this->lastEngineCleanUp + this->engineCleanup < currentTime) {
-        this->engineContent.renderer.Clear();
-        DebugDust::GenerateLogFile("logs.log");
-        this->lastEngineCleanUp = currentTime;
-      }
+			// Engine cleanup
+			double currentTime = this->engineContent.renderer.GetTime();
+			if (this->lastEngineCleanUp + this->engineCleanup < currentTime) {
+				this->engineContent.renderer.Clear();
+				DebugDust::GenerateLogFile("logs.log");
+				this->lastEngineCleanUp = currentTime;
+			}
 
-      this->engineContent.physicalSpace.Update(
-          this->engineContent.renderer.GetDeltaTime());
+			this->engineContent.physicalSpace.Update(this->engineContent.renderer.GetDeltaTime());
 
-      this->engineContent.renderer.Draw();
-      this->engineContent.renderer.Show();
-    }
-    for (auto &currentWorld : worlds) {
-      if (currentWorld != nullptr) {
-        currentWorld->AlwayUpdate();
-        if (!this->isEditor) {
-          currentWorld->EndUpdate();
-        }
-      }
-    }
+			this->engineContent.renderer.Draw();
+			this->engineContent.renderer.Show();
+		}
+		for (auto &currentWorld : worlds) {
+			if (currentWorld != nullptr) {
+				currentWorld->AlwayUpdate();
+				if (!this->isEditor) {
+					currentWorld->EndUpdate();
+				}
+			}
+		}
 
-    auto requests = this->GetWorldManager()->GetAllDynamicObjectsRequests();
-    for (auto &request : requests) {
-      if (request == Request::SAVE) {
-        this->GetWorldManager()->SaveWorlds();
-      } else if (request == Request::EXIT) {
-        this->Exit();
-      }
-    }
-  }
+		auto requests = this->GetWorldManager()->GetAllDynamicObjectsRequests();
+		for (auto &request : requests) {
+			if (request == Request::SAVE) {
+				this->GetWorldManager()->SaveWorlds();
+			} else if (request == Request::EXIT) {
+				this->Exit();
+			}
+		}
+	}
 
-  void SetupWorlds() {
-    auto worlds = this->_worldManager.GetWorlds();
-    for (auto &currentWorld : worlds) {
-      currentWorld->engineContent = &this->engineContent;
+	void SetupWorlds() {
+		auto worlds = this->_worldManager.GetWorlds();
+		for (auto &currentWorld : worlds) {
+			currentWorld->engineContent = &this->engineContent;
 
-      currentWorld->UpdateLinks();
-    }
-  }
+			currentWorld->UpdateLinks();
+		}
+	}
 
-  /// Proper way to remove the current worlds
-  void ClearWorlds() { this->_worldManager.Clear(); }
+	/// Proper way to remove the current worlds
+	void ClearWorlds() { this->_worldManager.Clear(); }
 
-  Texture *GetTexture(std::string name) {
-    auto dbImages =
-        this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
-    auto dbImageName =
-        this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
+	Texture *GetTexture(std::string name) {
+		auto dbImages = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
+		auto dbImageName = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
 
-    PrettyEngine::Texture *texture = nullptr;
+		PrettyEngine::Texture *texture = nullptr;
 
-    int index = 0;
-    for (auto &img : dbImages) {
-      int imgBytes;
-      std::vector<unsigned char> imgData;
-      int imgHeight;
-      int imgWidth;
-      int imgChannels;
+		int index = 0;
+		for (auto &img : dbImages) {
+			int imgBytes;
+			std::vector<unsigned char> imgData;
+			int imgHeight;
+			int imgWidth;
+			int imgChannels;
 
-      imgBytes = img.bytes;
-      imgData = img.data;
+			imgBytes = img.bytes;
+			imgData = img.data;
 
-      if (imgBytes <= 0 || imgData.empty()) {
-        DebugLog(LOG_ERROR, "Missing texture: " << name, true);
-        continue;
-      }
+			if (imgBytes <= 0 || imgData.empty()) {
+				DebugLog(LOG_ERROR, "Missing texture: " << name, true);
+				continue;
+			}
 
-      auto rawData = PrettyEngine::DecodeImage(&imgData, imgBytes, &imgHeight,
-                                               &imgWidth, &imgChannels);
+			auto rawData = PrettyEngine::DecodeImage(&imgData, imgBytes, &imgHeight, &imgWidth, &imgChannels);
 
-      if (rawData.empty()) {
-        DebugLog(LOG_ERROR, "Failed to decode: " << name, true);
-      }
+			if (rawData.empty()) {
+				DebugLog(LOG_ERROR, "Failed to decode: " << name, true);
+			}
 
-      if (dbImageName[index] == name) {
-        texture = this->engineContent.renderer.AddTextureFromData(
-            dbImageName[index], rawData.data(), imgWidth, imgHeight,
-            PrettyEngine::TextureType::Base,
-            PrettyEngine::TextureWrap::ClampToBorder,
-            PrettyEngine::TextureFilter::Linear);
-        break;
-      }
+			if (dbImageName[index] == name) {
+				texture = this->engineContent.renderer.AddTextureFromData(dbImageName[index], rawData.data(), imgWidth, imgHeight, PrettyEngine::TextureType::Base, PrettyEngine::TextureWrap::ClampToBorder, PrettyEngine::TextureFilter::Linear);
+				break;
+			}
 
-      index++;
-    }
+			index++;
+		}
 
-    if (texture == nullptr) {
-      DebugLog(LOG_ERROR, "Could not find texture: " << name, true);
-      return nullptr;
-    }
+		if (texture == nullptr) {
+			DebugLog(LOG_ERROR, "Could not find texture: " << name, true);
+			return nullptr;
+		}
 
-    return texture;
-  }
+		return texture;
+	}
 
-  void SetPhysics(bool value) { this->_physicsEnabled = value; }
+	void SetPhysics(bool value) { this->_physicsEnabled = value; }
 
-  void TogglePhysics() { this->_physicsEnabled = !this->_physicsEnabled; }
+	void TogglePhysics() { this->_physicsEnabled = !this->_physicsEnabled; }
 
-  bool PhysicsEnabled() { return this->_physicsEnabled; }
+	bool PhysicsEnabled() { return this->_physicsEnabled; }
 
-  void SetWindowIcon(std::string textureName) {
-    auto rawTextures =
-        this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
-    auto names = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
+	void SetWindowIcon(std::string textureName) {
+		auto rawTextures = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
+		auto names = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
 
-    int iter = 0;
-    for (auto &name : names) {
-      if (name == textureName) {
-        auto img = rawTextures[iter];
-        int imgHeight = 0;
-        int imgWidth = 0;
-        int imgChannels = 0;
+		int iter = 0;
+		for (auto &name : names) {
+			if (name == textureName) {
+				auto img = rawTextures[iter];
+				int imgHeight = 0;
+				int imgWidth = 0;
+				int imgChannels = 0;
 
-        auto decoded = DecodeImage(&img.data, img.bytes, &imgHeight, &imgWidth,
-                                   &imgChannels);
+				auto decoded = DecodeImage(&img.data, img.bytes, &imgHeight, &imgWidth, &imgChannels);
 
-        this->engineContent.renderer.SetWindowIcon(decoded.data(), imgWidth,
-                                                   imgHeight);
+				this->engineContent.renderer.SetWindowIcon(decoded.data(), imgWidth, imgHeight);
 
-        return;
-      }
-      iter++;
-    }
-  }
+				return;
+			}
+			iter++;
+		}
+	}
 
-  PrettyEngine::WorldManager *GetWorldManager() { return &this->_worldManager; }
+	PrettyEngine::WorldManager *GetWorldManager() { return &this->_worldManager; }
 
-private:
-  EventManager eventManager;
+  private:
+	EventManager eventManager;
 
-  std::shared_ptr<DataBase> engineDatabase;
+	std::shared_ptr<DataBase> engineDatabase;
 
-  PrettyEngine::WorldManager _worldManager;
+	PrettyEngine::WorldManager _worldManager;
 
-  bool exit = false;
+	bool exit = false;
 
-  bool showDebugUI = true;
+	bool showDebugUI = true;
 
-  bool _physicsEnabled = true;
+	bool _physicsEnabled = true;
 
-  EngineContent engineContent;
+	EngineContent engineContent;
 
-  toml::parse_result customConfig;
+	toml::parse_result customConfig;
 
-  double lastEngineCleanUp = 0.0f;
-  double engineCleanup = 5.0f;
+	double lastEngineCleanUp = 0.0f;
+	double engineCleanup = 5.0f;
 
-  ImPlotContext *_imPlotContext;
+	ImPlotContext *_imPlotContext;
 
-  Editor editor;
+	Editor editor;
 
 #if ENGINE_EDITOR
-  bool isEditor = true;
+	bool isEditor = true;
 #else
-  bool isEditor = false;
+	bool isEditor = false;
 #endif
 };
 }; // namespace PrettyEngine

@@ -68,16 +68,18 @@ static std::string GetTimeAsString() {
 	return out;
 }
 
+#define WaitCout() std::cout.flush();
+
 static void PrintLog(std::string type, std::string time, std::string fileName, const char* function, std::string message, int line) {
- 	#if !ENGINE_EDITOR
+#if !ENGINE_EDITOR
 	if (type != LOG_DEBUG)
- 	#endif
+#endif
  {
   std::cout << '[' << type << " Time: " << time << ' ' << fileName << " Line: " << line << " Function: " << function << ']' << ' ' << message << std::endl;
+  // Flush the Cout to avoid wrong debug messages
+  WaitCout();
  }
 }
-
-#define WaitCout() std::cout.flush();
 
 #define DebugLog(type, msg, msgBox) \
 	if (true) { \

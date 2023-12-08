@@ -179,6 +179,10 @@ namespace PrettyEngine {
 			return false;
 		}
 
+  		void Clear() {
+   			this->_keyWatchers.clear();
+  		}
+
 	private:
 		glm::vec2 _cursorLastPosition = glm::vec2();
 

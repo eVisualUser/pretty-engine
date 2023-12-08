@@ -316,11 +316,16 @@ namespace PrettyEngine {
 				SUPPORT_OPENAL_EXTENSION_EFX = true;
 			}
 		}
-		
-		~AudioEngine() {
+
+  		void Clear() {
 			for(auto & audioSource: this->sources) {
 				audioSource->Clear();
 			}
+   			this->sources.clear();
+  		}
+
+		~AudioEngine() {
+			this->Clear();
 			
 			if (this->openALContext != nullptr) {
 				alcDestroyContext(this->openALContext);

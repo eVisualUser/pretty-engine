@@ -76,6 +76,20 @@ set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/external/zlib")
 set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/zlib")
 
 message("-- OpenAL")
+# Set CMake options to control OpenAL Soft features
+option(ALSOFT_UTILS "Build utility programs" OFF)
+option(ALSOFT_TESTS "Build test programs" OFF)
+option(ALSOFT_EXAMPLES "Build example programs" OFF)
+option(ALSOFT_INSTALL "Install OpenAL Soft" OFF)
+option(ALSOFT_EMBED_HRTF_DATA "Embed HRTF data in the library" OFF)
+option(ALSOFT_HRTF_DEFS "Build definitions for HRTF data" OFF)
+option(ALSOFT_CONFIG "Build alsoft-config program" OFF)
+
+# Additional options related to 3D audio playback
+option(ALSOFT_NO_CONFIG_UTIL "Disable alsoft-config utility" OFF)
+option(ALSOFT_NO_ASM "Disable assembly optimizations" OFF)
+option(ALSOFT_NO_LOOPBACK "Disable Loopback devices" OFF)
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
 set(LIBTYPE STATIC)

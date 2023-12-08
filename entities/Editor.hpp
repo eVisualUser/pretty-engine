@@ -213,13 +213,13 @@ class Editor : public virtual Entity {
         }
 
         if (this->editorGuide) {
-            if (ImGui::Begin(this->localization->Get("Editor Guide").c_str())) {
-                ImGui::Text("%s", this->localization->Get("Welcome to the PrettyEditor !").c_str());
+            if (ImGui::Begin("Editor Guide")) {
+                ImGui::Text("%s", "Welcome to the PrettyEditor !");
                 ImGui::Separator();
-                ImGui::Text("%s", this->localization->Get("Some shortcut: ").c_str());
-                ImGui::BulletText("%s", this->localization->Get("Press F3 to show debug informations.").c_str());
-                ImGui::BulletText("%s", this->localization->Get("Press F11 to toggle fullscreen.").c_str());
-                ImGui::BulletText("%s", this->localization->Get("Press Ctr + S to save.").c_str());
+                ImGui::Text("%s", "Some shortcut: ");
+                ImGui::BulletText("%s", "Press F3 to show debug informations.");
+                ImGui::BulletText("%s", "Press F11 to toggle fullscreen.");
+                ImGui::BulletText("%s", "Press Ctr + S to save.");
 
                 ImGui::Separator();
                 ImGui::Text("Tools");

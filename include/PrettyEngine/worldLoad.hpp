@@ -67,7 +67,6 @@ namespace PrettyEngine {
 			for(auto & world: this->_worldsFilesToLoad) {
 				this->_worldsFilesParsed.push_back(toml::parse_file(*world));
 			}
-			this->_worldsFilesToLoad.clear();
 			return this;
 		}
 
@@ -301,6 +300,15 @@ namespace PrettyEngine {
 
 			return out;
 		}
+
+  		void Reload() {
+   			this->_worldsFilesParsed.clear();
+   			this->_worldsInstances.clear();
+
+   			this->ParseWorldsFiles();
+   			this->CreateWorldsInstances();
+   			this->LoadWorlds();
+  		}
 
 	private:
 		std::vector<std::string> _worldsFiles;

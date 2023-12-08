@@ -128,6 +128,11 @@ namespace PrettyEngine {
 			return nullptr;
 		}
 
+  		void Clear() {
+			this->_colliders.clear();
+   			this->_collisions.clear();
+  		}
+
 	private:
 		std::unordered_map<std::string, std::vector<Collider*>> _colliders;
 
