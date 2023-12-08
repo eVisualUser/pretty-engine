@@ -99,6 +99,17 @@ class Editor {
 			buttonName += entity;
 			if (ImGui::Button(buttonName.c_str())) {
 				CreateCustomEntity(entity, world);
+    			int entitiesWithSameName = 0;
+    			for(auto & worldEntity: world->entities) {
+					if (worldEntity.second->unique == entity) {
+						entitiesWithSameName++;
+     				}
+    			}
+				world->GetLastEntityRegistred()->object = entity;
+    			world->GetLastEntityRegistred()->unique = entity;
+    			if (entitiesWithSameName > 0) {
+     				world->GetLastEntityRegistred()->unique += "_" + std::to_string(entitiesWithSameName);
+    			}
 			}
 		}
 	}

@@ -37,6 +37,8 @@ public:
 	    this->CreatePublicVar("UseLight");
 	    this->CreatePublicVar("SunLight");
 	    this->CreatePublicVar("ScreenObject", "false");
+
+  		this->publicFuncions.insert_or_assign("Init", [this]() { this->Init(); });
 	}
 
 	void Init() {
@@ -112,19 +114,15 @@ public:
 
 	    bool loadMesh = false;
 
-	    auto meshName = this->GetPublicVarValue("Mesh");
-	    if (meshName == "rect") {
-	      // Check if the mesh is already loaded
-	      if (this->mesh == nullptr) {
-	        this->engineContent->renderer.RemoveMesh(meshGuid);
-	        auto newMesh = CreateRectMesh();
-	        this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh);
-	        this->renderModel.SetMesh(this->mesh);
-	        loadMesh = true;
-	      }
-	    } else {
-	      	DebugLog(LOG_WARNING, "Missing mesh for: " << this->unique, false);
-	    }
+		auto meshName = this->GetPublicVarValue("Mesh");
+		// Check if the mesh is already loaded
+		if (this->mesh == nullptr) {
+			this->engineContent->renderer.RemoveMesh(meshGuid);
+			auto newMesh = CreateRectMesh();
+			this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh);
+			this->renderModel.SetMesh(this->mesh);
+			loadMesh = true;
+		}
 
 	    if (loadMesh) {
 	      	this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
