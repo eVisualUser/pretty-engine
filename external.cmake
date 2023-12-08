@@ -30,6 +30,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	message("-- PulseAudio")
 	set(PULSEAUDIO_LIBRARY "${CMAKE_SOURCE_DIR}/external/pulseaudio")
 	set(PULSEAUDIO_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/pulseaudio/src")
+	include_directories("${CMAKE_SOURCE_DIR}/external/pulseaudio/src")
 endif()
 
 message("-- Boxer")
