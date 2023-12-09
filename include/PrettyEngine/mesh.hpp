@@ -17,6 +17,7 @@ namespace PrettyEngine {
 		glm::vec2 textureCoord;
 	};
 
+ 	/// Contain and manages a mesh.
 	class Mesh: public GCObject {
 	public:
 		/// Convert to an array buffer

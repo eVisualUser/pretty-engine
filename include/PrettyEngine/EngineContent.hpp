@@ -8,6 +8,7 @@
 #include <PrettyEngine/event.hpp>
 
 namespace PrettyEngine {
+	/// Contain all the sub-engines and systems shared by the Engine.
 	class EngineContent {
 	public:
 		Renderer renderer = Renderer();

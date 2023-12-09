@@ -40,6 +40,7 @@ namespace PrettyEngine {
 		Alpha = GL_ALPHA,
 	};
 
+ 	/// Manage a texture (do not containe the data).
 	class Texture: public GCObject {
 	public:
 		std::string name;

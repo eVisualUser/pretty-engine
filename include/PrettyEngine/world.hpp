@@ -35,6 +35,7 @@ namespace PrettyEngine {
 		}
 	}
 
+ 	/// Contain entities and manage their access.
 	class World {
 	public:
 		World() {

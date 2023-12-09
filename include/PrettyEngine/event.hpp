@@ -5,17 +5,20 @@
 #include <vector>
 
 namespace PrettyEngine {
+	/// An event is used to share data between objects without direct access.
 	class Event {
 	public:
 		std::string name;
 		void* content;
 	}; 
 
+ 	/// An object that can listen to events.
 	class EventListener {
 	public:
 		void OnEvent(Event* event) {}
 	};
 
+ 	/// Manage and distribute the events to the listeners.
 	class EventManager {
 	public:
 		void RegisterEvent(Event* event) {

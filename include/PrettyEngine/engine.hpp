@@ -23,8 +23,10 @@
 #include <string>
 
 namespace PrettyEngine {
+/// Body of the engine, contain everything
 class Engine {
   public:
+ 	/// Initialize the engine based on a toml configuration
 	Engine(std::string config) {
 		this->customConfig = toml::parse(config);
 
@@ -73,16 +75,20 @@ class Engine {
 		this->engineContent.renderer.Clear();
 	}
 
+ 	/// Ask the engine to exit
 	void Exit() { this->exit = true; }
 
+ 	/// Return a pointer to the boolean that define if the game must exit.
 	bool *GetExit() { return &this->exit; }
 
+ 	/// Launch the engine
 	void Run() {
 		while (this->engineContent.renderer.Valid() && !*this->GetExit()) {
 			this->Update();
 		}
 	}
 
+ 	/// Show UI for debug, and the integrated editor.
 	void UpdateDebugUI() {
 		if (this->engineContent.input.GetKeyDown(KeyCode::F3)) {
 			this->showDebugUI = !showDebugUI;
@@ -93,6 +99,7 @@ class Engine {
 		}
 	}
 
+ 	/// Update the content of the engine.
 	void Update() {
 		auto worlds = this->_worldManager.GetWorlds();
 		this->engineContent.input.Update();
@@ -163,6 +170,7 @@ class Engine {
 		}
 	}
 
+ 	/// Update the worlds pointers for the entities and components (necessary when create a new entity or component).
 	void SetupWorlds() {
 		auto worlds = this->_worldManager.GetWorlds();
 		for (auto &currentWorld : worlds) {
@@ -175,6 +183,7 @@ class Engine {
 	/// Proper way to remove the current worlds
 	void ClearWorlds() { this->_worldManager.Clear(); }
 
+ 	/// Get a texture from the engine database
 	Texture *GetTexture(std::string name) {
 		auto dbImages = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
 		auto dbImageName = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
@@ -219,12 +228,14 @@ class Engine {
 		return texture;
 	}
 
+ 	/// Enable or disable the physics.
 	void SetPhysics(bool value) { this->_physicsEnabled = value; }
 
 	void TogglePhysics() { this->_physicsEnabled = !this->_physicsEnabled; }
 
 	bool PhysicsEnabled() { return this->_physicsEnabled; }
 
+ 	/// Set the engine window using the engine database
 	void SetWindowIcon(std::string textureName) {
 		auto rawTextures = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
 		auto names = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");

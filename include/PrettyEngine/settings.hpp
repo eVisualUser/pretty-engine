@@ -10,6 +10,7 @@
 #include <fstream>
 
 namespace PrettyEngine {
+	/// Easy way to manage settings.
 	class Settings {
 	public:
 		Settings(std::string filePath) {

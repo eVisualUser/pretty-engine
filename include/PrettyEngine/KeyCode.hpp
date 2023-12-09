@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 namespace PrettyEngine {
+	/// List of keys supported by the engine.
 	enum class KeyCode {
 	    Unknown = GLFW_KEY_UNKNOWN,
 	    Space = GLFW_KEY_SPACE,

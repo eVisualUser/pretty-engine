@@ -21,6 +21,7 @@ namespace PrettyEngine {
 		EXIT,
 	};
 
+ 	/// Object dynamicly managed in the engine.
 	class DynamicObject: public Tagged {
 	public:
    		DynamicObject() {

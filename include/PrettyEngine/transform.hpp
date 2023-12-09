@@ -10,6 +10,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 namespace PrettyEngine {
+	/// Represent an object in a space.
 	class Transform: public SerialObject {
 	public:
 		Transform() {

@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace PrettyEngine {
+	/// Allow an object to have multiple tags.
 	class Tagged {
 	public:
 		static std::string* CreateSafeTag(std::string tag) {

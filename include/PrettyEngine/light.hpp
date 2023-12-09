@@ -10,11 +10,13 @@
 #include <glm/vec3.hpp>
 
 namespace PrettyEngine {
+	/// The way a light will be rendered.
 	enum class LightType {
 		PointLight = 0,
 		SpotLight,
 	};
 
+ 	/// Represent a light.
 	class Light: public Transform {
 	public:
 		void SetSpotLightCutOff(float angleInDegrees) {

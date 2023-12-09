@@ -20,8 +20,10 @@
 #include <vector>
 
 namespace PrettyEngine {
+	/// Manage the loading and saving of Worlds.
 	class WorldManager {
 	public:
+   		/// Remove a world instance.
 		void RemoveWorld(std::string worldName) {
 			int index = 0;
 			for(auto & world: this->_worldsInstances) {

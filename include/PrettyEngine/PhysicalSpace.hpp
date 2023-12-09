@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 
 namespace PrettyEngine {
+	/// Physics engine and so manage the PhysicalObjects.
 	class PhysicalSpace {
 	public:
 		void AddCollider(std::string layerName, Collider* collider) {

@@ -23,6 +23,7 @@ namespace PrettyEngine {
 		Toml,
 	};
 
+ 	/// Serialized object
 	class SerialObject {
 	public:
 		virtual void AddToToml(toml::table* table) { DebugLog(LOG_DEBUG, "To do", false); }

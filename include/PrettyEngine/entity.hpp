@@ -29,11 +29,14 @@ namespace PrettyEngine {
 		}
 
 	public:
+   		/// The entity that own the component.
 		DynamicObject* owner;
 
+  		/// True if start was never called.
 		bool worldFirst = true;
 	};
 
+ 	/// An object that is part from a world and can contain components.
 	class Entity: public virtual DynamicObject, public virtual Transform {
 	public:
 		~Entity() {
@@ -47,6 +50,7 @@ namespace PrettyEngine {
 	public:
 		void* engine;
 
+  		/// True if start was never called.
 		bool worldFirst = true;
 
 		std::string entityName = DefaultEntityName;

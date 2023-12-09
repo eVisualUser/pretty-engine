@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace PrettyEngine {
+	/// Wrap around graphics Apis.
 	class Graphics {
 	public:
 		static void BindVariable(unsigned int id, unsigned int value, int lenght = 1) {

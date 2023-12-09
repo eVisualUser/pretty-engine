@@ -13,6 +13,7 @@
 #define GET_RENDERER(ptr) (PrettyEngine::Renderer*)ptr
 
 namespace PrettyEngine {
+	/// Define the shape and way to render of a VisualObject.
 	class RenderModel {
 	public:
 		void SetMesh(Mesh* newMesh) {
@@ -33,12 +34,14 @@ namespace PrettyEngine {
 		bool overrideProjection = false;
 	};
 
+ 	/// Custom data used by RenderFeatures.
 	class VisualDataPack: Tagged {
 	public:
 		std::string name;
 		void* content;
 	};
 	
+ 	/// Represent an object rendered to the screen.
 	class VisualObject: virtual public Transform {
 	public:
 		VisualObject() {}

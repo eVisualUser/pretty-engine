@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace PrettyEngine {
+	/// Add a pass of logic the rendering engine.
 	class RenderFeature {
 	public:
 		virtual void OnCreated() {}

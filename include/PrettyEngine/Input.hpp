@@ -53,6 +53,7 @@ namespace PrettyEngine {
     	return KeyWatcherMode::Press;
     }
 
+ 	/// Safe way to manage inputs and share them between objects.
     struct KeyWatcher {
     public:
     	std::string name = "?";
@@ -61,6 +62,7 @@ namespace PrettyEngine {
     	bool state;
     };
 
+ 	/// Manage the inputs of the game.
 	class Input {
 	public:
 		Input(GLFWwindow* window) {
