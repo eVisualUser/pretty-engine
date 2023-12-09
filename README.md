@@ -8,10 +8,6 @@ Don't mind to use it until all features are set at something else than WIP.
 
 I share it to get feedbacks and maybe give some help to people learning one of the library I use.
 
-## Links
-
-[Documentation](https://sylvain-game.notion.site/Pretty-Engine-c1c22db06b0745aea7835ba95b8e6467?pvs=4)
-
 ## Goals
 
 - [ ] Easy to learn.
