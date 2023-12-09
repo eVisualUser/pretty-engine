@@ -63,13 +63,17 @@ static std::string GetTimeAsString() {
 	std::time_t now = std::time(0);
 
 	struct tm timeInfo;
-	localtime_s(&timeInfo, &now);
+ 	#if __LINUX__
+ 		localtime_r(&now, &timeInfo);
+ 	#else
+		localtime_s(&timeInfo, &now);
+	#endif
 
 	char buffer[20];
 
 	std::strftime(buffer, 20, "%Y-%m-%d %H:%M:%S", &timeInfo);
 
- 	result += buffer;
+	result += buffer;
 
 	return result;
 }
