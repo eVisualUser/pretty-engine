@@ -40,7 +40,7 @@ background_color = [0.245, 0.40, 0.65, 0.5]
 demo = [] # Preload meshes to allow world loading
 
 [engine]
-database = "public/data/engine.db"
+database = "data/engine.db"
 )";
 
 static const char* ASSET_BUILTIN_EXAMPLE = R"(# Example

@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include("${CMAKE_SOURCE_DIR}/assets.cmake")
 
-file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "./public/")
+file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "${CMAKE_BUILD_DIR}/public/")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
@@ -16,6 +16,8 @@ include("${CMAKE_SOURCE_DIR}/external.cmake")
 include("${CMAKE_SOURCE_DIR}/custom.cmake")
 
 project(pretty C CXX)
+
+add_compile_definitions(PRETTY_ENGINE_PROJECT="${CMAKE_SOURCE_DIR}")
 
 include_directories("include")
 

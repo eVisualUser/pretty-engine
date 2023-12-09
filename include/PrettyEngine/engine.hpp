@@ -37,7 +37,7 @@ class Engine {
 		this->engineContent.renderer.Setup();
 
 		std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
-		this->engineDatabase = std::make_shared<DataBase>(engineDataBaseFile);
+		this->engineDatabase = std::make_shared<DataBase>(GetEnginePublicPath(engineDataBaseFile, true));
 
 		auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 		this->engineContent.renderer.SetWindowTitle(windowTitle);
