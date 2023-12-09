@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <chrono>
 #include <sstream>
+#include <ctime>
 
 namespace PrettyEngine {
 	struct Log {
@@ -38,8 +38,6 @@ static void ShowMessageBox(std::string type, std::string message) {
 		style = boxer::Style::Error;
 	} else if (type == LOG_WARNING) {
 		style = boxer::Style::Warning;
-	} else if (type == LOG_INFO) {
-		style = boxer::Style::Info;
 	}
 
 	boxer::show(message.c_str(), type.c_str(), style, boxer::Buttons::OK);
@@ -61,12 +59,19 @@ static void AddLog(std::string newLog, std::string type) {
 }
 
 static std::string GetTimeAsString() {
-	std::string out;
+	std::string result;
+	std::time_t now = std::time(0);
 
-	auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-    out = std::format("{:%Y-%m-%d %X}", time);
+	struct tm timeInfo;
+	localtime_s(&timeInfo, &now);
 
-	return out;
+	char buffer[20];
+
+	std::strftime(buffer, 20, "%Y-%m-%d %H:%M:%S", &timeInfo);
+
+ 	result += buffer;
+
+	return result;
 }
 
 #define WaitCout() std::cout.flush();
