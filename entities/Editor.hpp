@@ -63,14 +63,6 @@ class Editor : public virtual Entity {
         keyRight.key = KeyCode::RightArrow;
         keyRight.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyRight);
-
-        // Render to texture
-        // this->secondCamera = this->engineContent->renderer.AddCamera();
-        // this->secondCamera->active = true;
-        // this->secondCamera->SetRenderToTexture(false);
-
-        // this->visualObject->textures.clear();
-        // this->visualObject->AddTexture(this->secondCamera->GetTexture());
     }
 
     void OnDestroy() override {
