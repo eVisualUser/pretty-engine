@@ -44,8 +44,7 @@ namespace PrettyEngine {
 				glDeleteTextures(1, &this->texture.textureID);
 				glDeleteFramebuffers(1, &this->glFrameBufferID);
 				this->renderToTexture = false;
-			}
-			else {
+			} else {
 				// Generate Texture
 				glGenTextures(1, &this->texture.textureID);
 				glBindTexture(GL_TEXTURE_2D, this->texture.textureID);
@@ -76,25 +75,21 @@ namespace PrettyEngine {
 		}
 
 		void Render() {
-			if (this->renderToTexture) {
-				if (this->texture.textureID == 0) {
-					DebugLog(LOG_ERROR, "Camera: " << this->id << " have no texture generated.", true);
-				}
-				if (this->glFrameBufferID == 0) {
-					DebugLog(LOG_ERROR, "Camera: " << this->id << " have no framebuffer generated.", true);
-				}
+			if (this->texture.textureID == 0) {
+				DebugLog(LOG_ERROR, "Camera: " << this->id << " have no texture generated.", true);
+			}
+			if (this->glFrameBufferID == 0) {
+				DebugLog(LOG_ERROR, "Camera: " << this->id << " have no framebuffer generated.", true);
+			}
 				
-				if (this->texture.textureID != 0 && this->glFrameBufferID != 0) {
-					glBindFramebuffer(GL_FRAMEBUFFER, this->glFrameBufferID);
-				}
+			if (this->texture.textureID != 0 && this->glFrameBufferID != 0) {
+				glBindFramebuffer(GL_FRAMEBUFFER, this->glFrameBufferID);
 			}
 		}
 
 		/// Make sure that the camera do not let something binded
 		void ResetRender() {
-			if (this->renderToTexture) {
- 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
- 			}
+ 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		Texture* GetTexture() {
@@ -110,7 +105,6 @@ namespace PrettyEngine {
 		glm::vec3 colorFilter = glm::vec3(1.0f, 1.0f, 1.0f);
 		glm::vec2 resolution = glm::vec2(600, 800);
 
-	private:
 		unsigned int glFrameBufferID;
 	};
 }

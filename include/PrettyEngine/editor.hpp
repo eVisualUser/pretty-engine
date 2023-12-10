@@ -1,8 +1,7 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
-#include "PrettyEngine/audio.hpp"
-#include "imgui.h"
+#include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/debug.hpp>
@@ -123,7 +122,13 @@ class Editor {
 					ImGui::Text("Rotation: %f;%f;%f", camera.rotation.x, camera.rotation.y, camera.rotation.z);
 					std::string renderToTexture = std::to_string(camera.id);
 					renderToTexture += " Render to texture state";
-					ImGui::Checkbox(renderToTexture.c_str(), &camera.renderToTexture);
+
+					bool renderToTextureState = camera.renderToTexture;
+					ImGui::Checkbox(renderToTexture.c_str(), &renderToTextureState);
+					if (renderToTextureState != camera.renderToTexture) {
+						camera.SetRenderToTexture(renderToTextureState);
+					}
+
 					std::string active = std::to_string(camera.id);
 					active += " Active State";
 					ImGui::Checkbox(active.c_str(), &camera.active);

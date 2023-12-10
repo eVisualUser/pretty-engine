@@ -363,8 +363,6 @@ namespace PrettyEngine {
     }
 
     void Renderer::Draw() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
         float currentTime = static_cast<float>(glfwGetTime());
 
         bool isMinimized = glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
@@ -399,7 +397,14 @@ namespace PrettyEngine {
                     auto cameraProjection = camera.projection;
                     this->renderCube.position = camera.position;
 
-                    camera.Render();
+                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+                    if (camera.renderToTexture) {
+						camera.Render();
+					} else {
+						camera.ResetRender();
+                    }
+
                     GL_CHECK_ERROR();
 
                     int layerId;

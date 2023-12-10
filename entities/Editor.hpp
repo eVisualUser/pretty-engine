@@ -44,9 +44,6 @@ class Editor : public virtual Entity {
             this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
         this->localizationEditorPtr->localization = this->localization;
 
-        // Default camera position (to be able to see the render)
-        this->engineContent->renderer.GetCurrentCamera()->position.z = -1.0f;
-
         keyUp.name = "EditorKeyUp";
         keyUp.key = KeyCode::UpArrow;
         keyUp.mode = KeyWatcherMode::Press;
