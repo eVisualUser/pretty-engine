@@ -22,7 +22,7 @@ namespace PrettyEngine {
 	};
 
  	/// Object dynamicly managed in the engine.
-	class DynamicObject: public Tagged {
+	class DynamicObject: public Tagged, public virtual SerialObject {
 	public:
    		DynamicObject() {
    			this->publicFuncions.insert_or_assign("OnUpdatePublicVariables", [this]() { this->OnUpdatePublicVariables(); });
@@ -72,7 +72,13 @@ namespace PrettyEngine {
 		}
 
 		void SetPublicVarValue(std::string name, std::string value) {
-			this->publicMap.insert_or_assign(name, value);
+			if (value != this->GetPublicVarValue(name)) {
+				this->publicMap.insert_or_assign(name, value);
+
+				for (auto &action : this->onPublicVariableChanged) {
+					(action.second)(name);
+				}
+			}
 		}
 
 		std::vector<float> GetPublicVarAsFloatVec(std::string name) {
@@ -83,6 +89,19 @@ namespace PrettyEngine {
 			}
 
 			return out;
+		}
+
+		std::string AddActionOnPublicVariableChanged(std::function<void(std::string)> function, std::string name = xg::newGuid()) { 
+			if (function == nullptr) {
+				DebugLog(LOG_ERROR, "Tried to add a null function in " << this->unique, true);
+			} else {
+				this->onPublicVariableChanged.insert_or_assign(name, function);
+			}
+			return name;
+		}
+
+		void RemoveActionOnPublicVariableChanged(std::string name) { 
+			this->onPublicVariableChanged.erase(name);
 		}
 		
 	public:
@@ -97,6 +116,9 @@ namespace PrettyEngine {
 	public:
 		std::string unique;
 		std::string object;
+
+	private:
+		std::unordered_map<std::string, std::function<void(std::string)>> onPublicVariableChanged;
 	};
 }
 

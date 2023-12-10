@@ -44,6 +44,12 @@ public:
 		});
 
 		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshBaseTexture(); });
+
+		this->AddActionOnPublicVariableChanged([this](std::string variableName) { 
+			if (variableName == "TextureBase") {
+				this->RefreshBaseTexture();
+			}	
+		});
 	}
 
 	void OnEditorStart() override { this->OnStart(); }
