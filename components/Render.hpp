@@ -38,7 +38,30 @@ public:
 	    this->CreatePublicVar("SunLight");
 	    this->CreatePublicVar("ScreenObject", "false");
 
-  		this->publicFuncions.insert_or_assign("Init", [this]() { this->Init(); });
+  		this->publicFuncions.insert_or_assign("UpdateRender", [this]() {
+			this->Init();
+			this->OnUpdate();
+		});
+
+		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshBaseTexture(); });
+	}
+
+	void OnEditorStart() override { this->OnStart(); }
+
+	void OnEditorUpdate() override { this->OnUpdate(); }
+
+	void RefreshBaseTexture() {
+		if (this->GetPublicVarValue("UseTextureBase") == "true") {
+			auto baseTexturePath = this->GetPublicVarValue("TextureBase");
+			auto path = GetEnginePublicPath(baseTexturePath, true);
+			if (FileExist(path)) {
+				this->engineContent->renderer.RemoveTexture(this->textureGuid);
+				this->visualObject->RemoveTexture(TextureType::Base);
+				this->engineContent->renderer.Clear();
+				this->texture = this->engineContent->renderer.AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->visualObject->AddTexture(this->texture);
+			}
+		}
 	}
 
 	void Init() {
@@ -65,23 +88,7 @@ public:
 	    this->renderModel.SetShaderProgram(shader);
 	    this->visualObject->AddRenderModel(&this->renderModel);
 
-	    this->renderModel.useTexture =
-	        (this->GetPublicVarValue("UseTexture") == "true");
-
-	    if (this->GetPublicVarValue("UseTextureBase") == "true" &&
-	        this->texture == nullptr) {
-	      auto baseTexturePath = this->GetPublicVarValue("TextureBase");
-	      auto path = GetEnginePublicPath(baseTexturePath, true);
-	      if (FileExist(path)) {
-	        this->engineContent->renderer.RemoveTexture(this->textureGuid);
-	        this->visualObject->RemoveTexture(this->texture);
-	        this->texture = this->engineContent->renderer.AddTexture(
-	            this->textureGuid, path, TextureType::Base,
-	            TextureWrap::ClampToBorder, TextureFilter::Linear,
-	            TextureChannels::RGBA);
-	        this->visualObject->AddTexture(this->texture);
-	      }
-	    }
+	    this->renderModel.useTexture = (this->GetPublicVarValue("UseTexture") == "true");
 
 	    if (this->GetPublicVarValue("UseTextureTransparency") == "true") {
 	      auto baseTexturePath = this->GetPublicVarValue("TextureNormal");
