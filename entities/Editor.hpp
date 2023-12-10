@@ -44,9 +44,6 @@ class Editor : public virtual Entity {
             this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
         this->localizationEditorPtr->localization = this->localization;
 
-        // Default camera position (to be able to see the render)
-        this->engineContent->renderer.GetCurrentCamera()->position.z = -1.0f;
-
         keyUp.name = "EditorKeyUp";
         keyUp.key = KeyCode::UpArrow;
         keyUp.mode = KeyWatcherMode::Press;
@@ -66,14 +63,6 @@ class Editor : public virtual Entity {
         keyRight.key = KeyCode::RightArrow;
         keyRight.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyRight);
-
-        // Render to texture
-        // this->secondCamera = this->engineContent->renderer.AddCamera();
-        // this->secondCamera->active = true;
-        // this->secondCamera->SetRenderToTexture(false);
-
-        // this->visualObject->textures.clear();
-        // this->visualObject->AddTexture(this->secondCamera->GetTexture());
     }
 
     void OnDestroy() override {

@@ -68,7 +68,18 @@ namespace PrettyEngine {
 		void RemoveTexture(std::string name) {
 			unsigned int index = 0;
 			for (auto & texture: this->textures) {
-				if (texture->name == name && texture->useGC) {
+				if (texture->name == name) {
+					texture->userCount--;
+					this->textures.erase(this->textures.begin() + index);
+				}
+				index++;
+			}
+		}
+
+		void RemoveTexture(TextureType textureType) {
+			unsigned int index = 0;
+			for (auto &texture : this->textures) {
+				if (texture->textureType == textureType) {
 					texture->userCount--;
 					this->textures.erase(this->textures.begin() + index);
 				}

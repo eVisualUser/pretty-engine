@@ -31,7 +31,7 @@ namespace PrettyEngine {
 	static std::string GetEnginePublicPath(std::string base, bool editOriginal = false) {
 		#if _DEBUG
 			if (editOriginal) {
-				return "../assets/ENGINE_PUBLIC/" + base;
+				return std::string(PRETTY_ENGINE_PROJECT) + "/assets/ENGINE_PUBLIC/" + base;
 			} else {
 				return "./public/" + base;
 			}

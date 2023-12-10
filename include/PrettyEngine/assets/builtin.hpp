@@ -34,13 +34,13 @@ create_default_camera = true
 set_default_camera_as_main = true
 
 [engine.render.opengl]
-background_color = [0.245, 0.40, 0.65, 0.5]
+background_color = [0.245, 0.40, 0.65, 1.0]
 
 [engine.world.preload]
 demo = [] # Preload meshes to allow world loading
 
 [engine]
-database = "public/data/engine.db"
+database = "data/engine.db"
 )";
 
 static const char* ASSET_BUILTIN_EXAMPLE = R"(# Example

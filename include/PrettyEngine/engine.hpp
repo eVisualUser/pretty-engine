@@ -37,7 +37,7 @@ class Engine {
 		this->engineContent.renderer.Setup();
 
 		std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
-		this->engineDatabase = std::make_shared<DataBase>(engineDataBaseFile);
+		this->engineDatabase = std::make_shared<DataBase>(GetEnginePublicPath(engineDataBaseFile, true));
 
 		auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 		this->engineContent.renderer.SetWindowTitle(windowTitle);
@@ -104,7 +104,7 @@ class Engine {
 		auto worlds = this->_worldManager.GetWorlds();
 		this->engineContent.input.Update();
 
-		// Builtin fullscreen support
+		// Builtin fullscreen support (F11 is reserved)
 		if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
 			this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
 		}
@@ -116,25 +116,30 @@ class Engine {
 					if (!this->isEditor) {
 						currentWorld->CallFunctionProcesses();
 						currentWorld->Update();
+					} else {
+						currentWorld->EditorUpdate();
 					}
-
-					currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
-					currentWorld->EditorUpdate();
 				}
 			}
 
 			this->engineContent.renderer.StartUIRendering();
 #if ENGINE_EDITOR
-   			this->UpdateDebugUI();
-   			worlds = this->_worldManager.GetWorlds();
+			this->UpdateDebugUI();
+			worlds = this->_worldManager.GetWorlds();
 			this->SetupWorlds();
 #endif
-			for (auto &currentWorld : worlds) {
-				if (currentWorld != nullptr) {
-					currentWorld->CallRenderFunctions();
-					if (!this->isEditor) {
-						currentWorld->PrePhysics();
+			if (this->engineContent.renderer.GetCurrentCamera() != nullptr) {
+				for (auto &currentWorld : worlds) {
+					currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
+					if (currentWorld != nullptr) {
+						currentWorld->CallRenderFunctions();
 					}
+				}
+			}
+
+			for (auto &currentWorld : worlds) {
+				if (!this->isEditor) {
+					currentWorld->PrePhysics();
 				}
 			}
 

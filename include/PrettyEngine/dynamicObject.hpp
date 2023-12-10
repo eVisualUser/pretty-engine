@@ -64,7 +64,11 @@ namespace PrettyEngine {
 		}
 
 		std::string GetPublicVarValue(std::string name) {
-			return this->publicMap[name];
+			if (this->publicMap.contains(name)) {
+				return this->publicMap[name];
+			} else {
+				return "null";
+			}
 		}
 
 		void SetPublicVarValue(std::string name, std::string value) {
