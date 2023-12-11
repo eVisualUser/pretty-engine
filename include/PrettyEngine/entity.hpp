@@ -85,6 +85,9 @@ namespace PrettyEngine {
 		std::vector<std::shared_ptr<Component>> components;
 	private:
 		std::string _entityGUID = xg::newGuid();
+	
+	public:
+		std::unordered_map<std::string, std::shared_ptr<Entity>>* entities;
 	};
 };
 
