@@ -6,20 +6,20 @@ components = [
         'Render',
         'UseTexture',
         'true',
-        'TextureTransparency',
-        '',
-        'TextureNormalGUID',
-        '3017c07f-9174-489b-b634-7ca9a3f031bd',
         'UseTextureBase',
         'true',
+        'TextureNormalGUID',
+        '3017c07f-9174-489b-b634-7ca9a3f031bd',
+        'TextureTransparency',
+        '',
+        'TextureBase',
+        'image.png',
         'UseTextureTransparency',
         'false',
-        'TextureBase',
-        'cpp_logo.png',
-        'UseLight',
-        '',
         'UseTextureNormal',
         'false',
+        'UseLight',
+        '',
         'TextureBaseGUID',
         'b166c7ac-44b5-432b-b1c6-91109568ca3f',
         'TextureTransparencyGUID',
@@ -41,7 +41,7 @@ object = 'Editor'
 public_map = []
 
     [entities.editorEntity.transform]
-    position = [ -0.3574382960796356, 0.43760937452316284, 0.0 ]
+    position = [ -4.57956600189209, 0.43760937452316284, 0.0 ]
     rotation = [ 0.0, 7.640509466000367e-06, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 

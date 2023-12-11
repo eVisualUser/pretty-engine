@@ -174,7 +174,7 @@ class Editor {
 					headerName += component->unique;
 
 					if (ImGui::CollapsingHeader(headerName.c_str())) {
-						ImGui::LabelText("Unique: ", "%s", component->unique.c_str());
+						ImGui::Text("Unique: %s", component->unique.c_str());
 						this->ShowManualFunctionsCalls(component.get());
 
 						if (ImGui::Button("Remove")) {
