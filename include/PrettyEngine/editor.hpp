@@ -27,14 +27,14 @@ class Editor {
   public:
 	Editor() {
 		// Load the list of all components
-		auto componentListFile = GetEnginePublicPath("../../components/list.csv");
+		auto componentListFile = GetEnginePublicPath("../../components/list.csv", true);
 		if (FileExist(componentListFile)) {
 			auto fileContent = ReadFileToString(componentListFile);
 			this->existingComponents = ParseCSVLine(fileContent);
 		}
 
 		// Load the list of all entities
-		auto entitiesListFile = GetEnginePublicPath("../../entities/list.csv");
+		auto entitiesListFile = GetEnginePublicPath("../../entities/list.csv", true);
 		if (FileExist(entitiesListFile)) {
 			auto fileContent = ReadFileToString(entitiesListFile);
 			this->existingEntities = ParseCSVLine(fileContent);
@@ -163,7 +163,9 @@ class Editor {
 						ImGui::Text("Unique: %s", component->unique.c_str());
 						this->ShowManualFunctionsCalls(component.get());
 
-						if (ImGui::Button("Remove")) {
+						std::string removeButtonName = "Remove: ";
+						removeButtonName += component->unique;
+						if (ImGui::Button(removeButtonName.c_str())) {
 							selectedEntity->components.erase(selectedEntity->components.begin() + componentIndex);
 							break;
 						}
@@ -175,8 +177,8 @@ class Editor {
 							component->SetPublicVarValue(publicElement.first, buffer);
 						}
 						ImGui::Separator();
-						componentIndex++;
 					}
+					componentIndex++;
 				}
 
 				if (ImGui::Button("Add Component")) {

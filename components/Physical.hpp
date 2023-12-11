@@ -4,6 +4,7 @@
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/localization.hpp>
 
 #include <Guid.hpp>
 
@@ -11,12 +12,27 @@ namespace Custom {
 	class Physical: public PrettyEngine::Component {
 	public:
 		void OnUpdatePublicVariables() override {
+			this->AddActionOnPublicVariableChanged([this](std::string var) {
+				if (var == "Gravity") {
+					PRINT_GLM_VEC3(this->GetCollider()->gravity);
+					auto gravity = PrettyEngine::ParseCSVLine(this->GetPublicVarValue("Gravity"), ';');
+					for (int i = 0; i < gravity.size(); i++) {
+						float axisValue = std::stof(gravity[i]);
+						if (i < this->GetCollider()->gravity.length()) {
+							this->GetCollider()->gravity[i] = axisValue;
+						}
+					}
+					PRINT_GLM_VEC3(this->GetCollider()->gravity);
+				}
+			});
+
 			this->CreatePublicVar("rigidbody", "false");
 			this->CreatePublicVar("model", "AABB");
 			this->CreatePublicVar("layer", "Default");
 			this->CreatePublicVar("name", xg::newGuid());
 			this->CreatePublicVar("mass", "1");
 			this->CreatePublicVar("fixed", "false");
+			this->CreatePublicVar("Gravity", "0;9.81;0");
 
 			if (this->GetPublicVarValue("fixed") == "false") {
 				this->_colliderA.fixed = false;

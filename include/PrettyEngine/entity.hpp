@@ -22,9 +22,9 @@ namespace PrettyEngine {
 
 	class Component: public DynamicObject {
 	public:
-		virtual void OnStart() {}
-		virtual void OnUpdate() {}
-		virtual void OnDestroy() {}
+		~Component() {
+			this->OnDestroy();
+		}
 
 		Transform* GetTransform() {
 			return dynamic_cast<Transform*>(this->owner);
@@ -42,6 +42,7 @@ namespace PrettyEngine {
 	class Entity: public virtual DynamicObject, public virtual Transform {
 	public:
 		~Entity() {
+			this->OnDestroy();
 			this->publicMap.clear();
 			this->components.clear();
 		}

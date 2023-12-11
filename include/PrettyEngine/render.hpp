@@ -93,6 +93,7 @@ namespace PrettyEngine {
 					if (element.first == name) {
 						element.second->OnRendererUnRegister((void*)this);
 						sublist.erase(name);
+						return;
 					}
 				}
 			}

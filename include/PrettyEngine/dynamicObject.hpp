@@ -31,6 +31,8 @@ namespace PrettyEngine {
 			this->publicFuncions.insert_or_assign("OnRender", [this]() { this->OnRender(); });
   		}
 
+		~DynamicObject() { this->OnDestroy(); }
+
 		/// Called when the components loaded
 		virtual void OnUpdatePublicVariables() {}
 		/// Called before the first frame.
@@ -60,6 +62,9 @@ namespace PrettyEngine {
 		void CreatePublicVar(std::string name, std::string defaultValue = "") {
 			if (!this->publicMap.contains(name)) {
 				this->publicMap.insert(std::make_pair(name, defaultValue));
+				for (auto &action : this->onPublicVariableChanged) {
+					(action.second)(name);
+				}
 			}
 		}
 

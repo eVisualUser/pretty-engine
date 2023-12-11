@@ -18,6 +18,12 @@ namespace Custom {
 class Render : public PrettyEngine::Component {
 public:
 	void OnUpdatePublicVariables() override {
+		this->AddActionOnPublicVariableChanged([this](std::string variableName) {
+			if (variableName == "TextureBase") {
+				this->RefreshBaseTexture();
+			}
+		});
+
 		this->CreatePublicVar("UseTexture", "false");
 
 	    this->CreatePublicVar("UseTextureBase", "false");
@@ -44,12 +50,6 @@ public:
 		});
 
 		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshBaseTexture(); });
-
-		this->AddActionOnPublicVariableChanged([this](std::string variableName) { 
-			if (variableName == "TextureBase") {
-				this->RefreshBaseTexture();
-			}	
-		});
 	}
 
 	void OnEditorStart() override { this->OnStart(); }
@@ -146,6 +146,8 @@ public:
   	void OnStart() override {
 	    this->Init();
   	}
+
+	~Render() { this->OnDestroy();	}
 
   	void OnDestroy() override {
     	this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);
