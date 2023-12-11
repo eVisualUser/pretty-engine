@@ -208,7 +208,6 @@ namespace PrettyEngine {
 			for (auto & element: this->glTextures) {
 				auto texture = &element.second;
 				if (texture->userCount <= 0 && texture->useGC || clearEverything) {
-     				DebugLog(LOG_WARNING, "Unused texture: " << texture->name, false);
 					this->RemoveTexture(texture->name);
 					this->Clear();
 					return;

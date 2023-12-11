@@ -121,13 +121,43 @@ class Editor {
 					ImGui::Separator();
 				}
 			}
-
+			
 			if (ImGui::CollapsingHeader("Content counter")) {
 				ImGui::LabelText("Light count: ", "%lli", renderer->lights.size());
 				ImGui::LabelText("VisualObject count: ", "%lli", renderer->visualObjects.size());
 				ImGui::LabelText("Light count: ", "%lli", renderer->lights.size());
 				ImGui::LabelText("Texture count: ", "%lli", renderer->glTextures.size());
 				ImGui::LabelText("Mesh count: ", "%lli", renderer->glMeshList.size());
+			}
+
+			if (ImGui::CollapsingHeader("VisualObjects")) {
+				int layerIndex = 0;
+				for (auto &layer : renderer->visualObjects) {
+					std::string headerTitle = "Layer ";
+					headerTitle += std::to_string(layerIndex);
+					if (ImGui::CollapsingHeader(headerTitle.c_str())) {
+						for (auto &visualObject : layer) {
+							ImGui::Text("VisualObject: %s", visualObject.first);
+						}
+					}
+					layerIndex++;
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Textures")) {
+				for (auto & texture : renderer->glTextures) {
+					if (ImGui::BeginTable("TextureTable", 1)) {
+						ImGui::TableHeader("Texture");
+						ImGui::TableNextRow();
+						ImGui::TableNextColumn();
+						if (ImGui::CollapsingHeader(texture.first.c_str())) {
+							ImGui::Image(ImTextureID(texture.second.textureID), ImVec2(100, 100));
+							ImGui::SameLine();
+							ImGui::Text("User count: %lli", texture.second.userCount);
+						}
+					}
+					ImGui::EndTable();
+				}
 			}
 		}
 		ImGui::End();

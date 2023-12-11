@@ -52,7 +52,10 @@ public:
 		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshBaseTexture(); });
 	}
 
-	void OnEditorStart() override { this->OnStart(); }
+	void OnEditorStart() override {
+		this->OnStart();
+		this->RefreshBaseTexture();
+	}
 
 	void OnEditorUpdate() override { this->OnUpdate(); }
 
@@ -61,7 +64,6 @@ public:
 			auto baseTexturePath = this->GetPublicVarValue("TextureBase");
 			auto path = GetEnginePublicPath(baseTexturePath, true);
 			if (FileExist(path)) {
-				this->engineContent->renderer.RemoveTexture(this->textureGuid);
 				this->visualObject->RemoveTexture(TextureType::Base);
 				this->engineContent->renderer.Clear();
 				this->texture = this->engineContent->renderer.AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
