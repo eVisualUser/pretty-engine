@@ -37,12 +37,10 @@ namespace Custom {
 class Editor : public virtual Entity {
   public:
     void OnEditorStart() override {
-        this->localization = std::make_shared<Localization>();
-        this->localization->LoadFile(GetEnginePublicPath("editor.csv", true));
-
-        this->localizationEditorPtr =
-            this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
-        this->localizationEditorPtr->localization = this->localization;
+		this->localizationEditorPtr = this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
+		if (this->localizationEditorPtr == nullptr) {
+			DebugLog(LOG_ERROR, "Missing LocalizationEditor component", true);
+        }
 
         keyUp.name = "EditorKeyUp";
         keyUp.key = KeyCode::UpArrow;
@@ -212,7 +210,7 @@ class Editor : public virtual Entity {
 
                 ImGui::Separator();
                 ImGui::Text("Tools");
-                if (ImGui::Button("Localization Editor")) {
+				if (this->localizationEditorPtr != nullptr && ImGui::Button("Localization Editor")) {
                     this->localizationEditorPtr->Toggle();
                 }
             }
@@ -228,12 +226,8 @@ class Editor : public virtual Entity {
         if (actionBox) {
             ImGui::SetNextWindowPos(actionBoxStartPos);
             if (ImGui::Begin("actionBox", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
-                if (ImGui::Button(this->localization->Get("Save Editor").c_str())) {
+                if (ImGui::Button("Save Editor")) {
                     this->requests.push_back(Request::SAVE);
-                }
-
-                if (ImGui::Button(this->localization->Get("Save Editor localization").c_str())) {
-                    this->localization->Save();
                 }
 
                 if (ImGui::Button("Console")) {
@@ -317,11 +311,9 @@ class Editor : public virtual Entity {
     bool actionBox = false;
     ImVec2 actionBoxStartPos;
 
-    LocalizationEditor *localizationEditorPtr;
+    LocalizationEditor* localizationEditorPtr;
 
     std::string file = "game.toml";
-
-    std::shared_ptr<Localization> localization;
 
     float _speed = 3.0f;
 

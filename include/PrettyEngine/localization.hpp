@@ -124,6 +124,8 @@ namespace PrettyEngine {
 				return 0;
 			}
 
+			column++;
+
 			this->lastLangIndex = column;
  			return column;
 		}
@@ -178,6 +180,8 @@ namespace PrettyEngine {
 				this->content.erase(this->content.begin() + index);
 			}
 		}
+
+		void SetLangIndex(int newLangIndex) { this->lastLangIndex = newLangIndex; }
 		
 	private:
 		int lastLangIndex = 0;

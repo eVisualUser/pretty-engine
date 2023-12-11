@@ -26,8 +26,6 @@ namespace PrettyEngine {
 class Editor {
   public:
 	Editor() {
-		this->debugLocalization.LoadFile(GetEnginePublicPath("debug_localization.csv", true));
-
 		// Load the list of all components
 		auto componentListFile = GetEnginePublicPath("../../components/list.csv");
 		if (FileExist(componentListFile)) {
@@ -43,22 +41,10 @@ class Editor {
 		}
 	}
 
-	~Editor() { this->debugLocalization.Save(); }
-
 	void ShowWorldDebugInfo(Renderer *renderer) {
-		if (ImGui::Begin(this->debugLocalization.Get("Debug Tools").c_str(), NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoSavedSettings)) {
-			ImGui::BeginMenuBar();
-			for (std::string language : *this->debugLocalization.GetAllLanguages()) {
-				if (ImGui::Button(language.c_str())) {
-					this->debugLocalization.GetLangIndex(language.c_str());
-				}
-			}
-			ImGui::EndMenuBar();
-
-			auto visualObjects = this->debugLocalization.Get("Visual Objects: ");
-			ImGui::Text("%s%i", visualObjects.c_str(), renderer->GetVisualObjectsCount());
-			auto lights = this->debugLocalization.Get("Lights: ");
-			ImGui::Text("%s%i", lights.c_str(), renderer->GetLightCount());
+		if (ImGui::Begin("Debug Tools", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoSavedSettings)) {
+			ImGui::Text("Visual Objects : %i", renderer->GetVisualObjectsCount());
+			ImGui::Text("Lights: %i", renderer->GetLightCount());
 		}
 		ImGui::End();
 	}
@@ -319,8 +305,6 @@ class Editor {
 
   private:
 	char textInputworldToLoad[100];
-
-	Localization debugLocalization;
 
 	std::vector<Entity *> selectedEntities;
 
