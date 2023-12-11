@@ -52,7 +52,7 @@ public:
 		});
 	}
 
-	void OnEditorStart() override { DebugLog(LOG_DEBUG, "Start !", false) this->OnStart(); }
+	void OnEditorStart() override { this->OnStart(); }
 
 	void OnEditorUpdate() override { this->OnUpdate(); }
 
