@@ -7,7 +7,7 @@ namespace PrettyEngine {
 	static DataBase assetDataBase = DataBase(GetEnginePublicPath("assets.db", true));
 	static std::string tableName = "any";
 
-	std::vector<SQLBlobData> AssetsManager::GetBinary(std::string directory, std::string assetName) {
+	std::vector<SQLBlobData> AssetDataBase::GetBinary(std::string directory, std::string assetName) {
 		std::stringstream command;
 
 		command << "SELECT CASE ";
@@ -19,7 +19,7 @@ namespace PrettyEngine {
 		return assetDataBase.QuerySQLBlob(command.str());
 	}
 
-	std::vector<std::string> AssetsManager::GetText(std::string directory, std::string assetName) {
+	std::vector<std::string> AssetDataBase::GetText(std::string directory, std::string assetName) {
 		std::stringstream command;
 
 		command << "SELECT CASE ";
@@ -31,7 +31,7 @@ namespace PrettyEngine {
 		return assetDataBase.QuerySQLText(command.str());
 	}
 
-	void AssetsManager::SetText(std::string directory, std::string assetName, std::string text) {
+	void AssetDataBase::SetText(std::string directory, std::string assetName, std::string text) {
 		auto exist = false;
 		for(auto & name: assetDataBase.QuerySQLText("SELECT name FROM " + tableName)) {
 			if (name == assetName) {

@@ -7,7 +7,7 @@
 #include <string>
 
 namespace PrettyEngine {
-	class AssetsManager {
+	class AssetDataBase {
 	public:
 		static std::vector<SQLBlobData> GetBinary(std::string directory, std::string assetName);
 		static std::vector<std::string> GetText(std::string directory, std::string assetName);
