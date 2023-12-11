@@ -16,6 +16,8 @@
 #include <memory>
 
 namespace PrettyEngine {
+	class World;
+
 	#define DefaultEntityName "AnyEntity"
 
 	class Component: public DynamicObject {
@@ -87,7 +89,7 @@ namespace PrettyEngine {
 		std::string _entityGUID = xg::newGuid();
 	
 	public:
-		std::unordered_map<std::string, std::shared_ptr<Entity>>* entities;
+		World *world;
 	};
 };
 
