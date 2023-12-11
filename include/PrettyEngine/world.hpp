@@ -216,7 +216,6 @@ namespace PrettyEngine {
 		void UpdateLinks() {
 			for (auto & entity: this->entities) {
 				entity.second->engineContent = this->engineContent;
-				entity.second->entities = &this->entities;
 				entity.second->world = this;
 
 				for(auto & component: entity.second->components) {
