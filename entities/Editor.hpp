@@ -70,14 +70,6 @@ class Editor : public virtual Entity {
         this->engineContent->input.RemoveKeyWatcher(&keyRight);
     }
 
-    void OnAlwaysUpdate() override {
-        if (!this->engineContent->renderer.GetWindowFocus()) {
-            this->engineContent->renderer.SetWindowOpacity(0.5f);
-        } else {
-            this->engineContent->renderer.SetWindowOpacity(1.0f);
-        }
-    }
-
     void MenuBar() {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::Button("Input Debugger")) {

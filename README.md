@@ -8,6 +8,8 @@ Don't mind to use it until all features are set at something else than WIP.
 
 I share it to get feedbacks and maybe give some help to people learning one of the library I use.
 
+<img src="./assets/ENGINE_PUBLIC/editor_example.png"/>
+
 ## Goals
 
 - [ ] Easy to learn.
