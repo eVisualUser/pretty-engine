@@ -1,7 +1,7 @@
 #ifndef H_DATA
 #define H_DATA
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
 #include <cstring>

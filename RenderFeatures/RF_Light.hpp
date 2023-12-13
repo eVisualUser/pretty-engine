@@ -1,8 +1,8 @@
 #pragma once
 
-#include <PrettyEngine/RenderFeature.hpp>
-#include <PrettyEngine/debug.hpp>
-#include <PrettyEngine/light.hpp>
+#include <PrettyEngine/render/RenderFeature.hpp>
+#include <PrettyEngine/debug/debug.hpp>
+#include <PrettyEngine/render/light.hpp>
 
 namespace Custom {
 	class RF_Light: public PrettyEngine::RenderFeature {

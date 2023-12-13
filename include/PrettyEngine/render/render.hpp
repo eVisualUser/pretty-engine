@@ -1,18 +1,17 @@
 #ifndef H_RENDER
 #define H_RENDER
 
-#include "PrettyEngine/debug.hpp"
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/PrettyGL.hpp>
-#include <PrettyEngine/visualObject.hpp>
-#include <PrettyEngine/camera.hpp>
+#include <PrettyEngine/render/PrettyGL.hpp>
+#include <PrettyEngine/render/visualObject.hpp>
+#include <PrettyEngine/render/camera.hpp>
 #include <PrettyEngine/collider.hpp>
-#include <PrettyEngine/light.hpp>
-#include <PrettyEngine/RenderFeature.hpp>
+#include <PrettyEngine/render/light.hpp>
+#include <PrettyEngine/render/RenderFeature.hpp>
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>

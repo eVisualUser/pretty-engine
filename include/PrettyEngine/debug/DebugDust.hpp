@@ -3,7 +3,7 @@
 #ifndef HPP_DEBUG_DUST
 #define HPP_DEBUG_DUST
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
 namespace PrettyEngine {

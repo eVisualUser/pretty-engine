@@ -1,7 +1,7 @@
 #ifndef H_LOCALIZATION
 #define H_LOCALIZATION
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
 #include <cstddef>

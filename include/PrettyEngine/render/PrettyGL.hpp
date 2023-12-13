@@ -1,7 +1,7 @@
 #ifndef H_PRETTY_GL
 #define H_PRETTY_GL
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/utils.hpp>
 

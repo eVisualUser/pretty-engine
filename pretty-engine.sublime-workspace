@@ -30797,7 +30797,7 @@
 		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/collider.hpp",
 		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/Collision.hpp",
 		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/data.hpp",
-		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/debug.hpp",
+		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/debug/debug.hpp",
 		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/dynamicObject.hpp",
 		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/include/PrettyEngine/editor.hpp",
 		"/C/Users/sylva/Desktop/custom game engine/pretty-engine/entities/Editor.hpp",

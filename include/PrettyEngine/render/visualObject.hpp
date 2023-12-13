@@ -2,11 +2,11 @@
 #define H_VISUAL_OBJECT
 
 #include <PrettyEngine/tags.hpp>
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/PrettyGL.hpp>
-#include <PrettyEngine/camera.hpp>
+#include <PrettyEngine/render/PrettyGL.hpp>
+#include <PrettyEngine/render/camera.hpp>
 
 #include <string>
 

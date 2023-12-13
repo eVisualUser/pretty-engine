@@ -2,7 +2,7 @@
 #define H_DYNAMIC_OBJECT
 
 #include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/render.hpp>
+#include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/Input.hpp>

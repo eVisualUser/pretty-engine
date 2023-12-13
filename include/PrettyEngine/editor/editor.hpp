@@ -4,9 +4,9 @@
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/render.hpp>
+#include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/world.hpp>

@@ -1,4 +1,4 @@
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/assetManager.hpp>
 

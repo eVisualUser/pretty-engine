@@ -3,18 +3,18 @@
 
 #include <Physical.hpp>
 #include <PrettyEngine/KeyCode.hpp>
-#include <PrettyEngine/PrettyGL.hpp>
-#include <PrettyEngine/camera.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/render/PrettyGL.hpp>
+#include <PrettyEngine/render/camera.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/localization.hpp>
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/render.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/shaders.hpp>
-#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/utils.hpp>
-#include <PrettyEngine/visualObject.hpp>
+#include <PrettyEngine/render/visualObject.hpp>
 
 #include <Render.hpp>
 

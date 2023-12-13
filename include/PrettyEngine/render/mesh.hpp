@@ -1,9 +1,9 @@
 #ifndef H_MESH
 #define H_MESH
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/gc.hpp>
-#include <PrettyEngine/PrettyGL.hpp>
+#include <PrettyEngine/render/PrettyGL.hpp>
 
 #include <glm/glm.hpp>
 

@@ -2,8 +2,8 @@
 #define H_COLLIDER
 
 // Pretty Engine
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/tags.hpp>

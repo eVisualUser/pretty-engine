@@ -3,7 +3,7 @@
 #include <PrettyEngine/Collision.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/localization.hpp>
 
 #include <Guid.hpp>

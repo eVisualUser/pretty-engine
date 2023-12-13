@@ -1,18 +1,18 @@
 #ifndef H_ENGINE
 #define H_ENGINE
 
-#include <PrettyEngine/DebugDust.hpp>
+#include <PrettyEngine/debug/debug.hpp>
+#include <PrettyEngine/debug/DebugDust.hpp>
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/KeyCode.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/data.hpp>
-#include <PrettyEngine/debug.hpp>
-#include <PrettyEngine/editor.hpp>
+#include <PrettyEngine/editor/editor.hpp>
 #include <PrettyEngine/event.hpp>
-#include <PrettyEngine/render.hpp>
-#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/render/render.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 

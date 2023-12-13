@@ -1,7 +1,7 @@
 #ifndef HPP_UTILS
 #define HPP_UTILS
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 
 #include <string>
 #include <vector>

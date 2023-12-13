@@ -1,7 +1,7 @@
 #ifndef H_SERIAL
 #define H_SERIAL
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 
 #include <sstream>
 #include <toml++/toml.h>

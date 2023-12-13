@@ -1,15 +1,15 @@
 #include <PrettyEngine/localization.hpp>
-#include <PrettyEngine/light.hpp>
+#include <PrettyEngine/render/light.hpp>
 #include <PrettyEngine/collider.hpp>
-#include <PrettyEngine/camera.hpp>
-#include <PrettyEngine/render.hpp>
-#include <PrettyEngine/Graphics.hpp>
+#include <PrettyEngine/render/camera.hpp>
+#include <PrettyEngine/render/render.hpp>
+#include <PrettyEngine/render/Graphics.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
 
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/shaders.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <RenderFeatures.hpp>
 

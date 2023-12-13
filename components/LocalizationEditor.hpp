@@ -1,6 +1,6 @@
 #pragma once
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/localization.hpp>

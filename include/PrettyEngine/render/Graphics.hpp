@@ -1,7 +1,7 @@
 #ifndef H_GRAPHICS
 #define H_GRAPHICS
 
-#include <PrettyEngine/PrettyGL.hpp>
+#include <PrettyEngine/render/PrettyGL.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

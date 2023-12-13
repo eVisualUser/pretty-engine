@@ -1,10 +1,10 @@
 #ifndef H_CAMERA
 #define H_CAMERA
 
-#include <PrettyEngine/texture.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/render/texture.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/PrettyGL.hpp>
+#include <PrettyEngine/render/PrettyGL.hpp>
 
 #include <glm/glm.hpp>
 #include <string>

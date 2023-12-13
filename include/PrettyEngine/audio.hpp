@@ -1,7 +1,7 @@
 #ifndef H_AUDIO
 #define H_AUDIO
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/collider.hpp>
 

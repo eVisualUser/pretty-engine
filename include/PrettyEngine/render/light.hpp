@@ -1,8 +1,8 @@
 #ifndef H_LIGHT
 #define H_LIGHT
 
-#include "glm/trigonometric.hpp"
-#include <PrettyEngine/texture.hpp>
+#include <glm/trigonometric.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/transform.hpp>
 
 #include <string>

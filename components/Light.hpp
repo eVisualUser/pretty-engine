@@ -1,7 +1,7 @@
 #pragma once
 
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/light.hpp>
+#include <PrettyEngine/render/light.hpp>
 
 #include <Guid.hpp>
 #include <string>

@@ -2,13 +2,13 @@
 #define H_COMPONENT_RENDER
 
 #include <Guid.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/shaders.hpp>
-#include <PrettyEngine/texture.hpp>
+#include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/visualObject.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/render/visualObject.hpp>
 
 #include <memory>
 

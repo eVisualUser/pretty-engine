@@ -1,7 +1,7 @@
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/engine.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 
 using namespace PrettyEngine;
 
