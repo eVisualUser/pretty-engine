@@ -237,8 +237,6 @@ namespace PrettyEngine {
 									}
 								}
 
-								
-
 								lastEntity->unique = entity.first;
 								lastEntity->object = newEntity;
 								lastEntity->OnUpdatePublicVariables();

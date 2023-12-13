@@ -2,7 +2,7 @@
 
 package main
 
-import(
+import (
 	"log"
 	"os"
 	"path/filepath"
@@ -15,23 +15,23 @@ func main() {
 
 func MakeCPPFileStringVariable(name string, content string) string {
 	var result string
-	
+
 	result += "/// Generated shader variable from file\n"
-	result += "static const char* " + name + " = ";
-	result += "R\"(";
-	result += content;
-	result +=")\";"
-	
+	result += "static const char* " + name + " = "
+	result += "R\"("
+	result += content
+	result += ")\";"
+
 	return result
 }
 
 func GenerateShadersHeader() {
-	dir := "../shaders";
-	
+	dir := "../shaders"
+
 	shaders, err := os.ReadDir(dir)
-	
+
 	shadersMap := make(map[string][]byte)
-	
+
 	if err != nil {
 		log.Fatal(err)
 	} else {
@@ -44,7 +44,7 @@ func GenerateShadersHeader() {
 					log.Fatal(err)
 				} else {
 					var shaderName string
-					shaderName = "SHADER_";
+					shaderName = "SHADER_"
 					shaderName += strings.ReplaceAll(shader.Name(), ".glsl", "_GLSL")
 					shaderName = strings.ReplaceAll(shaderName, ".vert", "_VERTEX")
 					shaderName = strings.ReplaceAll(shaderName, ".frag", "_FRAGMENT")
@@ -52,7 +52,7 @@ func GenerateShadersHeader() {
 				}
 			}
 		}
-		
+
 		var output string
 
 		output += "#pragma once\n\n"
@@ -76,4 +76,9 @@ func GenerateShadersHeader() {
 			log.Print("Succeed to generate header: shaders.hpp")
 		}
 	}
+}
+
+/// Generate the required function for object that will be generated in runtime
+func CustomObjectScript() {
+
 }
