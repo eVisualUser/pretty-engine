@@ -22,6 +22,7 @@ namespace PrettyEngine {
 	}
 
 	struct SQLBlobData {
+	  public:
 		std::vector<unsigned char> data;
 		int bytes;
 	};

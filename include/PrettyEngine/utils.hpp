@@ -1,5 +1,5 @@
-#ifndef H_UTILS
-#define H_UTILS
+#ifndef HPP_UTILS
+#define HPP_UTILS
 
 #include <PrettyEngine/debug.hpp>
 

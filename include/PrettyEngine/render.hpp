@@ -147,7 +147,7 @@ namespace PrettyEngine {
 		void UpdateMesh(Mesh* mesh);
 
 		void RemoveMesh(std::string name) {
-			auto mesh = this->glMeshList[name];
+			auto &mesh = this->glMeshList[name];
 
 			mesh.Cleanup();
 
@@ -300,7 +300,7 @@ namespace PrettyEngine {
 		}
 
 		void UnRegisterLight(Light* light) {
-			for (size_t i; i < this->lights.size(); i++) {
+			for (size_t i = 0; i < this->lights.size(); i++) {
 				if (this->lights[i]->name == light->name) {
 					this->lights.erase(this->lights.begin() + i);		
 				}
@@ -375,7 +375,7 @@ namespace PrettyEngine {
 		
 		void SetWindowIcon(unsigned char* data, int width, int height) {
 			this->_glfwIcons.clear();
-			GLFWimage image;
+			GLFWimage image {};
 			image.pixels = data;
 			image.width = width;
 			image.height = height;

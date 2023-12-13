@@ -8,6 +8,7 @@ namespace PrettyEngine {
 	/// Allow an object to have multiple tags.
 	class Tagged {
 	public:
+		/// Create a tag that are a copy and not a pointer
 		static std::string* CreateSafeTag(std::string tag) {
 			Tagged::longTermTags.push_back(tag);
 			return &Tagged::longTermTags.back();

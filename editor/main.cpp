@@ -1,10 +1,6 @@
-#include <PrettyEngine/utils.hpp>
-#include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 #include <PrettyEngine/engine.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
-#include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/render.hpp>
 #include <PrettyEngine/debug.hpp>
 
 using namespace PrettyEngine;

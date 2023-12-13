@@ -19,6 +19,7 @@
 #include <implot.h>
 #include <memory>
 #include <string>
+#include <filesystem>
 
 namespace PrettyEngine {
 
@@ -240,6 +241,8 @@ class Editor {
 								customComponent->OnUpdatePublicVariables();
 								customComponent->owner = selectedEntity;
 								customComponent->object = componentName;
+								customComponent->SetObjectSerializedName(componentName);
+								customComponent->SetSerializedUnique(newComponentName);
 
 								selectedEntity->components.push_back(customComponent);
 							}

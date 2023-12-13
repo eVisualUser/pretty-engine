@@ -17,7 +17,7 @@ using namespace PrettyEngine;
 namespace Custom {
 class Render : public PrettyEngine::Component {
 public:
-	void OnUpdatePublicVariables() override {
+	void OnUpdatePublicVariables() override {		
 		this->AddActionOnPublicVariableChanged([this](std::string variableName) {
 			if (variableName == "TextureBase") {
 				this->RefreshBaseTexture();

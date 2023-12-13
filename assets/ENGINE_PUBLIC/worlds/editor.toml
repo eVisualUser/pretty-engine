@@ -1,48 +1,28 @@
 [entities.editorEntity]
-components = [
-    [ 'LocalizationEditor', 'LocalizationEditor' ],
-    [
-        'Render',
-        'Render',
-        'UseTexture',
-        'true',
-        'UseTextureBase',
-        'true',
-        'TextureNormalGUID',
-        '3017c07f-9174-489b-b634-7ca9a3f031bd',
-        'TextureTransparency',
-        '',
-        'TextureBase',
-        'image.png',
-        'UseTextureTransparency',
-        'false',
-        'UseTextureNormal',
-        'false',
-        'UseLight',
-        '',
-        'TextureBaseGUID',
-        'b166c7ac-44b5-432b-b1c6-91109568ca3f',
-        'TextureTransparencyGUID',
-        '558c98ee-37bd-4b94-9d37-2f3903868d81',
-        'TextureNormal',
-        '',
-        'Mesh',
-        'rect',
-        'MeshGUID',
-        '6912f526-0da3-4b4b-bb34-5a4878d776cc',
-        'SunLight',
-        '',
-        'ScreenObject',
-        'false'
-    ]
-]
 name = 'Editor'
 object = 'Editor'
-public_map = []
+
+    [entities.editorEntity.components.LocalizationEditor]
+    ObjectName = 'LocalizationEditor'
+    ObjectUnique = 'LocalizationEditor'
+
+        [entities.editorEntity.components.LocalizationEditor.fields]
+
+    [entities.editorEntity.components.Render]
+    ObjectName = 'Render'
+    ObjectUnique = 'Render'
+
+        [entities.editorEntity.components.Render.fields]
+
+    [entities.editorEntity.serial]
+    ObjectName = ''
+    ObjectUnique = '8ea771fa-9747-4943-bfb9-97fe73f4626f'
+
+        [entities.editorEntity.serial.fields]
 
     [entities.editorEntity.transform]
-    position = [ -4.57956600189209, 0.43760937452316284, 0.0 ]
-    rotation = [ 0.0, 7.640509466000367e-06, 0.0, 1.0 ]
+    position = [ -0.8076468110084534, 0.4743005633354187, 0.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]

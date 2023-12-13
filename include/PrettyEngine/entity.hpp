@@ -67,7 +67,7 @@ namespace PrettyEngine {
 
 		void RemoveComponent(Component* component) {
 			for(int i = 0; i < this->components.size(); i++) {
-				if (this->components[i]->unique == component->unique) {
+				if (this->components[i]->unique == component->GetObjectSerializedUnique()) {
 					this->components.erase(this->components.begin() + i);
 					break;
 				}
@@ -77,7 +77,7 @@ namespace PrettyEngine {
 		template<typename T>
 		T* GetComponentAs(std::string unique) {
 			for(auto & component: this->components) {
-				if (component->unique == unique) {
+				if (component->GetObjectSerializedUnique() == unique) {
 					return dynamic_cast<T*>(component.get());
 				}
 			}
