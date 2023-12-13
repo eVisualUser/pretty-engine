@@ -17,32 +17,29 @@ using namespace PrettyEngine;
 namespace Custom {
 class Render : public PrettyEngine::Component {
 public:
-	void OnUpdatePublicVariables() override {		
-		this->AddActionOnPublicVariableChanged([this](std::string variableName) {
-			if (variableName == "TextureBase") {
-				this->RefreshBaseTexture();
-			}
-		});
+	void OnUpdatePublicVariables() override {
+		
+		this->AddSerializedField(SERIAL_TOKEN(bool), "UseTexure", SERIAL_TOKEN(false));
 
-		this->CreatePublicVar("UseTexture", "false");
+		this->AddSerializedField(SERIAL_TOKEN(bool), "UseTexture", SERIAL_TOKEN(false));
 
-	    this->CreatePublicVar("UseTextureBase", "false");
-	    this->CreatePublicVar("TextureBase");
-	    this->CreatePublicVar("TextureBaseGUID", xg::newGuid());
+	    this->AddSerializedField(SERIAL_TOKEN(bool), "UseTextureBase", SERIAL_TOKEN(false));
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureBase", "");
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureBaseGUID", xg::newGuid());
 
-	    this->CreatePublicVar("UseTextureTransparency", "false");
-	    this->CreatePublicVar("TextureTransparency");
-	    this->CreatePublicVar("TextureTransparencyGUID", xg::newGuid());
+	    this->AddSerializedField(SERIAL_TOKEN(bool), "UseTextureTransparency", SERIAL_TOKEN(false));
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureTransparency", "");
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureTransparencyGUID", xg::newGuid());
 
-	    this->CreatePublicVar("UseTextureNormal", "false");
-	    this->CreatePublicVar("TextureNormal");
-	    this->CreatePublicVar("TextureNormalGUID", xg::newGuid());
+	    this->AddSerializedField(SERIAL_TOKEN(bool), "UseTextureNormal", SERIAL_TOKEN(false));
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureNormal", "");
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureNormalGUID", xg::newGuid());
 
-	    this->CreatePublicVar("Mesh");
-	    this->CreatePublicVar("MeshGUID", xg::newGuid());
-	    this->CreatePublicVar("UseLight");
-	    this->CreatePublicVar("SunLight");
-	    this->CreatePublicVar("ScreenObject", "false");
+	    this->AddSerializedField(SERIAL_TOKEN(PrettyEngine::Mesh), "Mesh", "");
+		this->AddSerializedField(SERIAL_TOKEN(std::string), "MeshGUID", xg::newGuid());
+		this->AddSerializedField(SERIAL_TOKEN(bool), "UseLight", SERIAL_TOKEN(false));
+		this->AddSerializedField(SERIAL_TOKEN(bool), "SunLight", SERIAL_TOKEN(false));
+		this->AddSerializedField(SERIAL_TOKEN(bool), "ScreenObject", SERIAL_TOKEN(false));
 
   		this->publicFuncions.insert_or_assign("UpdateRender", [this]() {
 			this->Init();
@@ -73,18 +70,15 @@ public:
 	}
 
 	void Init() {
-  		this->visualObject->screenObject = (this->GetPublicVarValue("ScreenObject") == "true");
+		this->visualObject->screenObject = (this->GetSerializedFieldValue("ScreenObject") == "true");
 
-	    this->meshGuid = this->GetPublicVarValue("MeshGUID");
-	    this->textureGuid = this->GetPublicVarValue("TextureBaseGUID");
-	    this->textureTransparancyGuid =
-	        this->GetPublicVarValue("TextureTransparencyGUID");
-	    this->textureNormalGuid = this->GetPublicVarValue("TextureNormalGUID");
+	    this->meshGuid = this->GetSerializedFieldValue("MeshGUID");
+		this->textureGuid = this->GetSerializedFieldValue("TextureBaseGUID");
+	    this->textureTransparancyGuid = this->GetSerializedFieldValue("TextureTransparencyGUID");
+		this->textureNormalGuid = this->GetSerializedFieldValue("TextureNormalGUID");
 
-	    this->visualObject->useLight =
-	        (this->GetPublicVarValue("UseLight") == "true");
-	    this->visualObject->sunLight =
-	        (this->GetPublicVarValue("SunLight") == "true");
+	    this->visualObject->useLight = (this->GetSerializedFieldValue("UseLight") == "true");
+	    this->visualObject->sunLight = (this->GetSerializedFieldValue("SunLight") == "true");
 
 	    this->engineContent->renderer.AddShader("DefaultVertex", ShaderType::Vertex,
 	                                            Shaders::SHADER_VERTEX_VERTEX);
@@ -96,10 +90,10 @@ public:
 	    this->renderModel.SetShaderProgram(shader);
 	    this->visualObject->AddRenderModel(&this->renderModel);
 
-	    this->renderModel.useTexture = (this->GetPublicVarValue("UseTexture") == "true");
+	    this->renderModel.useTexture = (this->GetSerializedFieldValue("UseTexture") == "true");
 
-	    if (this->GetPublicVarValue("UseTextureTransparency") == "true") {
-	      auto baseTexturePath = this->GetPublicVarValue("TextureNormal");
+	    if (this->GetSerializedFieldValue("UseTextureTransparency") == "true") {
+			auto baseTexturePath = this->GetSerializedFieldValue("TextureNormal");
 	      auto path = GetEnginePublicPath(baseTexturePath, true);
 	      if (FileExist(path)) {
 	        this->engineContent->renderer.RemoveTexture(
@@ -113,9 +107,9 @@ public:
 	      }
 	    }
 
-	    if (this->GetPublicVarValue("UseTextureNormal") == "true") {
-	      auto baseTexturePath = this->GetPublicVarValue("TextureTransparency");
-	      auto path = GetEnginePublicPath(baseTexturePath, true);
+	    if (this->GetSerializedFieldValue("UseTextureNormal") == "true") {
+		  auto baseTexturePath = this->GetSerializedFieldValue("TextureTransparency");
+		  auto path = GetEnginePublicPath(baseTexturePath, true);
 	      if (FileExist(path)) {
 	        this->engineContent->renderer.RemoveTexture(this->textureGuid);
 	        this->visualObject->RemoveTexture(this->textureTransparency);

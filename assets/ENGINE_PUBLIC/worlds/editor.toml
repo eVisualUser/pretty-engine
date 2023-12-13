@@ -13,10 +13,26 @@ object = 'Editor'
     ObjectUnique = 'Render'
 
         [entities.editorEntity.components.Render.fields]
+        Mesh = [ 'PrettyEngine::Mesh', '' ]
+        MeshGUID = [ 'std::string', 'a71ab2f6-640e-4ac1-ba60-64cc21633bde' ]
+        ScreenObject = [ 'bool', 'false' ]
+        SunLight = [ 'bool', 'false' ]
+        TextureBase = [ 'std::string', '' ]
+        TextureBaseGUID = [ 'std::string', '54e240db-0b66-4360-b598-bc91f5b71a12' ]
+        TextureNormal = [ 'std::string', '' ]
+        TextureNormalGUID = [ 'std::string', '4a1bd1d5-ec7c-4967-890b-694f8e5f2324' ]
+        TextureTransparency = [ 'std::string', '' ]
+        TextureTransparencyGUID = [ 'std::string', '8c3b2244-5cbb-4c80-86f3-548ee2c2dc78' ]
+        UseLight = [ 'bool', 'false' ]
+        UseTexture = [ 'bool', 'false' ]
+        UseTextureBase = [ 'bool', 'false' ]
+        UseTextureNormal = [ 'bool', 'false' ]
+        UseTextureTransparency = [ 'bool', 'false' ]
+        UseTexure = [ 'bool', 'false' ]
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = '8ea771fa-9747-4943-bfb9-97fe73f4626f'
+    ObjectUnique = '7ccab998-7203-433d-8c79-c5fa4e4a1469'
 
         [entities.editorEntity.serial.fields]
 
