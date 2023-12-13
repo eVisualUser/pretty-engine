@@ -17,29 +17,30 @@ object = 'Editor'
         MeshGUID = [ 'std::string', 'a71ab2f6-640e-4ac1-ba60-64cc21633bde' ]
         ScreenObject = [ 'bool', 'false' ]
         SunLight = [ 'bool', 'false' ]
-        TextureBase = [ 'std::string', '' ]
+        TextureBase = [ 'std::string', 'cpp_logo.png' ]
         TextureBaseGUID = [ 'std::string', '54e240db-0b66-4360-b598-bc91f5b71a12' ]
         TextureNormal = [ 'std::string', '' ]
         TextureNormalGUID = [ 'std::string', '4a1bd1d5-ec7c-4967-890b-694f8e5f2324' ]
         TextureTransparency = [ 'std::string', '' ]
         TextureTransparencyGUID = [ 'std::string', '8c3b2244-5cbb-4c80-86f3-548ee2c2dc78' ]
         UseLight = [ 'bool', 'false' ]
-        UseTexture = [ 'bool', 'false' ]
-        UseTextureBase = [ 'bool', 'false' ]
+        UseTexture = [ 'bool', 'true' ]
+        UseTextureBase = [ 'bool', 'true' ]
         UseTextureNormal = [ 'bool', 'false' ]
         UseTextureTransparency = [ 'bool', 'false' ]
-        UseTexure = [ 'bool', 'false' ]
+        UseTexure = [ 'bool', 'true' ]
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = '8f0bd884-48cf-4555-8190-5b4cc35f8f34'
+    ObjectUnique = '6f42e6dc-f8eb-4c89-b2fa-5de81da67478'
 
         [entities.editorEntity.serial.fields]
 
     [entities.editorEntity.transform]
-    position = [ -0.8076468110084534, 0.4743005633354187, 0.0 ]
+    position = [ -140.87925720214844, 3.839716672897339, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]
 name = 'Editor'
+editor_only = true

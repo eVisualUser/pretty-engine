@@ -1,12 +1,14 @@
 #ifndef H_EVENT
 #define H_EVENT
 
+#include <PrettyEngine/tags.hpp>
+
 #include <string>
 #include <vector>
 
 namespace PrettyEngine {
 	/// An event is used to share data between objects without direct access.
-	class Event {
+	class Event: public Tagged {
 	public:
 		std::string name;
 		void* content;

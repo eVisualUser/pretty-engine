@@ -58,7 +58,7 @@ public:
 
 	void RefreshBaseTexture() {
 		if (this->GetSerializedFieldValue("UseTextureBase") == "true") {
-			auto baseTexturePath = this->GetPublicVarValue("TextureBase");
+			auto baseTexturePath = this->GetSerializedFieldValue("TextureBase");
 			auto path = GetEnginePublicPath(baseTexturePath, true);
 			if (FileExist(path)) {
 				this->visualObject->RemoveTexture(TextureType::Base);
