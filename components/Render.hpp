@@ -57,7 +57,7 @@ public:
 	void OnEditorUpdate() override { this->OnUpdate(); }
 
 	void RefreshBaseTexture() {
-		if (this->GetPublicVarValue("UseTextureBase") == "true") {
+		if (this->GetSerializedFieldValue("UseTextureBase") == "true") {
 			auto baseTexturePath = this->GetPublicVarValue("TextureBase");
 			auto path = GetEnginePublicPath(baseTexturePath, true);
 			if (FileExist(path)) {

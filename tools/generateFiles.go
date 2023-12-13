@@ -9,10 +9,6 @@ import (
 	"strings"
 )
 
-func main() {
-	GenerateShadersHeader()
-}
-
 func MakeCPPFileStringVariable(name string, content string) string {
 	var result string
 
@@ -79,6 +75,48 @@ func GenerateShadersHeader() {
 }
 
 /// Generate the required function for object that will be generated in runtime
-func CustomObjectScript() {
+func GenerateCustomObjectScript() {
+	dir, err := os.ReadDir("../PropertyEditor")
 
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var fileList []string
+
+	for _, entry := range dir {
+		if filepath.Ext(entry.Name()) == ".hpp" {
+			fileList = append(fileList, entry.Name())
+		}
+	}
+
+	out := "#pragma once\n" +
+		"\n" +
+		"#include <PrettyEngine/editor/PropertyEditor.hpp>\n" +
+		"#include <vector>\n" +
+		"#include <memory>\n\n"
+	out += "// Generated files\n"
+	for _, file := range fileList {
+		out += "#include<" + file + ">\n\n"
+	}
+
+	out += "/// Create an instance of all PropertyEditor\n"
+	out += "static std::vector<std::shared_ptr<PrettyEngine::PropertyEditor>> GeneratePropertyEditorList() {\n" +
+		"	std::vector<std::shared_ptr<PrettyEngine::PropertyEditor>> result;\n\n"
+
+	for _, file := range fileList {
+		fileName := strings.ReplaceAll(file, ".hpp", "")
+		out += "	result.push_back(" + "std::make_shared<Custom::" + fileName + ">()" + ");\n"
+	}
+
+	out += "\n" +
+		"	return result;\n" +
+		"}\n"
+
+	os.Remove("../PropertyEditor/PropertyEditor.h")
+	err = os.WriteFile("../PropertyEditor/PropertyEditor.h", []byte(out), 'w')
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

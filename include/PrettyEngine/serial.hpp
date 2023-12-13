@@ -159,7 +159,7 @@ namespace PrettyEngine {
 				}
 			}
 		}
-	private:
+	public:
 		std::string serialObjectName;
 		std::string serialObjectUnique;
 		std::vector<SerializedField> serialFields;

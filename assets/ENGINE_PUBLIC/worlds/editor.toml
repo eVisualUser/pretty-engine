@@ -32,7 +32,7 @@ object = 'Editor'
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = '7ccab998-7203-433d-8c79-c5fa4e4a1469'
+    ObjectUnique = '8f0bd884-48cf-4555-8190-5b4cc35f8f34'
 
         [entities.editorEntity.serial.fields]
 

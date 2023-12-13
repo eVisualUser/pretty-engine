@@ -16,8 +16,9 @@ const (
 	ResetColor   = "\033[0m"
 )
 
-func main() {
+func SafeBuild() {
 	if RequiredToolsInstalled() {
+		ClearAssets()
 		Build()
 	}
 }

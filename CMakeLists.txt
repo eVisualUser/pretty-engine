@@ -23,6 +23,8 @@ include_directories("include")
 
 include_directories("code")
 
+include_directories("PropertyEditor")
+
 file(GLOB code_sources "${CMAKE_SOURCE_DIR}/code/code/*.c" "${CMAKE_SOURCE_DIR}/code/code/*.cpp")
 
 add_library(pretty

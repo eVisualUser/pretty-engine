@@ -1,6 +1,7 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
+#include <PrettyEngine/editor/PropertyEditor.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
@@ -11,8 +12,11 @@
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/world.hpp>
 #include <PrettyEngine/worldLoad.hpp>
+
+// Generated files
 #include <components.hpp>
 #include <custom.hpp>
+#include <PropertyEditor.h>
 
 #include <functional>
 #include <imgui.h>
@@ -40,6 +44,8 @@ class Editor {
 			auto fileContent = ReadFileToString(entitiesListFile);
 			this->existingEntities = ParseCSVLine(fileContent);
 		}
+
+		this->_propertyEditorList = GeneratePropertyEditorList();
 	}
 
 	void ShowWorldDebugInfo(Renderer *renderer) {
@@ -181,12 +187,18 @@ class Editor {
 				ImGui::Text("Object: %s", selectedEntity->object.c_str());
 				this->ShowManualFunctionsCalls(selectedEntity);
 
+				for (auto &serializedField : selectedEntity->serialFields) {
+					for (auto &propertyEditor : this->_propertyEditorList) {
+						propertyEditor->Edit(&serializedField);
+					}
+				}
+
 				ImGui::Separator();
 
 				this->ShowTransform(selectedEntity);
 
 				int componentIndex = 0;
-				for (auto &component : selectedEntity->components) {
+				for (auto & component : selectedEntity->components) {
 					std::string headerName = "Component: ";
 					headerName += component->unique;
 
@@ -206,6 +218,12 @@ class Editor {
 							strcpy(buffer, publicElement.second.c_str());
 							ImGui::InputText(publicElement.first.c_str(), buffer, 100);
 							component->SetPublicVarValue(publicElement.first, buffer);
+						}
+						
+						for (auto &serializedField : component->serialFields) {
+							for (auto &propertyEditor : this->_propertyEditorList) {
+								propertyEditor->Edit(&serializedField);
+							}
 						}
 						ImGui::Separator();
 					}
@@ -341,10 +359,12 @@ class Editor {
   private:
 	char textInputworldToLoad[100];
 
-	std::vector<Entity *> selectedEntities;
+	std::vector<Entity*> selectedEntities;
 
 	std::vector<std::string> existingComponents;
 	std::vector<std::string> existingEntities;
+
+	std::vector<std::shared_ptr<PropertyEditor>> _propertyEditorList;
 
 	bool createComponent = false;
 };
