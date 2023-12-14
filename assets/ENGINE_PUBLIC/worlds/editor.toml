@@ -1,3 +1,20 @@
+[entities.Empty]
+name = 'AnyEntity'
+object = 'Empty'
+
+    [entities.Empty.components]
+
+    [entities.Empty.serial]
+    ObjectName = ''
+    ObjectUnique = '8583f39e-fcbd-43b2-a6c4-46367a9f7158'
+
+        [entities.Empty.serial.fields]
+
+    [entities.Empty.transform]
+    position = [ 0.0, 0.0, 0.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
+    scale = [ 1.0, 1.0, 1.0 ]
+
 [entities.editorEntity]
 name = 'Editor'
 object = 'Editor'
@@ -32,12 +49,12 @@ object = 'Editor'
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = '424f465f-0689-48cd-9f07-6915c1ba9c08'
+    ObjectUnique = '37e594c5-1be1-448c-92db-d470d98294e6'
 
         [entities.editorEntity.serial.fields]
 
     [entities.editorEntity.transform]
-    position = [ 0.43782180547714233, -0.07738597691059113, 0.0 ]
+    position = [ 0.0, 0.0, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
