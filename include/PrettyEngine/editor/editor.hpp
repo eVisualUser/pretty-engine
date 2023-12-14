@@ -57,21 +57,24 @@ class Editor {
 	}
 
 	void ShowTransform(Transform *transform) {
-		ImGui::InputFloat("Pos X", &transform->position.x);
-		ImGui::InputFloat("Pos Y", &transform->position.y);
-		ImGui::InputFloat("Pos Z", &transform->position.z);
+		std::string headerName = "Transform: " + transform->GetObjectSerializedName();
+		if (ImGui::CollapsingHeader(headerName.c_str())) {
+			ImGui::InputFloat("Pos X", &transform->position.x);
+			ImGui::InputFloat("Pos Y", &transform->position.y);
+			ImGui::InputFloat("Pos Z", &transform->position.z);
 
-		auto rotationEuler = transform->GetEulerRotation();
-		ImGui::InputFloat("Rot X", &rotationEuler.x);
-		ImGui::InputFloat("Rot Y", &rotationEuler.y);
-		ImGui::InputFloat("Rot Z", &rotationEuler.z);
-		transform->SetRotationUsingEuler(rotationEuler);
+			auto rotationEuler = transform->GetEulerRotation();
+			ImGui::InputFloat("Rot X", &rotationEuler.x);
+			ImGui::InputFloat("Rot Y", &rotationEuler.y);
+			ImGui::InputFloat("Rot Z", &rotationEuler.z);
+			transform->SetRotationUsingEuler(rotationEuler);
 
-		glm::vec3 scale = transform->scale;
-		ImGui::InputFloat("Scale X", &scale.x);
-		ImGui::InputFloat("Scale Y", &scale.y);
-		ImGui::InputFloat("Scale Z", &scale.z);
-		transform->SetScale(scale);
+			glm::vec3 scale = transform->scale;
+			ImGui::InputFloat("Scale X", &scale.x);
+			ImGui::InputFloat("Scale Y", &scale.y);
+			ImGui::InputFloat("Scale Z", &scale.z);
+			transform->SetScale(scale);
+		}
 	}
 
 	void ShowManualFunctionsCalls(DynamicObject *dynamicObject) {
@@ -104,6 +107,29 @@ class Editor {
     			}
 			}
 		}
+	}
+
+	void ShowToolScripts() {
+		if (ImGui::Begin("Tool Scripts")) {
+			for (auto &entry : std::filesystem::recursive_directory_iterator(GetEnginePublicPath("../../tools", true))) {
+				if (!entry.is_directory() && entry.path().extension() == ".go") {
+					std::string buttonName = "Run: ";
+					buttonName += entry.path().filename().string();
+					if (ImGui::Button(buttonName.c_str())) {
+						std::string command;
+						command += "go run ";
+						command += '\"' + entry.path().string() + '\"';
+						DebugLog(LOG_INFO, "Execute script: " << entry.path().parent_path(), true);
+						if (system(command.c_str())) {
+							DebugLog(LOG_ERROR, "Script failed", true);
+						} else {
+							DebugLog(LOG_INFO, "Script succeed", true);
+						}
+					}
+				}
+			}
+		}
+		ImGui::End();
 	}
 
 	void ShowRenderDebugger(Renderer *renderer) {
@@ -354,6 +380,7 @@ class Editor {
 		this->ShowWorldEditor(worldManager);
 		this->ShowSelectedEntities();
 		this->ShowRenderDebugger(renderer);
+		this->ShowToolScripts();
 	}
 
   private:

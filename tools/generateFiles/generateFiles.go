@@ -7,7 +7,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"runtime"
 )
+
+func main() {
+	GenerateShadersHeader()
+	GenerateCustomObjectScript()
+}
 
 func MakeCPPFileStringVariable(name string, content string) string {
 	var result string
@@ -22,7 +28,11 @@ func MakeCPPFileStringVariable(name string, content string) string {
 }
 
 func GenerateShadersHeader() {
-	dir := "../shaders"
+	_, executable, _, _ := runtime.Caller(0)
+
+	directory := filepath.Dir(executable)
+
+	dir := filepath.Join(directory, "../../shaders")
 
 	shaders, err := os.ReadDir(dir)
 
@@ -64,7 +74,7 @@ func GenerateShadersHeader() {
 
 		output += "\n} // Shaders"
 
-		err := os.WriteFile("../include/PrettyEngine/shaders.hpp", []byte(output), 'w')
+		err = os.WriteFile(filepath.Join(directory, "../../include/PrettyEngine/shaders.hpp"), []byte(output), 'w')
 
 		if err != nil {
 			log.Fatal(err)
@@ -76,7 +86,11 @@ func GenerateShadersHeader() {
 
 /// Generate the required function for object that will be generated in runtime
 func GenerateCustomObjectScript() {
-	dir, err := os.ReadDir("../PropertyEditor")
+	_, executable, _, _ := runtime.Caller(0)
+
+	directory := filepath.Dir(executable)
+
+	dir, err := os.ReadDir(filepath.Join(directory, "../../PropertyEditor"))
 
 	if err != nil {
 		log.Fatal(err)
@@ -113,8 +127,8 @@ func GenerateCustomObjectScript() {
 		"	return result;\n" +
 		"}\n"
 
-	os.Remove("../PropertyEditor/PropertyEditor.h")
-	err = os.WriteFile("../PropertyEditor/PropertyEditor.h", []byte(out), 'w')
+	os.Remove(filepath.Join(directory, "../../PropertyEditor/PropertyEditor.h"))
+	err = os.WriteFile(filepath.Join(directory, "../../PropertyEditor/PropertyEditor.h"), []byte(out), 'w')
 
 	if err != nil {
 		log.Fatal(err)

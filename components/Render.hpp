@@ -63,7 +63,7 @@ public:
 			if (FileExist(path)) {
 				this->visualObject->RemoveTexture(TextureType::Base);
 				this->engineContent->renderer.Clear();
-				this->texture = this->engineContent->renderer.AddTexture(this->textureGuid, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->texture = this->engineContent->renderer.AddTexture(baseTexturePath, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 				this->visualObject->AddTexture(this->texture);
 			}
 		}

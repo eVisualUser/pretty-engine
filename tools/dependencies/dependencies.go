@@ -2,6 +2,10 @@
 
 package main
 
+func main() {
+	CheckDependencies()
+}
+
 func CheckDependencies() {
 	var links []string
 

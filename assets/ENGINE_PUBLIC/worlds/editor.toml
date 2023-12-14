@@ -32,15 +32,14 @@ object = 'Editor'
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = '6f42e6dc-f8eb-4c89-b2fa-5de81da67478'
+    ObjectUnique = '424f465f-0689-48cd-9f07-6915c1ba9c08'
 
         [entities.editorEntity.serial.fields]
 
     [entities.editorEntity.transform]
-    position = [ -140.87925720214844, 3.839716672897339, 0.0 ]
+    position = [ 0.43782180547714233, -0.07738597691059113, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [meta]
 name = 'Editor'
-editor_only = true

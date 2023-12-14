@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 )
 
+func main() {
+	ClearAssets()
+}
+
 func ClearAssets() {
 	targetDirectory := "../Assets/ENGINE_PUBLIC"
 	entries, err := os.ReadDir(targetDirectory)
