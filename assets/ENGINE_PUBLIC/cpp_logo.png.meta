@@ -5,4 +5,5 @@ ObjectUnique = 'cpp_logo.png'
 exist = [ 'bool', 'true' ]
 local = [ 'std::string', 'any' ]
 metaCreationDate = [ 'std::string', '2023-12-18 01:48:43' ]
+textureChannels = [ 'int', '6408' ]
 used = [ 'bool', 'true' ]

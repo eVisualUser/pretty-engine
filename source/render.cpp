@@ -1,3 +1,4 @@
+#include "PrettyEngine/serial.hpp"
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/render/light.hpp>
 #include <PrettyEngine/collider.hpp>
@@ -170,6 +171,8 @@ namespace PrettyEngine {
 
             if (asset->Exist()) {
                 asset->SetUsed(true);
+                asset->AddSerializedField(SERIAL_TOKEN(int), "textureChannels", std::to_string((int)channels));
+                channels = (TextureChannels)std::stoi(asset->GetSerializedFieldValue("textureChannels"));
 
                 unsigned int textureID;
                 glGenTextures(1, &textureID);
