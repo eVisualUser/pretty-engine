@@ -169,6 +169,8 @@ namespace PrettyEngine {
             Texture texture;
 
             if (asset->Exist()) {
+                asset->SetUsed(true);
+
                 unsigned int textureID;
                 glGenTextures(1, &textureID);
                 if (!textureID) {

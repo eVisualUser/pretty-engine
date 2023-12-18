@@ -41,6 +41,10 @@ namespace PrettyEngine {
 			return GetEnginePublicPath(this->GetObjectSerializedUnique(), true);
 		}
 
+		void SetUsed(bool state) {
+			this->GetSerializedField("used")->value = state ? "true" : "false";
+		}
+
 		bool Exist() { return FileExist(this->GetFilePath()); }
 
 		std::vector<char> Read() {
