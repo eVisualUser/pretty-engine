@@ -13,7 +13,7 @@ namespace Custom {
 		void Edit(PrettyEngine::SerializedField* serializedField) override {
 			if (serializedField->type == SERIAL_TOKEN(std::string)) {
 				char buffer[100];
-				strcpy(buffer, serializedField->value.c_str());
+				strcpy_s(buffer, serializedField->value.c_str());
 				ImGui::InputText(serializedField->name.c_str(), buffer, 100);
 				serializedField->value = buffer;
 			}

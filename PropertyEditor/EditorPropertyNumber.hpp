@@ -30,7 +30,7 @@ namespace Custom {
 				serializedField->value = std::to_string(value);
 			}
 			else if (serializedField->type == SERIAL_TOKEN(glm::vec3)) {
-				auto parsed = ParseCSVLine(serializedField->value);
+				auto parsed = PrettyEngine::ParseCSVLine(serializedField->value);
 				float buffer[3] = {0.0f, 0.0f, 0.0f};
 				buffer[0] = std::stof(parsed[0]);
 				buffer[1] = std::stof(parsed[1]);
@@ -50,7 +50,7 @@ namespace Custom {
 				}
 				serializedField->value = newValue;
 			} else if (serializedField->type == SERIAL_TOKEN(glm::vec4)) {
-				auto parsed = ParseCSVLine(serializedField->value);
+				auto parsed = PrettyEngine::ParseCSVLine(serializedField->value);
 				float buffer[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 				buffer[0] = std::stof(parsed[0]);
 				buffer[1] = std::stof(parsed[1]);

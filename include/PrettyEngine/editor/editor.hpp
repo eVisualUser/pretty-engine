@@ -184,9 +184,10 @@ class Editor {
 						ImGui::TableNextRow();
 						ImGui::TableNextColumn();
 						if (ImGui::CollapsingHeader(texture.first.c_str())) {
-							ImGui::Image(ImTextureID(texture.second.textureID), ImVec2(100, 100));
+							ImTextureID imguiTextureId = (ImTextureID)(intptr_t)texture.second.textureID;
+							ImGui::Image(imguiTextureId, ImVec2(100, 100));
 							ImGui::SameLine();
-							ImGui::Text("User count: %lli", texture.second.userCount);
+							ImGui::Text("User count: %i", texture.second.userCount);
 						}
 					}
 					ImGui::EndTable();
@@ -241,7 +242,7 @@ class Editor {
 
 						for (auto &publicElement : component->publicMap) {
 							char buffer[100];
-							strcpy(buffer, publicElement.second.c_str());
+							strcpy_s(buffer, publicElement.second.c_str());
 							ImGui::InputText(publicElement.first.c_str(), buffer, 100);
 							component->SetPublicVarValue(publicElement.first, buffer);
 						}

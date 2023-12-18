@@ -65,7 +65,7 @@ namespace Custom {
 									for (auto &column : line) {
 										ImGui::TableNextColumn();
 										char buffer[1000] = "";
-										std::strcpy(buffer, column.c_str());
+										strcpy_s(buffer, column.c_str());
 
 										ImGui::InputTextMultiline((std::to_string(columnIndex) + '.' + std::to_string(lineIndex)).c_str(), buffer, 1000);
 
