@@ -12,6 +12,7 @@
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/render/light.hpp>
 #include <PrettyEngine/render/RenderFeature.hpp>
+#include <PrettyEngine/assetManager.hpp>
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -155,7 +156,7 @@ namespace PrettyEngine {
 
 		Texture* AddTexture(
 			std::string name,
-			std::string fileName,
+			Asset* asset,
 			TextureType textureType,
 			TextureWrap wrap,
 			TextureFilter filter,

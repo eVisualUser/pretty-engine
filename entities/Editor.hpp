@@ -100,6 +100,9 @@ class Editor : public virtual Entity {
         this->engineContent->renderer.GetCurrentCamera()->position.x = -this->position.x;
         this->engineContent->renderer.GetCurrentCamera()->position.y = -this->position.y;
 
+        this->engineContent->renderer.GetCurrentCamera()->viewportPositionRatio = glm::vec2(0.25f, 0.25f);
+		this->engineContent->renderer.GetCurrentCamera()->viewportSizeRatio = glm::vec2(0.5f, 0.5f);
+
         if (this->todoEditor) {
             if (ImGui::Begin("To-Do")) {
                 ImGui::InputText("File: ", this->toDoFile, 100);
@@ -135,8 +138,7 @@ class Editor : public virtual Entity {
                         out << parsed;
                         out.flush();
                     } else {
-                        DebugLog(LOG_ERROR,
-                                 "Failed to open: " << this->toDoFile, true);
+                        DebugLog(LOG_ERROR, "Failed to open: " << this->toDoFile, true);
                     }
                     out.close();
                 }

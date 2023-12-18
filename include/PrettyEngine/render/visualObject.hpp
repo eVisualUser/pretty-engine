@@ -20,6 +20,13 @@ namespace PrettyEngine {
 			this->mesh = newMesh;
 			this->mesh->userCount++;
 		}
+
+		void RemoveMesh() { 
+			if (this->mesh != nullptr) {
+				this->mesh->userCount--;
+				this->mesh = nullptr;
+			}
+		}
 		
 		void SetShaderProgram(GLShaderProgramRefs* newShaderProgram) {
 			this->shaderProgram = newShaderProgram;
@@ -167,6 +174,8 @@ namespace PrettyEngine {
 		bool useLight = true;
 
 		bool screenObject = false;
+
+		bool wireFrame = false;
 
 		/// A map of any kind of data
 		std::vector<VisualDataPack*> sharedData;

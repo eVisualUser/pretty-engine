@@ -74,6 +74,7 @@ namespace Custom {
 				this->light.opacityFactorEffect = std::stof(color[3]);
 			}
 
+			this->engineContent->renderer.UnRegisterLight(&this->light);
 			this->engineContent->renderer.RegisterLight(this->lightID, &this->light);
 		}
 
@@ -84,6 +85,9 @@ namespace Custom {
 		void OnDestroy() override {
 			this->engineContent->renderer.UnRegisterLight(&this->light);
 		}
+
+		void OnEditorStart() override { this->OnStart(); }
+		void OnEditorUpdate() override { this->OnUpdate();	}
 
 	private:
 		PrettyEngine::Light light;

@@ -170,7 +170,7 @@ class Editor {
 					headerTitle += std::to_string(layerIndex);
 					if (ImGui::CollapsingHeader(headerTitle.c_str())) {
 						for (auto &visualObject : layer) {
-							ImGui::Text("VisualObject: %s", visualObject.first);
+							ImGui::Text("VisualObject: %s", visualObject.first.c_str());
 						}
 					}
 					layerIndex++;
@@ -199,7 +199,7 @@ class Editor {
 	void ShowSelectedEntities() {
 		for (auto &selectedEntity : this->selectedEntities) {
 			int index = 0;
-			if (ImGui::Begin(selectedEntity->entityName.c_str(), NULL, ImGuiWindowFlags_MenuBar)) {
+			if (ImGui::Begin(selectedEntity->GetGUID().c_str(), NULL, ImGuiWindowFlags_MenuBar)) {
 				if (ImGui::BeginMenuBar()) {
 					if (ImGui::Button("Close")) {
 						this->selectedEntities.erase(this->selectedEntities.begin() + index);
@@ -210,7 +210,7 @@ class Editor {
 				}
 				ImGui::EndMenuBar();
 
-				ImGui::Text("Object: %s", selectedEntity->object.c_str());
+				ImGui::Text("Object: %s", selectedEntity->GetObjectSerializedName().c_str());
 				this->ShowManualFunctionsCalls(selectedEntity);
 
 				for (auto &serializedField : selectedEntity->serialFields) {
@@ -315,7 +315,7 @@ class Editor {
 							ImGui::TableSetupColumn("Components");
 							ImGui::TableSetupColumn("Select");
 							ImGui::TableHeadersRow();
-
+							
 							// Show entities infos
 							for (auto &entity : world->entities) {
 								ImGui::TableNextRow();
@@ -326,13 +326,13 @@ class Editor {
 								ImGui::TableNextColumn();
 								ImGui::Text("%lli", entity.second->components.size());
 								ImGui::TableNextColumn();
-								std::string buttonName = "Select " + entity.second->entityName;
+								std::string buttonName = "Select " + entity.second->GetGUID();
 								if (ImGui::Button(buttonName.c_str())) {
 									this->selectedEntities.push_back(entity.second.get());
 								}
         						std::string buttonRemove = "Remove " + entity.second->entityName;
         						if (ImGui::Button(buttonRemove.c_str())) {
-									world->entities.erase(entity.first);
+									world->entities.erase(entity.second->GetGUID());
          							this->selectedEntities.clear();
          							break;
         						}

@@ -60,6 +60,15 @@ namespace PrettyEngine {
 			return this->AddSerializedField(serializedField);
 		}
 
+		SerializedField* GetSerializedField(std::string name) { 
+			for (auto &field : this->serialFields) {
+				if (field.name == name) {
+					return &field;
+				}
+			}
+			return nullptr;
+		}
+
 		std::string GetSerializedFieldValue(std::string name) {
 			if (this->ContainSerializedField(name)) {
 				for (auto &serial : this->serialFields) {

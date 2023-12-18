@@ -1,0 +1,8 @@
+ObjectName = 'Asset'
+ObjectUnique = 'cpp_logo.png'
+
+[fields]
+exist = [ 'bool', 'true' ]
+local = [ 'std::string', 'any' ]
+metaCreationDate = [ 'std::string', '2023-12-18 01:40:09' ]
+used = [ 'bool', 'false' ]

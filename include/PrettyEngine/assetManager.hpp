@@ -4,36 +4,75 @@
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/serial.hpp>
-#include <PrettyEngine/utils.hpp>
-#include <PrettyEngine/localization.hpp>
+#include <PrettyEngine/gc.hpp>
 
 #include <vector>
 #include <string>
-#include <unordered_map>
 #include <fstream>
 
 namespace PrettyEngine { 
-	class Asset: public virtual Tagged, public virtual SerialObject {
+	class Asset: public virtual Tagged, public virtual SerialObject, public virtual GCObject {
 	public:
+		Asset() {}
+
 		Asset(std::string newPath) { 
 			this->remote = false;
 			this->path = newPath;
 
-			this->CreateMeta();
+			this->SetObjectSerializedName("Asset");
+			this->SetSerializedUnique(newPath);
 
-			// SerializedField serialTags("str[]", "tags", MakeStringFromStringVector(this->longTermTags));
-			// this->AddSerializedField(serialTags);
+			if (this->Exist()) {
+				this->CreateMeta();
 
-			this->Deserialize(ReadFileToString(this->GetMetaPath()), SerializationFormat::Toml);
-		}
+				this->AddSerializedField(SERIAL_TOKEN(bool), "exist", this->Exist() ? "true" : "false");
+				this->AddSerializedField(SERIAL_TOKEN(std::string), "metaCreationDate", GetTimeAsString());
+				this->AddSerializedField(SERIAL_TOKEN(std::string), "local", "any");
+				this->AddSerializedField(SERIAL_TOKEN(bool), "used", "false");
+
+				this->Deserialize(ReadFileToString(this->GetMetaPath()), SerializationFormat::Toml);
 				
+				this->SetObjectSerializedName("Asset");
+				this->SetSerializedUnique(newPath);
+			}
+		}
+
+		std::string GetFilePath() {
+			return GetEnginePublicPath(this->GetObjectSerializedUnique(), true);
+		}
+
+		bool Exist() { return FileExist(this->GetFilePath()); }
+
+		std::vector<char> Read() {
+			this->GetSerializedField("used")->value = "true";
+
+			std::ifstream input(this->GetFilePath(), std::ios::binary);
+
+			std::vector<char> output;
+
+			if (input.is_open()) {
+				this->GetSerializedField("exist")->value = "true";
+
+				char buffer;
+				while (input.get(buffer)) {
+					output.push_back(buffer);
+				}
+
+				input.close();
+			} else {
+				this->GetSerializedField("exist")->value = "false";
+				DebugLog(LOG_ERROR, "Failed to open: " << this->path, true);
+			}
+			return output;
+		}
+		
 		~Asset() {
-			if (!WriteFileString(this->GetMetaPath(), this->Serialize(SerializationFormat::Toml))) {
+			if (this->Exist() && !WriteFileString(this->GetMetaPath(), this->Serialize(SerializationFormat::Toml))) {
 				DebugLog(LOG_ERROR, "Failed to write meta file: " << this->GetMetaPath(), true);
 			}
 		}
 
-		std::string GetMetaPath() { return GetEnginePublicPath(this->path + ".meta", true); }
+		std::string GetMetaPath() { return this->GetFilePath() + ".meta"; }
 
 		bool HaveMeta() { return FileExist(this->GetMetaPath()); }
 

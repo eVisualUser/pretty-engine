@@ -56,6 +56,13 @@ namespace PrettyEngine {
     }
 
     Mesh* Renderer::AddMesh(std::string name, Mesh mesh, MeshDrawType meshDrawType) {
+        /// Avoid loading multiple time the same mesh
+        for (auto &exisitingMesh : this->glMeshList) {
+			if (exisitingMesh.first == name) {
+				return &this->glMeshList[name];
+            }
+        }
+
         // Vertex Array Object
         unsigned int vao;
         glGenVertexArrays(1, &vao);
@@ -141,13 +148,17 @@ namespace PrettyEngine {
 
         shaderProgramRefs.CreateUniformsFromCSV(ASSET_BUILTIN_UNIFORMS);
 
+        for (auto &renderFeature : this->_renderFeatures) {
+			renderFeature->OnShaderProgram(&shaderProgramRefs);
+        }
+
         this->glShaderPrograms.insert(std::make_pair(name, shaderProgramRefs));
         return &this->glShaderPrograms[name];
     }
 
     Texture* Renderer::AddTexture(
         std::string name,
-        std::string filePath,
+        Asset* asset,
         TextureType textureType,
         TextureWrap wrap,
         TextureFilter filter,
@@ -157,19 +168,19 @@ namespace PrettyEngine {
         if (!textureExist.first) {
             Texture texture;
 
-            if (FileExist(filePath)) {
+            if (asset->Exist()) {
                 unsigned int textureID;
                 glGenTextures(1, &textureID);
                 if (!textureID) {
-                    DebugLog(LOG_ERROR, "Failed to generate texture for: " << filePath, true);                
+					DebugLog(LOG_ERROR, "Failed to generate texture for: " << asset->GetFilePath(), true);                
                     std::exit(-1);
                 }
 
                 int width, height;
 
-                unsigned char* data = stbi_load(filePath.c_str(), &width, &height, nullptr, 0);
+                unsigned char *data = stbi_load(asset->GetFilePath().c_str(), &width, &height, nullptr, 0);
                 if (!data) {
-                    DebugLog(LOG_ERROR, "Failed to load image: " << filePath, true);
+					DebugLog(LOG_ERROR, "Failed to load image: " << asset->GetFilePath(), true);
                     std::exit(-1);
                 }
 
@@ -194,7 +205,7 @@ namespace PrettyEngine {
 
                 return &this->glTextures[name];
             } else {
-                DebugLog(LOG_ERROR, "File not found: " << filePath, true);
+				DebugLog(LOG_ERROR, "File not found: " << asset->GetFilePath(), true);
             }
         }
         return textureExist.second;
@@ -260,18 +271,6 @@ namespace PrettyEngine {
     	if (!glfwInit()) {
     		std::exit(-1);
     	}
-
-        auto filePath = GetEnginePublicPath("RenderFeaturesList.csv", true);
-        if (FileExist(filePath)) {
-            auto features = ReadFileToString(filePath);
-
-            for (auto & feature: ParseCSVLine(features)) {
-                this->AddRenderFeature(GetRenderFeature(feature));
-                this->_renderFeatures.back()->OnCreated();
-            }
-        } else {
-            DebugLog(LOG_WARNING, "RenderFeature list not found", true);
-        }
     }
 
     Renderer::~Renderer() {
@@ -347,6 +346,18 @@ namespace PrettyEngine {
 
         ImGui_ImplGlfw_InitForOpenGL(this->_window, true);
         ImGui_ImplOpenGL3_Init();
+
+        auto filePath = GetEnginePublicPath("RenderFeaturesList.csv", true);
+		if (FileExist(filePath)) {
+			auto features = ReadFileToString(filePath);
+
+			for (auto &feature : ParseCSVLine(features)) {
+				this->AddRenderFeature(GetRenderFeature(feature));
+				this->_renderFeatures.back()->OnCreated();
+			}
+		} else {
+			DebugLog(LOG_WARNING, "RenderFeature list not found", true);
+		}
     }
 
     void Renderer::UpdateIO() {
@@ -393,6 +404,8 @@ namespace PrettyEngine {
             // Render for each camera
             for (auto & camera: this->cameraList) {
                 if (camera.active) {
+					glViewport(width * camera.viewportPositionRatio.x, height * camera.viewportPositionRatio.y, width * camera.viewportSizeRatio.x, height * camera.viewportSizeRatio.y);
+
                     auto currentCameraMatrix = camera.GetTransformMatrix();
                     auto cameraProjection = camera.projection;
                     this->renderCube.position = camera.position;
@@ -407,11 +420,11 @@ namespace PrettyEngine {
 
                     GL_CHECK_ERROR();
 
-                    int layerId;
+                    int layerId = 0;
                     for (auto & layer: this->visualObjects) {
                         if (!CheckIfVectorContain(&this->hiddenLayers, &layerCount)) {
                             for(auto & visualObject: layer) {
-                                auto object = visualObject.second;
+                                auto & object = visualObject.second;
 
                                 if (object->d3) {
                                     this->SwitchTo3D();
@@ -529,7 +542,13 @@ namespace PrettyEngine {
                                                     }
                                                 }
 
+                                                if (object->wireFrame) {
+													glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                                                }
+
                                                 glDrawElements((GLenum)object->renderModel->drawMode, mesh->vertexCount, GL_UNSIGNED_INT, 0);
+
+                                                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                                             }
 
                                             object->OnDraw((void*)this);

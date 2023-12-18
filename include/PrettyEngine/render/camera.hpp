@@ -105,6 +105,9 @@ namespace PrettyEngine {
 		glm::vec3 colorFilter = glm::vec3(1.0f, 1.0f, 1.0f);
 		glm::vec2 resolution = glm::vec2(600, 800);
 
+		glm::vec2 viewportPositionRatio = glm::vec2(0.0f, 0.0f);
+		glm::vec2 viewportSizeRatio = glm::vec2(1.0f, 1.0f);
+
 		unsigned int glFrameBufferID;
 	};
 }

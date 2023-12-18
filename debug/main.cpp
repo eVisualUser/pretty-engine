@@ -9,6 +9,8 @@ int main() {
 	#endif
 
 	auto asset = PrettyEngine::Asset("cpp_logo.png");
+	
+	DebugLog(LOG_DEBUG, "Out: " << asset.Read().data(), true);
 
 	return 0;
 }

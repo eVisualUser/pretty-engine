@@ -9,6 +9,7 @@
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/render/mesh.hpp>
 #include <PrettyEngine/render/visualObject.hpp>
+#include <PrettyEngine/assetManager.hpp>
 
 #include <memory>
 
@@ -21,25 +22,24 @@ public:
 		
 		this->AddSerializedField(SERIAL_TOKEN(bool), "UseTexure", SERIAL_TOKEN(false));
 
-		this->AddSerializedField(SERIAL_TOKEN(bool), "UseTexture", SERIAL_TOKEN(false));
-
 	    this->AddSerializedField(SERIAL_TOKEN(bool), "UseTextureBase", SERIAL_TOKEN(false));
 		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureBase", "");
-		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureBaseGUID", xg::newGuid());
 
 	    this->AddSerializedField(SERIAL_TOKEN(bool), "UseTextureTransparency", SERIAL_TOKEN(false));
 		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureTransparency", "");
-		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureTransparencyGUID", xg::newGuid());
 
 	    this->AddSerializedField(SERIAL_TOKEN(bool), "UseTextureNormal", SERIAL_TOKEN(false));
 		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureNormal", "");
-		this->AddSerializedField(SERIAL_TOKEN(std::string), "TextureNormalGUID", xg::newGuid());
 
 	    this->AddSerializedField(SERIAL_TOKEN(PrettyEngine::Mesh), "Mesh", "");
 		this->AddSerializedField(SERIAL_TOKEN(std::string), "MeshGUID", xg::newGuid());
 		this->AddSerializedField(SERIAL_TOKEN(bool), "UseLight", SERIAL_TOKEN(false));
 		this->AddSerializedField(SERIAL_TOKEN(bool), "SunLight", SERIAL_TOKEN(false));
 		this->AddSerializedField(SERIAL_TOKEN(bool), "ScreenObject", SERIAL_TOKEN(false));
+
+		this->AddSerializedField(SERIAL_TOKEN(glm::vec4), "Color", "1;1;1;1");
+
+		this->AddSerializedField(SERIAL_TOKEN(bool), "WireFrame", SERIAL_TOKEN(false));
 
   		this->publicFuncions.insert_or_assign("UpdateRender", [this]() {
 			this->Init();
@@ -54,16 +54,17 @@ public:
 		this->RefreshBaseTexture();
 	}
 
+
 	void OnEditorUpdate() override { this->OnUpdate(); }
 
 	void RefreshBaseTexture() {
 		if (this->GetSerializedFieldValue("UseTextureBase") == "true") {
 			auto baseTexturePath = this->GetSerializedFieldValue("TextureBase");
-			auto path = GetEnginePublicPath(baseTexturePath, true);
-			if (FileExist(path)) {
+			this->baseTexture = Asset(baseTexturePath);
+			if (this->baseTexture.Exist()) {
 				this->visualObject->RemoveTexture(TextureType::Base);
 				this->engineContent->renderer.Clear();
-				this->texture = this->engineContent->renderer.AddTexture(baseTexturePath, path, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->texture = this->engineContent->renderer.AddTexture(baseTexturePath, &this->baseTexture, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 				this->visualObject->AddTexture(this->texture);
 			}
 		}
@@ -72,10 +73,17 @@ public:
 	void Init() {
 		this->visualObject->screenObject = (this->GetSerializedFieldValue("ScreenObject") == "true");
 
-	    this->meshGuid = this->GetSerializedFieldValue("MeshGUID");
-		this->textureGuid = this->GetSerializedFieldValue("TextureBaseGUID");
-	    this->textureTransparancyGuid = this->GetSerializedFieldValue("TextureTransparencyGUID");
-		this->textureNormalGuid = this->GetSerializedFieldValue("TextureNormalGUID");
+		this->visualObject->wireFrame = (this->GetSerializedFieldValue("WireFrame") == "true");
+
+		auto color = ParseCSVLine(this->GetSerializedFieldValue("Color"));
+
+		this->visualObject->baseColor.r = std::stof(color[0]);
+		this->visualObject->baseColor.g = std::stof(color[1]);
+		this->visualObject->baseColor.b = std::stof(color[2]);
+		this->visualObject->opacity = std::stof(color[3]);
+
+		// The mesh GUID is for now locked at this value, because mesh loading is not supported 
+	    this->meshGuid = "rect"; // this->GetSerializedFieldValue("MeshGUID");
 
 	    this->visualObject->useLight = (this->GetSerializedFieldValue("UseLight") == "true");
 	    this->visualObject->sunLight = (this->GetSerializedFieldValue("SunLight") == "true");
@@ -94,13 +102,13 @@ public:
 
 	    if (this->GetSerializedFieldValue("UseTextureTransparency") == "true") {
 			auto baseTexturePath = this->GetSerializedFieldValue("TextureNormal");
-	      auto path = GetEnginePublicPath(baseTexturePath, true);
-	      if (FileExist(path)) {
+			this->transparencyTexture = Asset(baseTexturePath);
+	      if (this->transparencyTexture.Exist()) {
 	        this->engineContent->renderer.RemoveTexture(
-	            this->textureTransparancyGuid);
+	            this->transparencyTexture.GetFilePath());
 	        this->visualObject->RemoveTexture(this->textureTransparency);
 	        this->textureTransparency = this->engineContent->renderer.AddTexture(
-	            this->textureTransparancyGuid, path, TextureType::Transparency,
+	            this->transparencyTexture.GetFilePath(), &this->transparencyTexture, TextureType::Transparency,
 	            TextureWrap::ClampToBorder, TextureFilter::Linear,
 	            TextureChannels::RGBA);
 	        this->visualObject->AddTexture(this->textureTransparency);
@@ -109,15 +117,15 @@ public:
 
 	    if (this->GetSerializedFieldValue("UseTextureNormal") == "true") {
 		  auto baseTexturePath = this->GetSerializedFieldValue("TextureTransparency");
-		  auto path = GetEnginePublicPath(baseTexturePath, true);
-	      if (FileExist(path)) {
-	        this->engineContent->renderer.RemoveTexture(this->textureGuid);
-	        this->visualObject->RemoveTexture(this->textureTransparency);
-	        this->textureTransparency = this->engineContent->renderer.AddTexture(
-	            this->textureGuid, path, TextureType::Transparency,
+		  this->normalTexture = Asset(baseTexturePath);
+	      if (this->normalTexture.Exist()) {
+	        this->engineContent->renderer.RemoveTexture(this->normalTexture.GetFilePath());
+	        this->visualObject->RemoveTexture(this->textureNormal);
+	        this->textureNormal = this->engineContent->renderer.AddTexture(
+	            this->normalTexture.GetFilePath(), &this->normalTexture, TextureType::Normal,
 	            TextureWrap::ClampToBorder, TextureFilter::Linear,
 	            TextureChannels::RGBA);
-	        this->visualObject->AddTexture(this->textureTransparency);
+	        this->visualObject->AddTexture(this->textureNormal);
 	      }
 	    }
 
@@ -126,7 +134,7 @@ public:
 		auto meshName = this->GetPublicVarValue("Mesh");
 		// Check if the mesh is already loaded
 		if (this->mesh == nullptr) {
-			this->engineContent->renderer.RemoveMesh(meshGuid);
+			this->renderModel.RemoveMesh();
 			auto newMesh = CreateRectMesh();
 			this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh);
 			this->renderModel.SetMesh(this->mesh);
@@ -163,13 +171,14 @@ private:
   	Texture *texture = nullptr;
   	Texture *textureTransparency = nullptr;
   	Texture *textureNormal = nullptr;
-  	std::string textureGuid = xg::newGuid();
-  	std::string textureTransparancyGuid = xg::newGuid();
-  	std::string textureNormalGuid = xg::newGuid();
 
   	RenderModel renderModel;
   	std::shared_ptr<VisualObject> visualObject = std::make_shared<VisualObject>();
   	std::string visualObjectGuid = xg::newGuid();
+
+	Asset baseTexture;
+	Asset transparencyTexture;
+	Asset normalTexture;
 };
 } // namespace Custom
 
