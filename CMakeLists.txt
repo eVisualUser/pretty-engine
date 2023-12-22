@@ -93,3 +93,5 @@ endif()
 
 target_link_libraries(editor pretty custom components renderFeatures ${extend})
 target_compile_definitions(editor PRIVATE ENGINE_EDITOR=1)
+
+include("${CMAKE_SOURCE_DIR}/test.cmake")

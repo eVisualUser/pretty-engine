@@ -263,6 +263,10 @@ class Engine {
 		}
 	}
 
+	EngineContent* GetEngineContent() {
+		return &this->engineContent;
+	}
+
 	PrettyEngine::WorldManager *GetWorldManager() { return &this->_worldManager; }
 
   private:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <BaseCharacterController.hpp>
 #include <Light.hpp>
 #include <LocalizationEditor.hpp>
 #include <Physical.hpp>
@@ -19,7 +20,9 @@
  ******************************************************/
 
 static std::shared_ptr<PrettyEngine::Component> GetCustomComponent(std::string name) {
-    if(name == "Light") {
+    if(name == "BaseCharacterController") {
+        return std::make_shared<Custom::BaseCharacterController>();
+    }     if(name == "Light") {
         return std::make_shared<Custom::Light>();
     }     if(name == "LocalizationEditor") {
         return std::make_shared<Custom::LocalizationEditor>();

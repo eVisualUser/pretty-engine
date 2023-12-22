@@ -38,7 +38,7 @@ object = 'Empty'
 
     [entities.Empty.serial]
     ObjectName = ''
-    ObjectUnique = 'f83124c6-ecd4-416f-a6e8-58a0abf6b902'
+    ObjectUnique = 'ee069012-10e9-4fc1-a660-b01f1788e51f'
 
         [entities.Empty.serial.fields]
 
@@ -80,12 +80,12 @@ object = 'Editor'
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = 'c958a953-60d6-4ebc-9457-9571f68af810'
+    ObjectUnique = 'eed8a6f7-09fb-4aa7-a1a0-9c88cb9190f2'
 
         [entities.editorEntity.serial.fields]
 
     [entities.editorEntity.transform]
-    position = [ 1.4952253103256226, 0.04083661362528801, 0.0 ]
+    position = [ 1.9663722515106201, -0.49978116154670715, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
