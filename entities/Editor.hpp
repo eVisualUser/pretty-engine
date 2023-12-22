@@ -15,7 +15,7 @@
 #include <PrettyEngine/render/texture.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/render/visualObject.hpp>
-
+#include <PrettyEngine/event.hpp>
 #include <Render.hpp>
 
 // Components
@@ -176,7 +176,9 @@ class Editor : public virtual Entity {
         if (this->engineContent->input.GetKeyPress(KeyCode::LeftControl) &&
             this->engineContent->input.GetKeyDown(KeyCode::S)) {
             DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);
-            this->requests.push_back(Request::SAVE);
+			Event saveEvent; 
+			saveEvent.AddTag("save");
+			this->engineContent->eventManager.SendEvent(&saveEvent);
         }
 
         if (this->keyUp.state) {
@@ -273,7 +275,7 @@ class Editor : public virtual Entity {
                         ImGui::TableNextRow();
                         ImGui::TableNextColumn();
 
-                        auto keyName = key->name;
+                        std::string keyName = key->name;
 
                         ImGui::Text("%s", keyName.c_str());
 

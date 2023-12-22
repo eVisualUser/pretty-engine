@@ -24,7 +24,7 @@
 
 namespace PrettyEngine {
 /// Body of the engine, contain everything
-class Engine {
+class Engine: public EventListener {
   public:
  	/// Initialize the engine based on a toml configuration
 	Engine(std::string config) {
@@ -42,7 +42,7 @@ class Engine {
 		auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 		this->engineContent.renderer.SetWindowTitle(windowTitle);
 
-		double backgroundColor[4];
+		double backgroundColor[4] = {0.0, 0.0, 0.0, 0.0};
 		backgroundColor[0] = this->customConfig["engine"]["render"]["opengl"]["background_color"][0].value_or(0.0f);
 		backgroundColor[1] = this->customConfig["engine"]["render"]["opengl"]["background_color"][1].value_or(0.0f);
 		backgroundColor[2] = this->customConfig["engine"]["render"]["opengl"]["background_color"][2].value_or(0.0f);
@@ -67,9 +67,13 @@ class Engine {
 		this->engineContent.renderer.ShowWindow();
 
 		this->engineContent.input.SetWindow(this->engineContent.renderer.GetWindow());
+
+		this->engineContent.eventManager.RegisterListener(this);
 	}
 
 	~Engine() {
+		this->engineContent.eventManager.UnRegisterListener(this);
+
 		ImPlot::DestroyContext(this->_imPlotContext);
 		this->_worldManager.Clear();
 		this->engineContent.renderer.Clear();
@@ -173,6 +177,15 @@ class Engine {
 				this->Exit();
 			}
 		}
+
+	}
+
+	void OnEvent(Event *event) override { 
+		if (event->HaveTag("save")) {
+			this->GetWorldManager()->SaveWorlds();
+		} else if (event->HaveTag("exit")) {
+			this->Exit();
+		}
 	}
 
  	/// Update the worlds pointers for the entities and components (necessary when create a new entity or component).
@@ -248,7 +261,7 @@ class Engine {
 		int iter = 0;
 		for (auto &name : names) {
 			if (name == textureName) {
-				auto img = rawTextures[iter];
+				PrettyEngine::SQLBlobData img = rawTextures[iter];
 				int imgHeight = 0;
 				int imgWidth = 0;
 				int imgChannels = 0;

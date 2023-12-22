@@ -38,7 +38,7 @@ object = 'Empty'
 
     [entities.Empty.serial]
     ObjectName = ''
-    ObjectUnique = 'ee069012-10e9-4fc1-a660-b01f1788e51f'
+    ObjectUnique = '4fa8ed4a-3270-4961-84fe-f593e33f9bf9'
 
         [entities.Empty.serial.fields]
 
@@ -80,7 +80,7 @@ object = 'Editor'
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = 'eed8a6f7-09fb-4aa7-a1a0-9c88cb9190f2'
+    ObjectUnique = '1ca19ecc-2f18-4af0-b555-b5259feb5689'
 
         [entities.editorEntity.serial.fields]
 
