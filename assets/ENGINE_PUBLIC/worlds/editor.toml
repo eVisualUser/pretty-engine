@@ -16,6 +16,12 @@ object = 'Empty'
         SpotLightCutOff = [ 'float', '0.000000' ]
         Type = [ 'PrettyEngine::LightType', 'point' ]
 
+    [entities.Empty.components.Physical]
+    ObjectName = 'Physical'
+    ObjectUnique = 'Physical'
+
+        [entities.Empty.components.Physical.fields]
+
     [entities.Empty.components.Render]
     ObjectName = 'Render'
     ObjectUnique = 'Render'
@@ -38,7 +44,7 @@ object = 'Empty'
 
     [entities.Empty.serial]
     ObjectName = ''
-    ObjectUnique = '4fa8ed4a-3270-4961-84fe-f593e33f9bf9'
+    ObjectUnique = '4474782a-0a19-4ab5-b1c7-eae1dcf170b2'
 
         [entities.Empty.serial.fields]
 
@@ -51,11 +57,25 @@ object = 'Empty'
 name = 'Editor'
 object = 'Editor'
 
+    [entities.editorEntity.components.BaseCharacterController]
+    ObjectName = 'BaseCharacterController'
+    ObjectUnique = 'BaseCharacterController'
+
+        [entities.editorEntity.components.BaseCharacterController.fields]
+        colliderName = [ 'std::string', 'Collider' ]
+        speed = [ 'float', '10.000000' ]
+
     [entities.editorEntity.components.LocalizationEditor]
     ObjectName = 'LocalizationEditor'
     ObjectUnique = 'LocalizationEditor'
 
         [entities.editorEntity.components.LocalizationEditor.fields]
+
+    [entities.editorEntity.components.Physical]
+    ObjectName = 'Physical'
+    ObjectUnique = 'Physical'
+
+        [entities.editorEntity.components.Physical.fields]
 
     [entities.editorEntity.components.Render]
     ObjectName = 'Render'
@@ -80,12 +100,12 @@ object = 'Editor'
 
     [entities.editorEntity.serial]
     ObjectName = ''
-    ObjectUnique = '1ca19ecc-2f18-4af0-b555-b5259feb5689'
+    ObjectUnique = '33537cf2-e040-4ad9-ad13-6c3f4c5ed8b4'
 
         [entities.editorEntity.serial.fields]
 
     [entities.editorEntity.transform]
-    position = [ 1.9663722515106201, -0.49978116154670715, 0.0 ]
+    position = [ 0.1486276537179947, -0.5028966665267944, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 

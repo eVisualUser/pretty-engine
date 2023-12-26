@@ -1,7 +1,6 @@
 #ifndef H_PHYSICAL_SPACE
 #define H_PHYSICAL_SPACE
 
-#include "glm/geometric.hpp"
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/Collision.hpp>
 

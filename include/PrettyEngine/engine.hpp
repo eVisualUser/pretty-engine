@@ -99,7 +99,7 @@ class Engine: public EventListener {
 		}
 
 		if (this->showDebugUI) {
-			this->editor.Update(&this->_worldManager, &this->engineContent.input, &this->engineContent.renderer, &this->engineContent.physicalSpace, &this->isEditor, &this->engineContent.audioEngine);
+			this->editor.Update(&this->engineContent, &this->_worldManager, &this->isEditor);
 		}
 	}
 
@@ -118,8 +118,8 @@ class Engine: public EventListener {
 			for (auto &currentWorld : worlds) {
 				if (currentWorld != nullptr) {
 					if (!this->isEditor) {
-						currentWorld->CallFunctionProcesses();
 						currentWorld->Update();
+						currentWorld->CallFunctionProcesses();
 					} else {
 						currentWorld->EditorUpdate();
 					}

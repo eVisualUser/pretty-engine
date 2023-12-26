@@ -349,21 +349,22 @@ class Editor {
 		ImGui::End();
 	}
 
-	void Update(WorldManager *worldManager, Input *input, Renderer *renderer, PhysicalSpace *physicalSpace, bool *isEditor, AudioEngine *audioEngine) {
+	bool Update(EngineContent* engineContent, WorldManager* worldManager, bool *isEditor) {
 		auto changedState = false;
 		if (ImGui::Begin("Play Mode")) {
 			if (*isEditor && ImGui::Button("Play")) {
 				worldManager->SaveWorlds();
+
 				*isEditor = false;
 				changedState = true;
 			}
 			ImGui::SameLine();
 			if (!*isEditor && ImGui::Button("Stop")) {
-				renderer->visualObjects.clear();
-				physicalSpace->Clear();
-				audioEngine->Clear();
-				input->Clear();
-				renderer->Clear(true);
+				engineContent->renderer.visualObjects.clear();
+				engineContent->physicalSpace.Clear();
+				engineContent->audioEngine.Clear();
+				engineContent->input.Clear();
+				engineContent->renderer.Clear(true);
     			this->selectedEntities.clear();
 
 				worldManager->Reload();
@@ -374,14 +375,24 @@ class Editor {
 		}
 		ImGui::End();
 		if (changedState) {
-			return;
+			for (auto &worlds : worldManager->GetWorlds()) {
+				for (auto &entity : *worlds->GetEntities()) {
+					entity.second->worldFirst = true;
+					for (auto &component : entity.second->components) {
+						component->worldFirst = true;
+					}
+				}
+			}
+			return changedState;
 		}
 
-		this->ShowWorldDebugInfo(renderer);
+		this->ShowWorldDebugInfo(&engineContent->renderer);
 		this->ShowWorldEditor(worldManager);
 		this->ShowSelectedEntities();
-		this->ShowRenderDebugger(renderer);
+		this->ShowRenderDebugger(&engineContent->renderer);
 		this->ShowToolScripts();
+
+		return changedState;
 	}
 
   private:

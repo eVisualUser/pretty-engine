@@ -77,7 +77,7 @@ namespace PrettyEngine {
 		template<typename T>
 		T* GetComponentAs(std::string unique) {
 			for(auto & component: this->components) {
-				if (component->GetObjectSerializedUnique() == unique) {
+				if (component->unique == unique) {
 					return dynamic_cast<T*>(component.get());
 				}
 			}
