@@ -1,7 +1,19 @@
 #ifndef H_EDITOR
 #define H_EDITOR
 
+// Components
+#include <Render.hpp>
+#include <LocalizationEditor.hpp>
 #include <Physical.hpp>
+
+#include <Guid.hpp>
+#include <cstring>
+#include <imgui.h>
+
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include <PrettyEngine/KeyCode.hpp>
 #include <PrettyEngine/render/PrettyGL.hpp>
 #include <PrettyEngine/render/camera.hpp>
@@ -16,20 +28,7 @@
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/render/visualObject.hpp>
 #include <PrettyEngine/event.hpp>
-#include <Render.hpp>
-
-// Components
-#include <LocalizationEditor.hpp>
-
-#include <Guid.hpp>
-#include <cstring>
-#include <imgui.h>
-#include <toml++/toml.h>
-
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <utility>
+#include <PrettyEngine/command.hpp>
 
 using namespace PrettyEngine;
 
@@ -61,6 +60,8 @@ class Editor : public virtual Entity {
         keyRight.key = KeyCode::RightArrow;
         keyRight.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyRight);
+
+        
     }
 
     void OnDestroy() override {
@@ -252,9 +253,11 @@ class Editor : public virtual Entity {
                     ImGui::TextColored(color, "%i: %s", index, line.log.c_str());
                     index++;
                 }
+
                 ImGui::InputText("Command", this->consoleCommandBuffer, 100);
                 if (ImGui::Button("Execute")) {
-                    DebugLog(LOG_WARNING, "Console commands not yet implemented.", true);
+                    std::string cmd = this->consoleCommandBuffer;
+					PrettyEngine::CommandSystem::Execute(cmd);
                 }
             }
             ImGui::End();

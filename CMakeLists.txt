@@ -30,6 +30,7 @@ file(GLOB code_sources "${CMAKE_SOURCE_DIR}/code/code/*.c" "${CMAKE_SOURCE_DIR}/
 add_library(pretty
 	"source/render.cpp"
 	"source/assetsManager.cpp"
+	"source/command.cpp"
 	${code_sources}
 )
 
