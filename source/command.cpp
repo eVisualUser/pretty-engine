@@ -3,11 +3,15 @@
 namespace PrettyEngine {
 	std::vector<Command> commands;
 
-	void CommandSystem::Execute(std::string command, bool systemCommand) {
+	bool Command::Target(std::vector<std::string>& command) {
+		return (command[0] == this->commandName);
+	}
+
+	void CommandSystem::Execute(std::string commandStr, bool systemCommand) {
 		if (systemCommand) {
-			system(command.c_str());
+			system(commandStr.c_str());
 		} else {
-			auto parsedCommand = ParseCSVLine(command, ' ');
+			auto parsedCommand = ParseCSVLine(commandStr, ' ');
 			for (auto &command : commands) {
 				if (command.Target(parsedCommand)) {
 					command.Execute(parsedCommand);
