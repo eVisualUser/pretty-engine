@@ -16,7 +16,6 @@
 #include <glm/vec3.hpp>
 
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 namespace PrettyEngine {
