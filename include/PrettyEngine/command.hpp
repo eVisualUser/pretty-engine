@@ -23,31 +23,11 @@ namespace PrettyEngine {
 
 	class CommandSystem {
 	public:
-		static void Execute(std::string command, bool systemCommand = false) {
-			if (systemCommand) {
-				system(command.c_str());
-			} else {
-				auto parsedCommand = ParseCSVLine(command, ' ');
-				for (auto &command : CommandSystem::commands) {
-					if (command.Target(parsedCommand)) {
-						command.Execute(parsedCommand);
-					}
-				}
-			}
-		}
+		static void Execute(std::string command, bool systemCommand = false);
 
-		static void AddCommand(Command& command) { CommandSystem::commands.push_back(command); }
+		static void AddCommand(Command& command);
 
-		static void RemoveCommand(Command& commandToRemove) { 
-			int commandIndex = 0;
-			for (auto &command : CommandSystem::commands) {
-				if (command.commandName == commandToRemove.commandName) {
-					CommandSystem::commands.erase(CommandSystem::commands.begin() + commandIndex);
-					return;
-				}
-				commandIndex++;
-			}
-		}
+		static void RemoveCommand(Command& commandToRemove);
 	};
 }
 
