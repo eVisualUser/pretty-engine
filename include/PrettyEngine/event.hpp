@@ -5,7 +5,6 @@
 
 #include <string>
 #include <vector>
-#include <coroutine>
 
 namespace PrettyEngine {
 	/// An event is used to share data between objects without direct access.

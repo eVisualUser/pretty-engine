@@ -9,9 +9,6 @@ namespace PrettyEngine {
 	public:
 		unsigned int userCount = 0;
 		bool useGC = true;
-
-	private:
-		static std::vector<GCObject> objects;
 	};
 }
 

@@ -47,12 +47,12 @@ namespace PrettyEngine {
 
 		bool Exist() { return FileExist(this->GetFilePath()); }
 
-		std::vector<char> Read() {
+		std::vector<unsigned char> Read() {
 			this->GetSerializedField("used")->value = "true";
 
 			std::ifstream input(this->GetFilePath(), std::ios::binary);
 
-			std::vector<char> output;
+			std::vector<unsigned char> output;
 
 			if (input.is_open()) {
 				this->GetSerializedField("exist")->value = "true";
@@ -69,7 +69,7 @@ namespace PrettyEngine {
 			}
 			return output;
 		}
-		
+
 		~Asset() {
 			if (this->Exist() && !WriteFileString(this->GetMetaPath(), this->Serialize(SerializationFormat::Toml))) {
 				DebugLog(LOG_ERROR, "Failed to write meta file: " << this->GetMetaPath(), true);

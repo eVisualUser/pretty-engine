@@ -36,9 +36,6 @@ class Engine: public EventListener {
 		this->engineContent.renderer.CreateWindow();
 		this->engineContent.renderer.Setup();
 
-		std::string engineDataBaseFile = this->customConfig["engine"]["database"].as_string()->get();
-		this->engineDatabase = std::make_shared<DataBase>(GetEnginePublicPath(engineDataBaseFile, true));
-
 		auto windowTitle = this->customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 		this->engineContent.renderer.SetWindowTitle(windowTitle);
 
@@ -61,8 +58,6 @@ class Engine: public EventListener {
 		this->engineContent.renderer.SetBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 
 		this->_imPlotContext = ImPlot::CreateContext();
-
-		this->SetWindowIcon("WindowIcon");
 
 		this->engineContent.renderer.ShowWindow();
 
@@ -201,80 +196,12 @@ class Engine: public EventListener {
 	/// Proper way to remove the current worlds
 	void ClearWorlds() { this->_worldManager.Clear(); }
 
- 	/// Get a texture from the engine database
-	Texture *GetTexture(std::string name) {
-		auto dbImages = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
-		auto dbImageName = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
-
-		PrettyEngine::Texture *texture = nullptr;
-
-		int index = 0;
-		for (auto &img : dbImages) {
-			int imgBytes;
-			std::vector<unsigned char> imgData;
-			int imgHeight;
-			int imgWidth;
-			int imgChannels;
-
-			imgBytes = img.bytes;
-			imgData = img.data;
-
-			if (imgBytes <= 0 || imgData.empty()) {
-				DebugLog(LOG_ERROR, "Missing texture: " << name, true);
-				continue;
-			}
-
-			auto rawData = PrettyEngine::DecodeImage(&imgData, imgBytes, &imgHeight, &imgWidth, &imgChannels);
-
-			if (rawData.empty()) {
-				DebugLog(LOG_ERROR, "Failed to decode: " << name, true);
-			}
-
-			if (dbImageName[index] == name) {
-				texture = this->engineContent.renderer.AddTextureFromData(dbImageName[index], rawData.data(), imgWidth, imgHeight, PrettyEngine::TextureType::Base, PrettyEngine::TextureWrap::ClampToBorder, PrettyEngine::TextureFilter::Linear);
-				break;
-			}
-
-			index++;
-		}
-
-		if (texture == nullptr) {
-			DebugLog(LOG_ERROR, "Could not find texture: " << name, true);
-			return nullptr;
-		}
-
-		return texture;
-	}
-
  	/// Enable or disable the physics.
 	void SetPhysics(bool value) { this->_physicsEnabled = value; }
 
 	void TogglePhysics() { this->_physicsEnabled = !this->_physicsEnabled; }
 
 	bool PhysicsEnabled() { return this->_physicsEnabled; }
-
- 	/// Set the engine window using the engine database
-	void SetWindowIcon(std::string textureName) {
-		auto rawTextures = this->engineDatabase->QuerySQLBlob("SELECT * FROM Textures;");
-		auto names = this->engineDatabase->QuerySQLText("SELECT * FROM Textures;");
-
-		int iter = 0;
-		for (auto &name : names) {
-			if (name == textureName) {
-				PrettyEngine::SQLBlobData img = rawTextures[iter];
-				int imgHeight = 0;
-				int imgWidth = 0;
-				int imgChannels = 0;
-
-				auto decoded = DecodeImage(&img.data, img.bytes, &imgHeight, &imgWidth, &imgChannels);
-
-				this->engineContent.renderer.SetWindowIcon(decoded.data(), imgWidth, imgHeight);
-
-				return;
-			}
-			iter++;
-		}
-	}
 
 	EngineContent* GetEngineContent() {
 		return &this->engineContent;
@@ -284,8 +211,6 @@ class Engine: public EventListener {
 
   private:
 	EventManager eventManager;
-
-	std::shared_ptr<DataBase> engineDatabase;
 
 	PrettyEngine::WorldManager _worldManager;
 
