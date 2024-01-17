@@ -70,6 +70,8 @@ namespace PrettyEngine {
 			return output;
 		}
 
+		std::string ReadToString() { return ReadFileToString(this->GetFilePath()); }
+
 		~Asset() {
 			if (this->Exist() && !WriteFileString(this->GetMetaPath(), this->Serialize(SerializationFormat::Toml))) {
 				DebugLog(LOG_ERROR, "Failed to write meta file: " << this->GetMetaPath(), true);
