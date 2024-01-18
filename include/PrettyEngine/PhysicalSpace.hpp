@@ -83,11 +83,10 @@ namespace PrettyEngine {
 
 			if (!collider->fixed) {
 				for(auto & collision: *collisions) {
-					float force = 100.0f;
 
 					auto delta = collider->position - collision.colliderOther->position;
 
-					delta = glm::normalize(delta);
+					delta = glm::normalize(delta) * collider->bounce;
 
 					if (collider->reverseDelta) {
 						delta = -delta;

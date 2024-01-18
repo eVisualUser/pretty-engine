@@ -44,8 +44,8 @@ namespace PrettyEngine {
 			if (this->colliderModel == ColliderModel::AABB) {
 				if (other->colliderModel == ColliderModel::AABB && other->layer == this->layer) {
 					if (this->fixed || (!this->fixed && !other->fixedCollisionOnly)) {
-						auto basePoints = (this->PointIn(other->GetMinHalf()) || this->PointIn(other->GetMaxHalf()) || this->PointIn(other->position));
-						auto inversePoints = (this->PointIn(other->GetInverseMin(true)) || this->PointIn(other->GetInverseMax(true)) || other->PointIn(this->position));
+						auto basePoints = (this->PointIn(other->GetMinHalf()) || this->PointIn(other->GetMaxHalf()));
+						auto inversePoints = (this->PointIn(other->GetInverseMin(true)) || this->PointIn(other->GetInverseMax(true)));
 
 						return (basePoints || inversePoints);
 					}
@@ -115,6 +115,7 @@ namespace PrettyEngine {
 			this->isRigidBody = state;
 		}
 
+		/// Move based on the velocity
 		void Move(glm::vec3 direction) {
 			this->velocity += direction;
 		}
@@ -126,8 +127,6 @@ namespace PrettyEngine {
 		
 	public:
 		ColliderModel colliderModel;
-
-		Mesh *mesh;
 
 		float radius = 1.0f;
 		

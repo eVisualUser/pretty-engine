@@ -175,6 +175,11 @@ namespace PrettyEngine {
 
 								CreateCustomEntity(newEntity, target);
 
+								if (target->lastEntityRegistred.empty()) {
+									DebugLog(LOG_DEBUG, "Failed to load entity: " << newEntity, true);
+									continue;
+								}
+
 								auto lastEntity = target->GetLastEntityRegistred();
 								lastEntity->entityName = newEntityName;
 	
@@ -235,9 +240,9 @@ namespace PrettyEngine {
 										}
 									}
 								}
-
+								
+								lastEntity->serialObjectName = newEntity;
 								lastEntity->serialObjectUnique = entity.first;
-								lastEntity->serialObjectUnique = newEntity;
 								lastEntity->OnUpdatePublicVariables();
 
 								auto transform = (*entity.second.as_table())["transform"];
