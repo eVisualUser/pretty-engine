@@ -74,7 +74,7 @@ namespace PrettyEngine {
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        auto buffer = mesh.CreateBuffer();
+        auto buffer = mesh.CreateVertexBuffer();
 
         glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), (GLenum)meshDrawType);
 
@@ -111,7 +111,7 @@ namespace PrettyEngine {
     void Renderer::UpdateMesh(Mesh* mesh) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 
-        auto data = mesh->CreateBuffer();
+        auto data = mesh->CreateVertexBuffer();
 
         glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), (GLenum)mesh->drawType);
     }

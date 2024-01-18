@@ -12,48 +12,44 @@ namespace Custom {
 	class Physical: public PrettyEngine::Component {
 	public:
 		void OnUpdatePublicVariables() override {
-			this->AddActionOnPublicVariableChanged([this](std::string var) {
-				if (var == "Gravity") {
-					PRINT_GLM_VEC3(this->GetCollider()->gravity);
-					auto gravity = PrettyEngine::ParseCSVLine(this->GetPublicVarValue("Gravity"), ';');
-					for (int i = 0; i < gravity.size(); i++) {
-						float axisValue = std::stof(gravity[i]);
-						if (i < this->GetCollider()->gravity.length()) {
-							this->GetCollider()->gravity[i] = axisValue;
-						}
+			this->publicFuncions.insert(std::make_pair("Update gravity", ([this]() {
+				auto gravity = PrettyEngine::ParseCSVLine(this->GetSerializedFieldValue("Gravity"), ';');
+				for (int i = 0; i < gravity.size(); i++) {
+					float axisValue = std::stof(gravity[i]);
+					if (i < this->GetCollider()->gravity.length()) {
+						this->GetCollider()->gravity[i] = axisValue;
 					}
-					PRINT_GLM_VEC3(this->GetCollider()->gravity);
 				}
-			});
+			})));
 
-			this->CreatePublicVar("rigidbody", "false");
-			this->CreatePublicVar("model", "AABB");
-			this->CreatePublicVar("layer", "Default");
-			this->CreatePublicVar("name", xg::newGuid());
-			this->CreatePublicVar("mass", "1");
-			this->CreatePublicVar("fixed", "false");
-			this->CreatePublicVar("Gravity", "0;9.81;0");
+			this->AddSerializedField(SERIAL_TOKEN(bool), "rigidbody", SERIAL_TOKEN(false));
+			this->AddSerializedField(SERIAL_TOKEN(std::string), "model", "AABB");
+			this->AddSerializedField(SERIAL_TOKEN(std::string), "layer", "Default");
+			this->AddSerializedField(SERIAL_TOKEN(std::string), "name", xg::newGuid());
+			this->AddSerializedField(SERIAL_TOKEN(float), "mass", "1");
+			this->AddSerializedField(SERIAL_TOKEN(bool), "fixed", "false");
+			this->AddSerializedField(SERIAL_TOKEN(glm::vec3), "Gravity", "0;9.81;0");
 
-			if (this->GetPublicVarValue("fixed") == "false") {
+			if (this->GetSerializedFieldValue("fixed") == "false") {
 				this->_colliderA.fixed = false;
 			} else {
 				this->_colliderA.fixed = true;
 			}
 
-			if (this->GetPublicVarValue("model") == "Sphere") {
+			if (this->GetSerializedFieldValue("model") == "Sphere") {
 				this->_colliderA.colliderModel = PrettyEngine::ColliderModel::Sphere;
 			} else {
 				this->_colliderA.colliderModel = PrettyEngine::ColliderModel::AABB;
 			}
 
-			if (this->GetPublicVarValue("rigidbody") == "true") {
+			if (this->GetSerializedFieldValue("rigidbody") == "true") {
 				this->_colliderA.SetRigidbody(true);
 			} else {
 				this->_colliderA.SetRigidbody(false);
 			}
 
-			this->_colliderA.name = this->GetPublicVarValue("name");
-			this->layer = this->GetPublicVarValue("layer");
+			this->_colliderA.name = this->GetSerializedFieldValue("name");
+			this->layer = this->GetSerializedFieldValue("layer");
 		}
 
 		void OnStart() override {

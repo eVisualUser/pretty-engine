@@ -15,12 +15,13 @@ namespace PrettyEngine {
 	public:
 		Asset() {}
 
-		Asset(std::string newPath) { 
-			this->remote = false;
-			this->path = newPath;
+		Asset(std::string publicRelativeFilePath) { this->Initialize(publicRelativeFilePath); }
+
+		void Initialize(std::string publicRelativeFilePath) {
+			this->path = publicRelativeFilePath;
 
 			this->SetObjectSerializedName("Asset");
-			this->SetSerializedUnique(newPath);
+			this->SetSerializedUnique(publicRelativeFilePath);
 
 			if (this->Exist()) {
 				this->CreateMeta();
@@ -31,9 +32,9 @@ namespace PrettyEngine {
 				this->AddSerializedField(SERIAL_TOKEN(bool), "used", "false");
 
 				this->Deserialize(ReadFileToString(this->GetMetaPath()), SerializationFormat::Toml);
-				
+
 				this->SetObjectSerializedName("Asset");
-				this->SetSerializedUnique(newPath);
+				this->SetSerializedUnique(publicRelativeFilePath);
 			}
 		}
 
@@ -90,7 +91,6 @@ namespace PrettyEngine {
 
 	private:
 		std::string path;
-		bool remote = false;
 	};
 
 	class AssetDataBase {

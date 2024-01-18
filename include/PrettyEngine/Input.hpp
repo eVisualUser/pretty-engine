@@ -54,7 +54,7 @@ namespace PrettyEngine {
     }
 
  	/// Safe way to manage inputs and share them between objects.
-    struct KeyWatcher {
+    class KeyWatcher {
     public:
     	std::string name = "?";
     	KeyCode key;

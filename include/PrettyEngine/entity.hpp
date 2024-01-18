@@ -17,8 +17,9 @@
 
 namespace PrettyEngine {
 	class World;
+	class Engine;
 
-	#define DefaultEntityName "AnyEntity"
+	#define DEFAULT_ENTITY_NAME "AnyEntity"
 
 	class Component: public DynamicObject {
 	public:
@@ -51,12 +52,11 @@ namespace PrettyEngine {
 			return this->_entityGUID;
 		}
 	public:
-		void* engine;
 
   		/// True if start was never called.
 		bool worldFirst = true;
 
-		std::string entityName = DefaultEntityName;
+		std::string entityName = DEFAULT_ENTITY_NAME;
 
 	public:
 		template<typename T>
@@ -67,7 +67,7 @@ namespace PrettyEngine {
 
 		void RemoveComponent(Component* component) {
 			for(int i = 0; i < this->components.size(); i++) {
-				if (this->components[i]->unique == component->GetObjectSerializedUnique()) {
+				if (this->components[i]->serialObjectUnique == component->GetObjectSerializedUnique()) {
 					this->components.erase(this->components.begin() + i);
 					break;
 				}
@@ -77,7 +77,7 @@ namespace PrettyEngine {
 		template<typename T>
 		T* GetComponentAs(std::string unique) {
 			for(auto & component: this->components) {
-				if (component->unique == unique) {
+				if (component->serialObjectUnique == unique) {
 					return dynamic_cast<T*>(component.get());
 				}
 			}

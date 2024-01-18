@@ -36,7 +36,7 @@ namespace PrettyEngine {
 		void UnRegisterListener(EventListener* listener) {
 			for(size_t i = 0; i < this->_eventListeners.size(); i++) {
 				if (this->_eventListeners[i] == listener) {
-					this->_eventListeners.erase(this->_eventListeners.begin() + static_cast<int>(i));
+					this->_eventListeners.erase(this->_eventListeners.begin() + i);
 				}
 			}
 		}

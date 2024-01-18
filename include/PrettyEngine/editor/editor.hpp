@@ -81,7 +81,7 @@ class Editor {
   		for (auto & publicFunction: dynamicObject->publicFuncions) {
 			std::string buttonName = "Call ";
    			buttonName += publicFunction.first + " for ";
-			buttonName += dynamicObject->unique;
+			buttonName += dynamicObject->serialObjectUnique;
    			if (ImGui::Button(buttonName.c_str())) {
 				publicFunction.second();
    			}
@@ -96,14 +96,14 @@ class Editor {
 				CreateCustomEntity(entity, world);
     			int entitiesWithSameName = 0;
     			for(auto & worldEntity: world->entities) {
-					if (worldEntity.second->unique == entity) {
+					if (worldEntity.second->serialObjectUnique == entity) {
 						entitiesWithSameName++;
      				}
     			}
-				world->GetLastEntityRegistred()->object = entity;
-    			world->GetLastEntityRegistred()->unique = entity;
+				world->GetLastEntityRegistred()->serialObjectUnique = entity;
+				world->GetLastEntityRegistred()->serialObjectUnique = entity;
     			if (entitiesWithSameName > 0) {
-     				world->GetLastEntityRegistred()->unique += "_" + std::to_string(entitiesWithSameName);
+					world->GetLastEntityRegistred()->serialObjectUnique += "_" + std::to_string(entitiesWithSameName);
     			}
 			}
 		}
@@ -214,6 +214,11 @@ class Editor {
 				ImGui::Text("Object: %s", selectedEntity->GetObjectSerializedName().c_str());
 				this->ShowManualFunctionsCalls(selectedEntity);
 
+				char entityNameBuffer[100];
+				strcpy(entityNameBuffer, selectedEntity->serialObjectUnique.c_str());
+				ImGui::InputText("Entity Unique", entityNameBuffer, 100);
+				selectedEntity->serialObjectUnique = entityNameBuffer;
+
 				for (auto &serializedField : selectedEntity->serialFields) {
 					for (auto &propertyEditor : this->_propertyEditorList) {
 						propertyEditor->Edit(&serializedField);
@@ -227,14 +232,25 @@ class Editor {
 				int componentIndex = 0;
 				for (auto & component : selectedEntity->components) {
 					std::string headerName = "Component: ";
-					headerName += component->unique;
+					headerName += component->serialObjectName;
+					headerName += " " + std::to_string(componentIndex);
 
 					if (ImGui::CollapsingHeader(headerName.c_str())) {
-						ImGui::Text("Unique: %s", component->unique.c_str());
+						// Unique attribute edit
+						{
+							char componentUniqueBuffer[100];
+							strcpy(componentUniqueBuffer, component->serialObjectUnique.c_str());
+
+							std::string inputTextName = component->serialObjectName + " Unique " + std::to_string(componentIndex);
+
+							ImGui::InputText(inputTextName.c_str(), componentUniqueBuffer, 100);
+							component->serialObjectUnique = componentUniqueBuffer;
+						}
+
 						this->ShowManualFunctionsCalls(component.get());
 
 						std::string removeButtonName = "Remove: ";
-						removeButtonName += component->unique;
+						removeButtonName += component->serialObjectUnique;
 						if (ImGui::Button(removeButtonName.c_str())) {
 							selectedEntity->components.erase(selectedEntity->components.begin() + componentIndex);
 							break;
@@ -257,11 +273,7 @@ class Editor {
 					componentIndex++;
 				}
 
-				if (ImGui::Button("Add Component")) {
-					this->createComponent = !this->createComponent;
-				}
-
-				if (this->createComponent) {
+				if (ImGui::CollapsingHeader("Add component")) {
 					for (auto &componentName : this->existingComponents) {
 						std::string buttonText = "Add " + componentName;
 						if (ImGui::Button(buttonText.c_str())) {
@@ -269,7 +281,7 @@ class Editor {
 							std::string newComponentName = componentName;
 
 							for (auto &component : selectedEntity->components) {
-								if (!component->unique.empty() && component->unique.starts_with(componentName)) {
+								if (!component->serialObjectUnique.empty() && component->serialObjectUnique.starts_with(componentName)) {
 									componentNameCount++;
 								}
 							}
@@ -282,10 +294,10 @@ class Editor {
 							if (customComponent == nullptr) {
 								DebugLog(LOG_ERROR, "Failed to get custom component: " << componentName, true);
 							} else {
-								customComponent->unique = newComponentName;
+								customComponent->serialObjectUnique = newComponentName;
 								customComponent->OnUpdatePublicVariables();
 								customComponent->owner = selectedEntity;
-								customComponent->object = componentName;
+								customComponent->serialObjectName = componentName;
 								customComponent->SetObjectSerializedName(componentName);
 								customComponent->SetSerializedUnique(newComponentName);
 
@@ -323,7 +335,7 @@ class Editor {
 								ImGui::TableNextColumn();
 								ImGui::Text("%s", entity.second->entityName.c_str());
 								ImGui::TableNextColumn();
-								ImGui::Text("%s", entity.second->object.c_str());
+								ImGui::Text("%s", entity.second->serialObjectName.c_str());
 								ImGui::TableNextColumn();
 								ImGui::Text("%lli", entity.second->components.size());
 								ImGui::TableNextColumn();

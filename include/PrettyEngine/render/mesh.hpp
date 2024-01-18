@@ -4,6 +4,7 @@
 #include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/gc.hpp>
 #include <PrettyEngine/render/PrettyGL.hpp>
+#include <PrettyEngine/transform.hpp>
 
 #include <glm/glm.hpp>
 
@@ -21,7 +22,7 @@ namespace PrettyEngine {
 	class Mesh: public GCObject {
 	public:
 		/// Convert to an array buffer
-		std::vector<float> CreateBuffer() {
+		std::vector<float> CreateVertexBuffer() {
 			std::vector<float> data;
 
 			for (auto & vertex: vertices) {
@@ -53,6 +54,7 @@ namespace PrettyEngine {
 		    glDeleteVertexArrays(1, &vao);
 		    glDeleteBuffers(1, &ebo);
 		}
+
 	public:
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;

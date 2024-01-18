@@ -98,7 +98,7 @@ namespace PrettyEngine {
 
 		std::string AddActionOnPublicVariableChanged(std::function<void(std::string)> function, std::string name = xg::newGuid()) { 
 			if (function == nullptr) {
-				DebugLog(LOG_ERROR, "Tried to add a null function in " << this->unique, true);
+				DebugLog(LOG_ERROR, "Tried to add a null function in " << this->serialObjectUnique, true);
 			} else {
 				this->onPublicVariableChanged.insert_or_assign(name, function);
 			}
@@ -117,10 +117,6 @@ namespace PrettyEngine {
 		std::vector<Request> requests;
 
   		std::unordered_map<std::string, std::function<void()>> publicFuncions;
-
-	public:
-		std::string unique;
-		std::string object;
 
 	private:
 		std::unordered_map<std::string, std::function<void(std::string)>> onPublicVariableChanged;

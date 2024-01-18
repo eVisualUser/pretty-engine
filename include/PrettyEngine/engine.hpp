@@ -24,7 +24,7 @@
 
 namespace PrettyEngine {
 /// Body of the engine, contain everything
-class Engine: public EventListener {
+class Engine final: public EventListener {
   public:
  	/// Initialize the engine based on a toml configuration
 	Engine(std::string config) {
@@ -100,6 +100,17 @@ class Engine: public EventListener {
 
  	/// Update the content of the engine.
 	void Update() {
+#if ENGINE_EDITOR
+		// Stop playing the game if an error occurred
+		if (logs.size() > 0) {
+			auto lastLog = logs[logs.size() - 1];
+			if (logs[logs.size() - 1].type == LOG_ERROR && !this->isEditor) {
+				this->isEditor = true;
+				DebugLog(LOG_WARNING, "An error occurred, play state stopped. Please check the console.", true);
+			}
+		}
+#endif
+
 		auto worlds = this->_worldManager.GetWorlds();
 		this->engineContent.input.Update();
 

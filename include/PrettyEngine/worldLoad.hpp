@@ -129,10 +129,10 @@ namespace PrettyEngine {
 					base.insert_or_assign("entities", toml::table{});
 					for(auto & entity: world->entities) {
 						auto entitiesTable = base["entities"].as_table();
-						entitiesTable->insert_or_assign(entity.second->unique, toml::table{});
-						auto entityTable = (*entitiesTable)[entity.second->unique].as_table();
+						entitiesTable->insert_or_assign(entity.second->serialObjectUnique, toml::table{});
+						auto entityTable = (*entitiesTable)[entity.second->serialObjectUnique].as_table();
 						entityTable->insert_or_assign("name", entity.second->entityName);
-						entityTable->insert_or_assign("object", entity.second->object);
+						entityTable->insert_or_assign("object", entity.second->serialObjectName);
 
 						entityTable->insert_or_assign("transform", toml::table{});
 						auto transformTable = (*entityTable)["transform"].as_table();
@@ -142,7 +142,7 @@ namespace PrettyEngine {
 
 						auto componentTable = toml::table();
 						for(auto & component: entity.second->components) {
-							componentTable.insert_or_assign(component->unique, toml::table(toml::parse(component->Serialize(SerializationFormat::Toml))));
+							componentTable.insert_or_assign(component->serialObjectUnique, toml::table(toml::parse(component->Serialize(SerializationFormat::Toml))));
 						}
 						entityTable->insert_or_assign("components", componentTable);
 					}
@@ -224,8 +224,8 @@ namespace PrettyEngine {
 												ss << *element.second.as_table();
 
 												component->Deserialize(ss.str());
-												component->object = component->GetObjectSerializedName();
-												component->unique = component->GetObjectSerializedUnique();
+												component->serialObjectName = component->GetObjectSerializedName();
+												component->serialObjectUnique = component->GetObjectSerializedUnique();
 												component->owner = lastEntity.get();
 
 												component->OnUpdatePublicVariables();
@@ -236,8 +236,8 @@ namespace PrettyEngine {
 									}
 								}
 
-								lastEntity->unique = entity.first;
-								lastEntity->object = newEntity;
+								lastEntity->serialObjectUnique = entity.first;
+								lastEntity->serialObjectUnique = newEntity;
 								lastEntity->OnUpdatePublicVariables();
 
 								auto transform = (*entity.second.as_table())["transform"];

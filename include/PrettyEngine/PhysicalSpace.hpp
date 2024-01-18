@@ -33,6 +33,8 @@ namespace PrettyEngine {
 			return false;
 		}
 
+		std::unordered_map<std::string, std::vector<Collider*>>* GetAllLayers() { return &this->_colliders;}
+
 		std::vector<Collider*>* GetOrCreateLayer(std::string layerName) {
 			for(auto & layer: this->_colliders) {
 				if (layer.first == layerName) {

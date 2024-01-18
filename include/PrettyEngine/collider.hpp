@@ -8,10 +8,6 @@
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/tags.hpp>
 
-// LibCCD
-#include <ccd/ccd.h>
-#include <ccd/quat.h>
-
 // GLM
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -26,8 +22,6 @@ namespace PrettyEngine {
 		AABB,
 		/// Simple Sphere collision detection
 		Sphere,
-		/// Mesh based collisions
-		Convex,
 	};
 
 	/// Repsesent an object in a world that react/affect the physics
@@ -66,7 +60,6 @@ namespace PrettyEngine {
 					}
 				}
 			}
-
 			return this->BadSetup();
 		}
 
@@ -125,14 +118,6 @@ namespace PrettyEngine {
 		void Move(glm::vec3 direction) {
 			this->velocity += direction;
 		}
-		
-	// LibCCD specific
-	public:
-		// Function required by LibCCD
-		void Support(const void* obj, const ccd_vec3_t *dir, ccd_vec3_t *vec) {
-			Collider* collider = (Collider*)obj;
-		}
-
 	private:
 		bool BadSetup() {
 			DebugLog(LOG_ERROR, "Collider: " << this->name << " have no detection model set", true);
@@ -141,6 +126,8 @@ namespace PrettyEngine {
 		
 	public:
 		ColliderModel colliderModel;
+
+		Mesh *mesh;
 
 		float radius = 1.0f;
 		
