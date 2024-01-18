@@ -1,7 +1,9 @@
-#include <PrettyEngine/engine.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
+#include <PrettyEngine/debug/debug.hpp>
+#include <PrettyEngine/engine.hpp>
+#include <PrettyEngine/worldLoad.hpp>
 
-#include <thread>
+using namespace PrettyEngine;
 
 bool worldFilter(std::string name) {
 	if (name.starts_with("editor") || name.starts_with("Editor") || name.starts_with("EDITOR")) {
@@ -11,31 +13,22 @@ bool worldFilter(std::string name) {
 	return true;
 }
 
-static void EngineThread() {
-	PrettyEngine::Engine* engine = new PrettyEngine::Engine(ASSET_BUILTIN_CONFIG);
-
-	engine->GetWorldManager()
-		->AddWorldFile(GetEnginePublicPath("worlds/game.toml", true));
-	
-	engine->GetWorldManager()
-		->FilterWorldList(worldFilter)
-		->ParseWorldsFiles()
-		->CreateWorldsInstances()
-		->LoadWorlds();
-
-	engine->SetupWorlds();
-
-	engine->Run();
-	
-	delete engine;
-}
-
 int main() {
-	auto engine = std::thread(EngineThread);
+	auto engine = PrettyEngine::Engine(ASSET_BUILTIN_EDITOR_CONFIG);
+	engine.GetWorldManager()->AddWorldFile(GetEnginePublicPath("worlds/game.toml", true));
+	engine.GetWorldManager()->FilterWorldList(worldFilter);
+	engine.GetWorldManager()->ParseWorldsFiles();
+	engine.GetWorldManager()->CreateWorldsInstances();
 
-	// If you want to add something during the game execution.
-	
-	engine.join();
+	for (auto &error : engine.GetWorldManager()->FindErrors()) {
+		DebugLog(LOG_ERROR, error, true);
+	}
+
+	engine.GetWorldManager()->LoadWorlds();
+
+	engine.SetupWorlds();
+
+	engine.Run();
 
 	return 0;
 }
