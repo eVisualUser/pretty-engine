@@ -48,6 +48,15 @@ class Editor {
 		this->_propertyEditorList = GeneratePropertyEditorList();
 	}
 
+	~Editor() {
+		/*for (auto &propertyEditor : this->_propertyEditorList) {
+			propertyEditor.reset();
+		}
+
+		this->_propertyEditorList.clear();
+		this->_propertyEditorList.shrink_to_fit(); */
+	}
+
 	void ShowWorldDebugInfo(Renderer *renderer) {
 		if (ImGui::Begin("Debug Tools", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoSavedSettings)) {
 			ImGui::Text("Visual Objects : %i", renderer->GetVisualObjectsCount());
@@ -137,7 +146,8 @@ class Editor {
 			if (ImGui::CollapsingHeader("Camera Debugger")) {
 				for (auto &camera : renderer->cameraList) {
 					ImGui::Text("Camera: %lli", camera.id);
-					ImGui::Text("Position: %f;%f;%f", camera.position.x, camera.position.y, camera.position.z);
+
+					ImGui::InputFloat3("Position", &camera.position[0]);
 					ImGui::Text("Rotation: %f;%f;%f", camera.rotation.x, camera.rotation.y, camera.rotation.z);
 					std::string renderToTexture = std::to_string(camera.id);
 					renderToTexture += " Render to texture state";
@@ -316,7 +326,7 @@ class Editor {
 		if (ImGui::Begin("World Editor")) {
 			if (ImGui::BeginTabBar("Worlds")) {
 				// Iterate the worlds in the world manager
-				for (auto &world : worldManager->GetWorlds()) {
+				for (auto & world : *worldManager->GetWorlds()) {
 					// Show enities table
 					if (ImGui::BeginTabItem(world->worldName.c_str())) {
 						this->ShowCreateNewEntity(world);
@@ -365,6 +375,8 @@ class Editor {
 		auto changedState = false;
 		if (ImGui::Begin("Play Mode")) {
 			if (*isEditor && ImGui::Button("Play")) {
+				DebugLog(LOG_DEBUG, "[EDITOR] -> Play", false);
+
 				worldManager->SaveWorlds();
 
 				*isEditor = false;
@@ -387,7 +399,7 @@ class Editor {
 		}
 		ImGui::End();
 		if (changedState) {
-			for (auto &worlds : worldManager->GetWorlds()) {
+			for (auto &worlds : *worldManager->GetWorlds()) {
 				for (auto &entity : *worlds->GetEntities()) {
 					entity.second->worldFirst = true;
 					for (auto &component : entity.second->components) {

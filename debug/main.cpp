@@ -1,16 +1,12 @@
 #include <PrettyEngine/debug/debug.hpp>
-#include <PrettyEngine/localization.hpp>
-#include <PrettyEngine/assetManager.hpp>
+#include <PrettyEngine/version.hpp>	
 
 int main() {
 	
-	#ifdef _DEBUG
-		DebugLog(LOG_DEBUG, "Def: " << PRETTY_ENGINE_PROJECT, true);
-	#endif
+	PrettyEngine::Version version;
+	version.FromString("0.1.0");
 
-	auto asset = PrettyEngine::Asset("cpp_logo.png");
-	
-	DebugLog(LOG_DEBUG, "Out: " << asset.Read().data(), true);
+	DebugLog(LOG_DEBUG, "Version: " << version.ToString(), true);
 
 	return 0;
 }

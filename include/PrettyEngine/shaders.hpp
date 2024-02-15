@@ -38,6 +38,23 @@ uniform int lightLayer;
 
 #define UNIFORM_ARRAY_SIZE 100
 
+struct Light {
+    int layer;
+    vec3 position;
+    vec3 color;
+    float factor;
+    float radius;
+    float deferredFactor;
+    float opacityFactorEffect;
+    int spotLight;
+    vec3 spotLightDirection;
+    float spotLightCutoff;
+};
+
+layout(std140) uniform LightArray {
+    Light lights[UNIFORM_ARRAY_SIZE];
+};
+
 uniform int[UNIFORM_ARRAY_SIZE] lightsLayer;
 
 uniform vec3[UNIFORM_ARRAY_SIZE] lightsPosition;

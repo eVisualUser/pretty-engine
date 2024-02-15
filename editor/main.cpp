@@ -27,5 +27,9 @@ int main() {
 	
 	engine.Run();
 
+	engine.~Engine();
+
+
+
 	return 0;	
 }

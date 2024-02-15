@@ -19,7 +19,7 @@ namespace Custom {
 		}
 
 		void OnPrePhysics() override {
-			auto rigidbody = dynamic_cast<Entity*>(this->owner)->GetComponentAs<Physical>(this->GetSerializedFieldValue("colliderName"));
+			auto rigidbody = dynamic_cast<Entity*>(this->owner)->GetComponentAs<Physical>(this->GetSerializedFieldValue("colliderName")).ShowError();
 			
 			auto speed = std::stof(this->GetSerializedFieldValue("speed"));
 

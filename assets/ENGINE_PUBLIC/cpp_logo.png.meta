@@ -1,5 +1,5 @@
 ObjectName = 'Asset'
-ObjectUnique = 'cpp_logo.png'
+ObjectUnique = 'C:/Users/sylva/Desktop/custom game engine/pretty-engine/assets/ENGINE_PUBLIC/cpp_logo.png'
 
 [fields]
 exist = [ 'bool', 'true' ]
@@ -7,3 +7,4 @@ local = [ 'std::string', 'any' ]
 metaCreationDate = [ 'std::string', '2023-12-18 01:48:43' ]
 textureChannels = [ 'int', '6408' ]
 used = [ 'bool', 'true' ]
+version = [ 'std::string', '0.1.0' ]

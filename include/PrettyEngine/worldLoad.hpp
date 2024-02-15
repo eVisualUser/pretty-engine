@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <vector>
+#include <future>
 
 namespace PrettyEngine {
 	/// Manage the loading and saving of Worlds.
@@ -65,16 +66,22 @@ namespace PrettyEngine {
 		}
 
 		WorldManager* ParseWorldsFiles() {
-			for(auto & world: this->_worldsFilesToLoad) {
-				this->_worldsFilesParsed.push_back(toml::parse_file(*world));
+			for(const auto & world: this->_worldsFilesToLoad) {
+				if (world != nullptr) {
+					auto asset = Asset(*world);
+
+					toml::parse_result parseResult = toml::parse(asset.ReadToString());
+
+					this->_worldsFilesParsed.push_back(parseResult);
+				}
 			}
 			return this;
 		}
 
-		std::shared_ptr<World> GetWorldByName(std::string worldName) {
+		std::shared_ptr<World>* GetWorldByName(std::string worldName) {
 			for(auto & world: this->_worldsInstances) {
 				if (world->worldName == worldName) {
-					return world;
+					return &world;
 				}
 			}
 
@@ -104,7 +111,7 @@ namespace PrettyEngine {
 			return result;
 		}
 
-		void SaveWorlds() {
+		void SaveWorlds() const {
 			int index = 0;
 			for(auto & world: this->_worldsInstances) {
 				auto & filePath = this->_worldsFiles[index];
@@ -183,63 +190,67 @@ namespace PrettyEngine {
 								auto lastEntity = target->GetLastEntityRegistred();
 								lastEntity->entityName = newEntityName;
 	
-								// Entity serial
-								if (entity.second.is_table()) {
-									if (entity.second.as_table()->contains("serial")) {
-										auto entityTable = entity.second.as_table();
+								auto entitySerial = std::async([this, entity, lastEntity]{
+									// Entity serial
+									if (entity.second.is_table()) {
+										if (entity.second.as_table()->contains("serial")) {
+											auto entityTable = entity.second.as_table();
 
-										auto serial = (*entityTable)["serial"]["fields"];
-										if (serial.is_table()) {
-											auto serialTable = serial.as_table();
-											for (auto & element : *serialTable) {
-												if (element.second.is_array()) {
-													auto array = element.second.as_array();
-													SerializedField serialField;
-													serialField.name = element.first;
-													
-													if (array->size() > 0) {
-														serialField.type = array->at(0).value_or("null");
+											auto serial = (*entityTable)["serial"]["fields"];
+											if (serial.is_table()) {
+												auto serialTable = serial.as_table();
+												for (auto &element : *serialTable) {
+													if (element.second.is_array()) {
+														auto array = element.second.as_array();
+														SerializedField serialField;
+														serialField.name = element.first;
+
+														if (array->size() > 0) {
+															serialField.type = array->at(0).value_or("null");
+														}
+
+														if (array->size() > 1) {
+															serialField.value = array->at(1).value_or("null");
+														}
+														lastEntity->AddSerializedField(serialField);
 													}
-													
-													if (array->size() > 1) {
-														serialField.value = array->at(1).value_or("null");
-													}
-													lastEntity->AddSerializedField(serialField);
 												}
 											}
 										}
 									}
-								}
+								});
 
 								// Components serial
-								if (entity.second.is_table()) {
-									auto entityTable = entity.second.as_table();
-									if (entityTable->contains("components")) {
-										auto serial = (*entityTable)["components"];
-										if (serial.is_table()) {
-											auto serialTable = serial.as_table();
-											for (auto &element : *serialTable) {
-												auto elementTable = element.second.as_table();
-												
-												auto objectName = (*elementTable)["ObjectName"].value_or("null");
+								auto componentSerial = std::async([this, entity, lastEntity] {
+									if (entity.second.is_table()) {
+										auto entityTable = entity.second.as_table();
+										if (entityTable->contains("components")) {
+											auto serial = (*entityTable)["components"];
+											if (serial.is_table()) {
+												auto serialTable = serial.as_table();
+												for (auto &element : *serialTable) {
+													auto elementTable = element.second.as_table();
 
-												auto component = GetCustomComponent(objectName);
+													auto objectName = (*elementTable)["ObjectName"].value_or("null");
 
-												std::stringstream ss;
-												ss << *element.second.as_table();
+													auto component = GetCustomComponent(objectName);
 
-												component->Deserialize(ss.str());
-												component->serialObjectName = component->GetObjectSerializedName();
-												component->serialObjectUnique = component->GetObjectSerializedUnique();
-												component->owner = lastEntity.get();
+													std::stringstream ss;
+													ss << *element.second.as_table();
 
-												component->OnUpdatePublicVariables();
+													component->Deserialize(ss.str());
+													component->serialObjectName = component->GetObjectSerializedName();
+													component->serialObjectUnique = component->GetObjectSerializedUnique();
+													component->owner = lastEntity.get();
 
-												lastEntity->components.push_back(component);
+													component->OnUpdatePublicVariables();
+
+													lastEntity->components.push_back(component);
+												}
 											}
 										}
 									}
-								}
+								});
 								
 								lastEntity->serialObjectName = newEntity;
 								lastEntity->serialObjectUnique = entity.first;
@@ -249,6 +260,11 @@ namespace PrettyEngine {
 								if (transform.is_table() && target->GetLastEntityRegistred() != nullptr) {
 									lastEntity->FromToml(transform.as_table());
 								}
+
+								componentSerial.get();
+								entitySerial.get();
+
+								lastEntity->components.shrink_to_fit();
 							}
 						}
 						target->loaded = true;
@@ -258,21 +274,14 @@ namespace PrettyEngine {
 			}
 		}
 		
-		std::vector<std::shared_ptr<World>> GetWorlds() {
-			std::vector<std::shared_ptr<World>> out;
-			
-			for(int i = 0; i < this->_worldsInstances.size(); i++) {
-				out.push_back(this->_worldsInstances[i]);
-			}
-
-			return out;
+		std::vector<std::shared_ptr<World>>* GetWorlds() {
+			return &this->_worldsInstances;
 		}
 
 		void Clear() {
-			this->_worldsFiles.clear();
+			// this->_worldsFiles.clear();
 			this->_worldsFilesParsed.clear();
 			this->_worldsFilesToLoad.clear();
-			this->_worldsFilesParsed.clear();
 			this->_worldsInstances.clear();
 		}
 

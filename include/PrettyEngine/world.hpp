@@ -42,7 +42,6 @@ namespace PrettyEngine {
 			this->updateMTThreadAlive = true;
 			this->updateMT = new std::thread(MTUpdate, &this->updateMTThreadAlive, &this->update, &this->entities);
 
-			this->simulationCollider.colliderModel = ColliderModel::AABB;
 			this->simulationCollider.SetScale(glm::vec3(100, 100, 100));
 		}
 		
@@ -98,7 +97,7 @@ namespace PrettyEngine {
 		void Update() {
 			this->Start();
 			for (auto & entity: this->entities) {
-				if (entity.second.get() != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+				if (entity.second.get() != nullptr) {
 					entity.second->OnUpdate();
 					for (auto & component: entity.second->components) {
 						component->OnUpdate();
@@ -111,7 +110,7 @@ namespace PrettyEngine {
 			#if ENGINE_EDITOR
 				this->EditorStart();
 				for (auto & entity: this->entities) {
-					if (entity.second.get() != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+					if (entity.second.get() != nullptr) {
 						entity.second->OnEditorUpdate();
 						for (auto & component: entity.second->components) {
 							component->OnEditorUpdate();
@@ -135,7 +134,7 @@ namespace PrettyEngine {
 
 		void EndUpdate() {
 			for (auto & entity: this->entities) {
-				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+				if (entity.second != nullptr) {
 					entity.second->OnEndUpdate(); 
 					for (auto & component: entity.second->components) {
 						component->OnEndUpdate();
@@ -146,7 +145,7 @@ namespace PrettyEngine {
 
 		void PrePhysics() {
 			for (auto & entity: this->entities) {
-				if (entity.second != nullptr && this->simulationCollider.PointIn(entity.second->position)) {
+				if (entity.second != nullptr) {
 					entity.second->OnPrePhysics(); 
 					for (auto & component: entity.second->components) {
 						component->OnPrePhysics();

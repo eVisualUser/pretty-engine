@@ -57,11 +57,16 @@ namespace PrettyEngine {
 			for (auto & texture: this->textures) {
 				texture->userCount--;
 			}
+			this->textures.clear();
 		}
 
 		void AddTexture(Texture* texture) {
-			texture->userCount++;
-			this->textures.push_back(texture);
+			if (texture != nullptr) {
+				texture->userCount++;
+				this->textures.push_back(texture);
+			} else {
+				DebugLog(LOG_ERROR, "Texture nullptr", true);
+			}
 		}
 
 		void AddRenderModel(RenderModel* newRenderModel) {

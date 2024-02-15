@@ -120,7 +120,7 @@ func GenerateCustomObjectScript() {
 
 	for _, file := range fileList {
 		fileName := strings.ReplaceAll(file, ".hpp", "")
-		out += "	result.push_back(" + "std::make_shared<Custom::" + fileName + ">()" + ");\n"
+		out += "	result.push_back(" + "std::dynamic_pointer_cast<PropertyEditor>(std::make_shared<Custom::" + fileName + ">())" + ");\n"
 	}
 
 	out += "\n" +

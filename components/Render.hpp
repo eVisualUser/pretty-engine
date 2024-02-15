@@ -54,13 +54,13 @@ public:
 		this->RefreshBaseTexture();
 	}
 
-
 	void OnEditorUpdate() override { this->OnUpdate(); }
 
 	void RefreshBaseTexture() {
 		if (this->GetSerializedFieldValue("UseTextureBase") == "true") {
-			auto baseTexturePath = this->GetSerializedFieldValue("TextureBase");
+			const auto baseTexturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureBase"), true);
 			this->baseTexture = Asset(baseTexturePath);
+			
 			if (this->baseTexture.Exist()) {
 				this->visualObject->RemoveTexture(TextureType::Base);
 				this->engineContent->renderer.Clear();
@@ -75,7 +75,7 @@ public:
 
 		this->visualObject->wireFrame = (this->GetSerializedFieldValue("WireFrame") == "true");
 
-		auto color = ParseCSVLine(this->GetSerializedFieldValue("Color"));
+		const auto color = ParseCSVLine(this->GetSerializedFieldValue("Color"));
 
 		this->visualObject->baseColor.r = std::stof(color[0]);
 		this->visualObject->baseColor.g = std::stof(color[1]);
@@ -88,35 +88,42 @@ public:
 	    this->visualObject->useLight = (this->GetSerializedFieldValue("UseLight") == "true");
 	    this->visualObject->sunLight = (this->GetSerializedFieldValue("SunLight") == "true");
 
-	    this->engineContent->renderer.AddShader("DefaultVertex", ShaderType::Vertex,
-	                                            Shaders::SHADER_VERTEX_VERTEX);
-	    this->engineContent->renderer.AddShader(
-	        "DefaultFragment", ShaderType::Fragment, Shaders::SHADER_FRAGMENT_FRAGMENT);
-	    auto shader = this->engineContent->renderer.AddShaderProgram(
-	        "Default", "DefaultVertex", "DefaultFragment");
+		std::string defaultVertexShaderName = "DefaultVertex";
+		std::string defaultFragmentShaderName = "DefaultFragment";
+
+    	this->engineContent->renderer.AddShader(defaultVertexShaderName, ShaderType::Vertex, Shaders::SHADER_VERTEX_VERTEX);
+	    this->engineContent->renderer.AddShader(defaultFragmentShaderName, ShaderType::Fragment, Shaders::SHADER_FRAGMENT_FRAGMENT);
+
+	    const auto shader = this->engineContent->renderer.AddShaderProgram("Default", defaultVertexShaderName, defaultFragmentShaderName);
 
 	    this->renderModel.SetShaderProgram(shader);
+
+		this->RefreshBaseTexture();
+
 	    this->visualObject->AddRenderModel(&this->renderModel);
 
 	    this->renderModel.useTexture = (this->GetSerializedFieldValue("UseTexture") == "true");
 
 	    if (this->GetSerializedFieldValue("UseTextureTransparency") == "true") {
-			auto baseTexturePath = this->GetSerializedFieldValue("TextureNormal");
+			
+			const auto baseTexturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureTransparency"));
 			this->transparencyTexture = Asset(baseTexturePath);
-	      if (this->transparencyTexture.Exist()) {
-	        this->engineContent->renderer.RemoveTexture(
-	            this->transparencyTexture.GetFilePath());
-	        this->visualObject->RemoveTexture(this->textureTransparency);
-	        this->textureTransparency = this->engineContent->renderer.AddTexture(
-	            this->transparencyTexture.GetFilePath(), &this->transparencyTexture, TextureType::Transparency,
-	            TextureWrap::ClampToBorder, TextureFilter::Linear,
-	            TextureChannels::RGBA);
-	        this->visualObject->AddTexture(this->textureTransparency);
-	      }
+	      	
+	      	if (this->transparencyTexture.Exist()) {
+		        this->engineContent->renderer.RemoveTexture(this->textureTransparency);
+
+		        this->visualObject->RemoveTexture(this->textureTransparency);
+		        this->textureTransparency = this->engineContent->renderer.AddTexture(
+		            this->transparencyTexture.GetFilePath(), &this->transparencyTexture, TextureType::Transparency,
+		            TextureWrap::ClampToBorder, TextureFilter::Linear,
+		            TextureChannels::RGBA);
+
+		        this->visualObject->AddTexture(this->textureTransparency);
+	      	}
 	    }
 
 	    if (this->GetSerializedFieldValue("UseTextureNormal") == "true") {
-		  auto baseTexturePath = this->GetSerializedFieldValue("TextureTransparency");
+		  const auto baseTexturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureNormal"), true);
 		  this->normalTexture = Asset(baseTexturePath);
 	      if (this->normalTexture.Exist()) {
 	        this->engineContent->renderer.RemoveTexture(this->normalTexture.GetFilePath());
@@ -131,11 +138,11 @@ public:
 
 	    bool loadMesh = false;
 
-		auto meshName = this->GetPublicVarValue("Mesh");
+		const auto meshPath = GetEnginePublicPath(this->GetPublicVarValue("Mesh"), true);
 		// Check if the mesh is already loaded
 		if (this->mesh == nullptr) {
 			this->renderModel.RemoveMesh();
-			auto newMesh = CreateRectMesh();
+			const auto newMesh = CreateRectMesh();
 			this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh);
 			this->renderModel.SetMesh(this->mesh);
 			loadMesh = true;
@@ -163,7 +170,7 @@ public:
 	    this->visualObject->scale = dynamic_cast<Entity *>(this->owner)->scale;
   	}
 
-  	VisualObject *GetVisualObject() { return this->visualObject.get(); }
+  	VisualObject *GetVisualObject() const { return this->visualObject.get(); }
 
 private:
   	Mesh *mesh = nullptr;
@@ -172,7 +179,7 @@ private:
   	Texture *textureTransparency = nullptr;
   	Texture *textureNormal = nullptr;
 
-  	RenderModel renderModel;
+  	RenderModel renderModel = RenderModel();
   	std::shared_ptr<VisualObject> visualObject = std::make_shared<VisualObject>();
   	std::string visualObjectGuid = xg::newGuid();
 

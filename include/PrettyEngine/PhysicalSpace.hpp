@@ -59,7 +59,7 @@ namespace PrettyEngine {
 
 		std::vector<Collision> FindCollisions(Collider* collider) {
 			std::vector<Collision> out;
-			
+
 			auto layer = this->FindColliderLayer(collider);
 			
 			for(auto & i: *layer) {
@@ -121,7 +121,7 @@ namespace PrettyEngine {
 
 		std::vector<Collision>* GetCollisions(Collider* collider) {
 			for(auto & collisions: this->_collisions) {
-				if (collisions.first->name == collider->name) {
+				if (collisions.first != nullptr && collisions.first->name == collider->name) {
 					return &collisions.second;
 				}
 			}

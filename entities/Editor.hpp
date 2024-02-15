@@ -35,33 +35,45 @@ using namespace PrettyEngine;
 namespace Custom {
 class Editor : public virtual Entity {
   public:
-    void OnEditorStart() override {
-		this->localizationEditorPtr = this->GetComponentAs<LocalizationEditor>("LocalizationEditor");
-		if (this->localizationEditorPtr == nullptr) {
-			DebugLog(LOG_ERROR, "Missing LocalizationEditor component", true);
-        }
+    void OnUpdatePublicVariables() override {
+        this->localizationEditorPtr = Option(this->GetComponentAs<LocalizationEditor>("LocalizationEditor").Resolve([this](LocalizationEditor** value){
+            (*value) = this->AddComponent<LocalizationEditor>("LocalizationEditor");
+            return (*value) == nullptr;
+        })->ShowError());
+    }
 
+    void OnEditorStart() override {
         keyUp.name = "EditorKeyUp";
         keyUp.key = KeyCode::UpArrow;
         keyUp.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyUp);
+        keyUp.actionOnKey = [this]{
+            this->position.y += this->_speed * this->engineContent->renderer.GetDeltaTime();
+        };
 
         keyDown.name = "EditorKeyDown";
         keyDown.key = KeyCode::DownArrow;
         keyDown.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyDown);
+        keyDown.actionOnKey = [this]{
+            this->position.y -= this->_speed * this->engineContent->renderer.GetDeltaTime();
+        };
 
         keyLeft.name = "EditorKeyLeft";
         keyLeft.key = KeyCode::LeftArrow;
         keyLeft.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyLeft);
+        keyLeft.actionOnKey = [this]{
+            this->position.x -= this->_speed * this->engineContent->renderer.GetDeltaTime();
+        };
 
         keyRight.name = "EditorKeyRight";
         keyRight.key = KeyCode::RightArrow;
         keyRight.mode = KeyWatcherMode::Press;
         this->engineContent->input.AddKeyWatcher(&keyRight);
-
-        
+        keyRight.actionOnKey = [this]{
+            this->position.x += this->_speed * this->engineContent->renderer.GetDeltaTime();
+        };
     }
 
     void OnDestroy() override {
@@ -92,12 +104,18 @@ class Editor : public virtual Entity {
         ImGui::EndMainMenuBar();
     }
 
+    void OnUpdate() override {
+    #if ENGINE_EDITOR
+        this->_cameraSpeed.UpdateValue();
+    #endif
+    }
+
     void OnRender() override {
         this->MenuBar();
 
-        this->cameraZ += this->engineContent->input.GetMouseWheelDelta() * this->engineContent->renderer.GetDeltaTime() * 200.0f;
-
-        this->engineContent->renderer.GetCurrentCamera()->position.z = -this->cameraZ;
+        this->cameraZ += this->engineContent->renderer.GetDeltaTime() * this->engineContent->input.GetMouseWheelDelta() * (*this->_cameraSpeed.Get());
+        
+        this->engineContent->renderer.GetCurrentCamera()->position.z = this->cameraZ;
         this->engineContent->renderer.GetCurrentCamera()->position.x = -this->position.x;
         this->engineContent->renderer.GetCurrentCamera()->position.y = -this->position.y;
 
@@ -119,6 +137,7 @@ class Editor : public virtual Entity {
                 } else if (!FileExist(realPath) && ImGui::Button("Create")) {
                     CreateFile(realPath);
                 }
+                
                 if (FileExist(realPath) && ImGui::Button("Save")) {
                     auto parsed = toml::parse_file(realPath);
                     if (!parsed.contains("todo")) {
@@ -179,20 +198,6 @@ class Editor : public virtual Entity {
 			this->engineContent->eventManager.SendEvent(&saveEvent);
         }
 
-        if (this->keyUp.state) {
-            this->position.y +=
-                this->_speed * this->engineContent->renderer.GetDeltaTime();
-        } else if (this->keyDown.state) {
-            this->position.y -=
-                this->_speed * this->engineContent->renderer.GetDeltaTime();
-        }
-
-        if (this->keyLeft.state) {
-            this->position.x -= this->_speed * this->engineContent->renderer.GetDeltaTime();
-        } else if (this->keyRight.state) {
-            this->position.x += this->_speed * this->engineContent->renderer.GetDeltaTime();
-        }
-
         if (this->editorGuide) {
             if (ImGui::Begin("Editor Guide")) {
                 ImGui::Text("%s", "Welcome to the PrettyEditor !");
@@ -204,9 +209,12 @@ class Editor : public virtual Entity {
 
                 ImGui::Separator();
                 ImGui::Text("Tools");
-				if (this->localizationEditorPtr != nullptr && ImGui::Button("Localization Editor")) {
-                    this->localizationEditorPtr->Toggle();
-                }
+
+                this->localizationEditorPtr.HaveValue([this](LocalizationEditor* value){
+    				if (ImGui::Button("Localization Editor")) {
+                        value->Toggle();
+                    }
+                });
             }
             ImGui::End();
         }
@@ -304,10 +312,17 @@ class Editor : public virtual Entity {
     }
 
   private:
+    PublicProperty<float> _cameraSpeed = PublicProperty<float>(this,
+        "Camera Speed",
+        10.0f,
+        SERIAL_FUNCTION(float, std::to_string(x)),
+        DESERIAL_FUNCTION(std::stof(x))
+    );
+
     bool actionBox = false;
     ImVec2 actionBoxStartPos;
 
-    LocalizationEditor* localizationEditorPtr;
+    Option<LocalizationEditor*> localizationEditorPtr = Option<LocalizationEditor*>(nullptr);
 
     std::string file = "game.toml";
 
@@ -327,7 +342,7 @@ class Editor : public virtual Entity {
 
     bool editorGuide = true;
 
-    float cameraZ = 0.0f;
+    float cameraZ = -10.0f;
 
     bool todoEditor = false;
  

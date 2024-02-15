@@ -5,7 +5,6 @@
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/render/mesh.hpp>
 #include <PrettyEngine/render/texture.hpp>
-#include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/render/PrettyGL.hpp>
 #include <PrettyEngine/render/visualObject.hpp>
 #include <PrettyEngine/render/camera.hpp>
@@ -41,7 +40,7 @@ namespace PrettyEngine {
 
 		/// Create a window and hide it by default.
 		void CreateWindow();
-		void ShowWindow();
+		void ShowWindow() const;
 
 		/// Initialize all the OpenGL and GLFW requirements.
 		void Setup(glm::vec3 renderCubeScale = glm::vec3(20.0f, 20.0f, 100.0f));
@@ -55,12 +54,12 @@ namespace PrettyEngine {
 		/// Render a frame.
 		void Render();
 
-		void SetBackgroundColor(float r, float g, float b, float a) {
-			glClearColor(r, g, b, a);
+		void SetBackgroundColor(float red, float green, float blue, float alpha) {
+			glClearColor(red, green, blue, alpha);
 		}
 
 		/// Return true if the user try to close the window.
-		bool Valid() {
+		bool Valid() const {
 			return !glfwWindowShouldClose(this->_window);
 		}
 
@@ -71,11 +70,11 @@ namespace PrettyEngine {
 	    	bool isMinimized = glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
 
 	    	if (!isMinimized) {
-				this->_windowRatio = (float) width / height;
+				this->_windowRatio = static_cast<float>(width / height);
 			}
 		}
 
-		void RegisterVisualObject(std::string name, std::shared_ptr<VisualObject> visualObject) {
+		void RegisterVisualObject(std::string& name, std::shared_ptr<VisualObject>& visualObject) {
 			this->CreateLayer(visualObject->renderLayer);
 
 			auto& list = this->visualObjects[visualObject->renderLayer];
@@ -85,7 +84,7 @@ namespace PrettyEngine {
 			list.insert(std::make_pair(name, visualObject));
 		}
 
-		void UnRegisterVisualObject(std::string name) {
+		void UnRegisterVisualObject(std::string& name) {
 			auto& list = this->visualObjects;
 
 			for (auto & sublist: list) {
@@ -105,25 +104,34 @@ namespace PrettyEngine {
 		}
 
 		/// Compile and register a shader from source.
-		void AddShader(std::string name, ShaderType shaderType, const char* shader) {
-			unsigned int glShader = glCreateShader(static_cast<GLenum>(shaderType));
+		void AddShader(std::string& name, ShaderType shaderType, const char* shader) {
+			if (!this->glShaders.contains(name)) {
+				if (GL_CHECK_ERROR()) {
+					DebugLog(LOG_ERROR, "OpengGL error before compiling: " << name, true);
+				}
+				unsigned int glShader = glCreateShader(static_cast<GLenum>(shaderType));
 			
-			glShaderSource(glShader, 1, &shader, NULL);
-	    	glCompileShader(glShader);
+				glShaderSource(glShader, 1, &shader, nullptr);
+				glCompileShader(glShader);
 
-	    	#if _DEBUG
-	    	int status;
-		    glGetShaderiv(glShader, GL_COMPILE_STATUS, &status);
+#if _DEBUG
+				int status;
+				glGetShaderiv(glShader, GL_COMPILE_STATUS, &status);
 
-		    if(!status) {
-		        char buffer[512];
-		        glGetShaderInfoLog(glShader, 512, NULL, buffer);
+				if(!status) {
+					char buffer[512];
+					glGetShaderInfoLog(glShader, 512, NULL, buffer);
 
-		        std::cerr << buffer << std::endl;
-		    }
-	    	#endif
+					std::cerr << buffer << std::endl;
+				}
+#endif
 
-	    	this->glShaders.insert(std::make_pair(name, glShader));
+				this->glShaders.insert(std::make_pair(name, glShader));
+
+				if (GL_CHECK_ERROR()) {
+					DebugLog(LOG_ERROR, "OpengGL error after compiling: " << name, true);
+				}
+			}
 		}
 
 		GLShaderProgramRefs* AddShaderProgram(
@@ -133,20 +141,20 @@ namespace PrettyEngine {
 			std::vector<std::string> otherShaders = {}
 		);
 
-		void RemoveShaderProgram(std::string name) {
+		void RemoveShaderProgram(std::string& name) {
 			glDeleteProgram(this->glShaderPrograms[name].shaderProgram);
 			this->glShaderPrograms.erase(name);
 		}
 
 		Mesh* AddMesh(
-			std::string name,
+			std::string& name,
 			Mesh mesh,
 			MeshDrawType meshDrawType = MeshDrawType::Static
 		);
 
 		void UpdateMesh(Mesh* mesh);
 
-		void RemoveMesh(std::string name) {
+		void RemoveMesh(const std::string& name) {
 			auto &mesh = this->glMeshList[name];
 
 			mesh.Cleanup();
@@ -174,6 +182,12 @@ namespace PrettyEngine {
 			TextureChannels channels = TextureChannels::RGBA
 		);
 
+		void RemoveTexture(Texture* texture) {
+			glDeleteTextures(1, &texture->textureID);
+
+			this->glTextures.erase(texture->name);
+		}
+
 		void RemoveTexture(std::string name) {
 			glDeleteTextures(1, &this->glTextures[name].textureID);
 
@@ -200,17 +214,16 @@ namespace PrettyEngine {
 			}
 		}
 
-		unsigned int GetShaderProgramID(std::string name) {
+		unsigned int GetShaderProgramID(std::string& name) {
 			return this->glShaderPrograms[name].shaderProgram;
 		}
 
 		void Clear(bool clearEverything = false) {
 			for (auto & element: this->glTextures) {
 				auto texture = &element.second;
-				if (texture->userCount <= 0 && texture->useGC || clearEverything) {
+				if (texture != nullptr && (texture->userCount <= 0 && texture->useGC || clearEverything)) {
 					this->RemoveTexture(texture->name);
-					this->Clear();
-					return;
+					return this->Clear();
 				}
 			}
 
@@ -225,7 +238,7 @@ namespace PrettyEngine {
 			}
 		}
 
-		std::pair<bool, Texture*> TextureExist(std::string name) {
+		std::pair<bool, Texture*> TextureExist(std::string& name) {
 			for (auto & texture: this->glTextures) {
 				if (texture.second.name == name) {
 					return std::make_pair(true, &texture.second);
@@ -251,7 +264,7 @@ namespace PrettyEngine {
 			return &this->cameraList.back();
 		}
 
-		void RemoveCamera(Camera* camera) {
+		void RemoveCamera(const Camera* camera) {
 			for (size_t i = 0; i < this->cameraList.size(); i++) {
 				if (this->cameraList[i].id == camera->id) {
 					this->cameraList.erase(this->cameraList.begin() + i);
@@ -268,7 +281,7 @@ namespace PrettyEngine {
 			return nullptr;
 		}
 
-		void SetWindowTitle(std::string title) {
+		void SetWindowTitle(const std::string& title) const {
 			glfwSetWindowTitle(this->_window, title.c_str());
 		}
 
@@ -282,24 +295,24 @@ namespace PrettyEngine {
 	        if (fullScreen) {
         		glfwSetWindowMonitor(this->_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 	        } else {
-        		glfwSetWindowMonitor(this->_window, NULL, 100, 100, 1900 / 3, 1080 / 3, mode->refreshRate);
+        		glfwSetWindowMonitor(this->_window, nullptr, 100, 100, 1900 / 3, 1080 / 3, mode->refreshRate);
 			}
 		}
 
-		void SetWindowOpacity(float opacity) {
+		void SetWindowOpacity(const float& opacity) const {
 			glfwSetWindowOpacity(this->_window, opacity);
 		}
 
-		bool GetFullscreen() {
+		bool GetFullscreen() const {
 			return this->fullscreen;
 		}
 
-		void RegisterLight(std::string name, Light* light) {
+		void RegisterLight(std::string& name, Light* light) {
 			light->name = name;
 			this->lights.push_back(light);
 		}
 
-		void UnRegisterLight(Light* light) {
+		void UnRegisterLight(const Light* light) {
 			for (size_t i = 0; i < this->lights.size(); i++) {
 				if (this->lights[i]->name == light->name) {
 					this->lights.erase(this->lights.begin() + i);		
@@ -307,54 +320,52 @@ namespace PrettyEngine {
 			}
 		}
 
-		GLFWwindow* GetWindow() {
+		GLFWwindow* GetWindow() const {
 			return this->_window;
 		}
 
 		/// Activate features to get a better 3D rendering, but will break 2D rendering features
-		void SwitchTo3D() {
+		void SwitchTo3D() const {
 			glEnable(GL_DEPTH_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
-		void SwitchTo2D() {
+		void SwitchTo2D() const {
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		double GetTime() {
+		double GetTime() const {
 			return glfwGetTime();
 		}
 
-		void HideWindow() {
+		void HideWindow() const {
 			glfwHideWindow(this->_window);
 		}
 
 		void UpdateIO();
 		void StartUIRendering();
 
-		unsigned int GetVisualObjectsCount() {
+		unsigned int GetVisualObjectsCount() const {
 			unsigned int out = 0;
 
 			for (auto & layer: this->visualObjects) {
-				for (auto & obj: layer) {
-					out++;
-				}
+				out += layer.size();
 			}
 			
 			return out;
 		}
 
-		unsigned int GetLightCount() {
+		unsigned int GetLightCount() const {
 			return this->lights.size();
 		}
 
 		void DrawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color, float width = 1.0f);
 
 		int GetFPS() {
-			return (int)glm::floor(1.0f / this->GetDeltaTime());
+			return static_cast<int>(glm::floor(1.0f / this->GetDeltaTime()));
 		}
 
-		bool WindowActive() {
+		bool WindowActive() const {
 			bool isMinimized = glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
         	bool isFocused = glfwGetWindowAttrib(this->_window, GLFW_FOCUSED);
         	return isMinimized || isFocused;
@@ -365,12 +376,12 @@ namespace PrettyEngine {
 			this->antialiasing = value;
 		}
 		
-		int GetAntiAliasing() {
+		int GetAntiAliasing() const {
 			return this->antialiasing;
 		}
 
-		void ResetWindowIcon() {
-			glfwSetWindowIcon(this->_window, 0, NULL);
+		void ResetWindowIcon() const {
+			glfwSetWindowIcon(this->_window, 0, nullptr);
 		}
 		
 		void SetWindowIcon(unsigned char* data, int width, int height) {
@@ -385,11 +396,11 @@ namespace PrettyEngine {
 			glfwSetWindowIcon(this->_window, this->_glfwIcons.size(), this->_glfwIcons.data());
 		}
 
-		bool GetWindowFocus() {
+		bool GetWindowFocus() const {
 			return glfwGetWindowAttrib(this->_window, GLFW_FOCUSED);
 		}
 
-		bool GetWindowMinimized() {
+		bool GetWindowMinimized() const {
         	return glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
 		}
 
@@ -409,7 +420,7 @@ namespace PrettyEngine {
 			this->_targetFrameRate = frameRate;
 		}
 
-		int GetTargetFrameRate() {
+		int GetTargetFrameRate() const {
 			return this->_targetFrameRate;
 		}
 

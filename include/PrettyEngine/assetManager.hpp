@@ -1,45 +1,29 @@
 #ifndef HPP_ASSET_MANAGER
 #define HPP_ASSET_MANAGER
 
+#include <PrettyEngine/version.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/gc.hpp>
+#include <PrettyEngine/utils.hpp>
 
 #include <vector>
 #include <string>
-#include <fstream>
+#include <future>
 
-namespace PrettyEngine { 
+namespace PrettyEngine {
+	
 	class Asset: public virtual Tagged, public virtual SerialObject, public virtual GCObject {
 	public:
-		Asset() {}
+		Asset() = default;
 
 		Asset(std::string publicRelativeFilePath) { this->Initialize(publicRelativeFilePath); }
 
-		void Initialize(std::string publicRelativeFilePath) {
-			this->path = publicRelativeFilePath;
-
-			this->SetObjectSerializedName("Asset");
-			this->SetSerializedUnique(publicRelativeFilePath);
-
-			if (this->Exist()) {
-				this->CreateMeta();
-
-				this->AddSerializedField(SERIAL_TOKEN(bool), "exist", this->Exist() ? "true" : "false");
-				this->AddSerializedField(SERIAL_TOKEN(std::string), "metaCreationDate", GetTimeAsString());
-				this->AddSerializedField(SERIAL_TOKEN(std::string), "local", "any");
-				this->AddSerializedField(SERIAL_TOKEN(bool), "used", "false");
-
-				this->Deserialize(ReadFileToString(this->GetMetaPath()), SerializationFormat::Toml);
-
-				this->SetObjectSerializedName("Asset");
-				this->SetSerializedUnique(publicRelativeFilePath);
-			}
-		}
+		void Initialize(std::string& publicRelativeFilePath);
 
 		std::string GetFilePath() {
-			return GetEnginePublicPath(this->GetObjectSerializedUnique(), true);
+			return this->GetObjectSerializedUnique();
 		}
 
 		void SetUsed(bool state) {
@@ -48,30 +32,21 @@ namespace PrettyEngine {
 
 		bool Exist() { return FileExist(this->GetFilePath()); }
 
-		std::vector<unsigned char> Read() {
-			this->GetSerializedField("used")->value = "true";
+		std::vector<unsigned char> Read();
 
-			std::ifstream input(this->GetFilePath(), std::ios::binary);
-
-			std::vector<unsigned char> output;
-
-			if (input.is_open()) {
-				this->GetSerializedField("exist")->value = "true";
-
-				char buffer;
-				while (input.get(buffer)) {
-					output.push_back(buffer);
-				}
-
-				input.close();
-			} else {
-				this->GetSerializedField("exist")->value = "false";
-				DebugLog(LOG_ERROR, "Failed to open: " << this->path, true);
-			}
-			return output;
+		std::future<std::vector<unsigned char>> ReadAsync() {
+			return std::async([this]{
+				return this->Read();
+			});
 		}
 
 		std::string ReadToString() { return ReadFileToString(this->GetFilePath()); }
+
+		std::future<std::string> ReadToStringAsync() {
+			return std::async([this]{
+				return this->ReadToString();
+			});
+		}
 
 		~Asset() {
 			if (this->Exist() && !WriteFileString(this->GetMetaPath(), this->Serialize(SerializationFormat::Toml))) {
@@ -91,6 +66,7 @@ namespace PrettyEngine {
 
 	private:
 		std::string path;
+		Version version;
 	};
 
 	class AssetDataBase {

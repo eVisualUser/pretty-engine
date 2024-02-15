@@ -9,6 +9,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <future>
 
 namespace PrettyEngine {
 	#define SERIAL_TOKEN(token) #token
@@ -42,6 +43,11 @@ namespace PrettyEngine {
 			this->serialObjectName = newName;
 		}
 
+		void SetupSerial(std::string newObjectName, std::string newUnique) {
+			this->SetSerializedUnique(newUnique);
+			this->SetObjectSerializedName(newObjectName);
+		}
+
 		std::string GetObjectSerializedName() { return this->serialObjectName; }
 		std::string GetObjectSerializedUnique() { return this->serialObjectUnique; }
 
@@ -50,9 +56,24 @@ namespace PrettyEngine {
 		}
 
 		void AddSerializedField(SerializedField serializedField) {
+
 			if (!this->ContainSerializedField(serializedField.name)) {
 				this->serialFields.push_back(serializedField);
 			}
+		}
+
+		/// Reduce memory current use.
+		void OptimizeSerialization() { 
+			for (auto &serialField : this->serialFields) {
+				serialField.name.shrink_to_fit();
+				serialField.type.shrink_to_fit();
+				serialField.value.shrink_to_fit();
+			}
+
+			this->serialObjectName.shrink_to_fit();
+			this->serialObjectUnique.shrink_to_fit();
+
+			this->serialFields.shrink_to_fit();
 		}
 
 		void AddSerializedField(std::string newType, std::string newName, std::string newValue) { 

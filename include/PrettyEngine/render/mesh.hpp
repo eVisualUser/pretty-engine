@@ -21,6 +21,8 @@ namespace PrettyEngine {
  	/// Contain and manages a mesh.
 	class Mesh: public GCObject {
 	public:
+		Mesh() = default;
+
 		/// Convert to an array buffer
 		std::vector<float> CreateVertexBuffer() {
 			std::vector<float> data;

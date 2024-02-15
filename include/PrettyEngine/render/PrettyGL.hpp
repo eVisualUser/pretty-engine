@@ -68,7 +68,7 @@ namespace PrettyEngine {
 	};
 
 	/// Call glGetError() after an OpenGL function call to check for errors
-	static void CheckOpenGLError(const char* file, int line) {
+	static bool CheckOpenGLError(const char* file, int line) {
 	    GLenum errorCode;
 	    while ((errorCode = glGetError()) != GL_NO_ERROR) {
 	        std::string error;
@@ -81,8 +81,10 @@ namespace PrettyEngine {
 	            case GL_OUT_OF_MEMORY:                 error = "GL_OUT_OF_MEMORY"; break;
 	            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "GL_INVALID_FRAMEBUFFER_OPERATION"; break;
 	        }
-	        DebugLog(LOG_DEBUG, "OpenGL Error (" << error << "): " << file << ":" << line, true);
+	        DebugLog(LOG_ERROR, "OpenGL Error (" << error << "): " << file << ":" << line, true);
+	        return true;
 	    }
+	    return false;
 	}
 
 	// Place this macro after each significant OpenGL function call

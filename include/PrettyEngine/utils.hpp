@@ -98,6 +98,24 @@ namespace PrettyEngine {
 		}
 	}
 
+	static std::vector<std::string> StringSplit(std::string* source, char separator) { 
+		std::vector<std::string> out;
+
+		std::string buffer;
+		for (auto &c : *source) {
+			if (c != separator) {
+				buffer += c;
+			} else {
+				out.push_back(buffer);
+			}
+		}
+		if (!buffer.empty()) {
+			out.push_back(buffer);
+		}
+
+		return out;
+	}
+
 	static void StringReplace(std::string* str, std::string base, std::string replacement) {
 		bool match = false;
 		size_t len = 0;

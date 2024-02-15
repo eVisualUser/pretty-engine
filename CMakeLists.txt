@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include("${CMAKE_SOURCE_DIR}/assets.cmake")
 
-file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "${CMAKE_BUILD_DIR}/public/")
+file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "${CMAKE_BINARY_DIR}/public/")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
@@ -31,6 +31,7 @@ add_library(pretty
 	"source/render.cpp"
 	"source/assetsManager.cpp"
 	"source/command.cpp"
+	"source/audio.cpp"
 	${code_sources}
 )
 
@@ -89,7 +90,7 @@ add_executable(editor
 )
 
 if(NOT ${extend} STREQUAL "")
-string(REPLACE "\n" " " extend ${extend})
+	string(REPLACE "\n" " " extend ${extend})
 endif()
 
 target_link_libraries(editor pretty custom components renderFeatures ${extend})

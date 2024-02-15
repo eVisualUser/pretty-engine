@@ -17,6 +17,8 @@ namespace PrettyEngine {
 			this->UpdateHalfScale();
 		}
 
+		virtual ~Transform() = default;
+
 		Transform* GetTransform() {
 			return this;
 		}

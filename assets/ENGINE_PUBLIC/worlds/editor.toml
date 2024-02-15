@@ -2,6 +2,24 @@
 name = 'editorEntity'
 object = 'Editor'
 
+    [entities.Editor.components.0ecc315b-5225-499b-b199-0a169c917942]
+    ObjectName = 'LocalizationEditor'
+    ObjectUnique = '0ecc315b-5225-499b-b199-0a169c917942'
+
+        [entities.Editor.components.0ecc315b-5225-499b-b199-0a169c917942.fields]
+
+    [entities.Editor.components.52fa3734-ab2b-48f9-a9ec-f862497b8963]
+    ObjectName = 'LocalizationEditor'
+    ObjectUnique = '52fa3734-ab2b-48f9-a9ec-f862497b8963'
+
+        [entities.Editor.components.52fa3734-ab2b-48f9-a9ec-f862497b8963.fields]
+
+    [entities.Editor.components.627f67b2-c9a2-4e44-9e46-799c258f39d6]
+    ObjectName = 'LocalizationEditor'
+    ObjectUnique = '627f67b2-c9a2-4e44-9e46-799c258f39d6'
+
+        [entities.Editor.components.627f67b2-c9a2-4e44-9e46-799c258f39d6.fields]
+
     [entities.Editor.components.BaseCharacterController]
     ObjectName = 'BaseCharacterController'
     ObjectUnique = 'BaseCharacterController'
@@ -21,13 +39,7 @@ object = 'Editor'
         mass = [ 'float', '1.000000' ]
         model = [ 'std::string', 'Sphere' ]
         name = [ 'std::string', '2e2b9d2e-1615-4d50-80eb-bb139cf77dbc' ]
-        rigidbody = [ 'bool', 'false' ]
-
-    [entities.Editor.components.LocalizationEditor]
-    ObjectName = 'LocalizationEditor'
-    ObjectUnique = 'LocalizationEditor'
-
-        [entities.Editor.components.LocalizationEditor.fields]
+        rigidbody = [ 'bool', 'true' ]
 
     [entities.Editor.components.Render]
     ObjectName = 'Render'
@@ -55,9 +67,10 @@ object = 'Editor'
     ObjectUnique = 'Editor'
 
         [entities.Editor.serial.fields]
+        'Camera Speed' = [ 'float', '10.000000' ]
 
     [entities.Editor.transform]
-    position = [ 0.1486276537179947, -0.5028966665267944, 0.0 ]
+    position = [ -0.0, 0.0, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
@@ -90,7 +103,7 @@ object = 'Empty'
         mass = [ 'float', '1.000000' ]
         model = [ 'std::string', 'Sphere' ]
         name = [ 'std::string', 'a14230b8-a675-4ac6-9517-5de9aed3df92' ]
-        rigidbody = [ 'bool', 'false' ]
+        rigidbody = [ 'bool', 'true' ]
 
     [entities.Empty.components.Render]
     ObjectName = 'Render'

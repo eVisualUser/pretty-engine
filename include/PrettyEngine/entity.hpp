@@ -2,7 +2,7 @@
 #define H_ENTITY
 
 #include <PrettyEngine/dynamicObject.hpp>
-#include <PrettyEngine/debug/debug.hpp>
+#include <PrettyEngine/PrettyError.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/render/visualObject.hpp>
@@ -11,13 +11,11 @@
 #include <PrettyEngine/tags.hpp>
 
 #include <Guid.hpp>
-#include <toml++/toml.h>
 
 #include <memory>
 
 namespace PrettyEngine {
 	class World;
-	class Engine;
 
 	#define DEFAULT_ENTITY_NAME "AnyEntity"
 
@@ -27,8 +25,12 @@ namespace PrettyEngine {
 			this->OnDestroy();
 		}
 
-		Transform* GetTransform() {
+		Transform* GetTransform() const {
 			return dynamic_cast<Transform*>(this->owner);
+		}
+
+		void SetupComponent(DynamicObject* newOwner) {
+			this->owner = newOwner; 
 		}
 
 	public:
@@ -60,9 +62,16 @@ namespace PrettyEngine {
 
 	public:
 		template<typename T>
-		Component* AddComponent() {
-			T component;
-			this->components.push_back(component);
+		T* AddComponent(std::string name) {
+			auto newComponent = std::make_shared<T>();
+
+			newComponent->SetupSerial(name, xg::newGuid());
+			newComponent->SetupDynamicObject(this->engineContent);
+			newComponent->SetupComponent(this);
+
+			this->components.push_back(newComponent);
+
+			return dynamic_cast<T*>(this->components.back().get());
 		}
 
 		void RemoveComponent(Component* component) {
@@ -75,14 +84,14 @@ namespace PrettyEngine {
 		}
 
 		template<typename T>
-		T* GetComponentAs(std::string unique) {
+		Error<T*> GetComponentAs(std::string unique) {
 			for(auto & component: this->components) {
 				if (component->serialObjectUnique == unique) {
-					return dynamic_cast<T*>(component.get());
+					return Error<T*>("Component found", false, dynamic_cast<T*>(component.get()));
 				}
 			}
-			DebugLog(LOG_ERROR, this->entityName << " Component not found: " << unique, true);
-			return nullptr;
+
+			return Error<T*>("Component not found", true, nullptr);
 		}
 
 		std::vector<std::shared_ptr<Component>> components;

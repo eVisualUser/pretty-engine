@@ -1,8 +1,12 @@
+/*
+ * The tests use manual multithreading to avoid running multiple programe,
+ * but keep to be as fast as possible.
+ */
+
 #include <assert.h>
 
 #include <PrettyEngine/engine.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
-#include <PrettyEngine/KeyCode.hpp>
 
 #include <thread>
 

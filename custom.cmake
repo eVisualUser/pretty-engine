@@ -1,5 +1,13 @@
 # Entities
 
+function(GenerateCustomFiles)
+	cmake_parse_arguments(
+		DIRECTORY,
+
+	)
+
+endfunction(GenerateCustomFiles)
+
 set(CUSTOM_DIRECTORY "${CMAKE_SOURCE_DIR}/entities")
 
 file(GLOB customFiles "${CUSTOM_DIRECTORY}/*.hpp")

@@ -17,10 +17,10 @@
 static std::vector<std::shared_ptr<PrettyEngine::PropertyEditor>> GeneratePropertyEditorList() {
 	std::vector<std::shared_ptr<PrettyEngine::PropertyEditor>> result;
 
-	result.push_back(std::make_shared<Custom::EditorPropertyBool>());
-	result.push_back(std::make_shared<Custom::EditorPropertyMesh>());
-	result.push_back(std::make_shared<Custom::EditorPropertyNumber>());
-	result.push_back(std::make_shared<Custom::EditorPropertyString>());
+	result.push_back(std::dynamic_pointer_cast<PropertyEditor>(std::make_shared<Custom::EditorPropertyBool>()));
+	result.push_back(std::dynamic_pointer_cast<PropertyEditor>(std::make_shared<Custom::EditorPropertyMesh>()));
+	result.push_back(std::dynamic_pointer_cast<PropertyEditor>(std::make_shared<Custom::EditorPropertyNumber>()));
+	result.push_back(std::dynamic_pointer_cast<PropertyEditor>(std::make_shared<Custom::EditorPropertyString>()));
 
 	return result;
 }

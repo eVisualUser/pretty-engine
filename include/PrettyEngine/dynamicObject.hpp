@@ -14,11 +14,59 @@
 #include <Guid.hpp>
 
 #include <string>
+#include <functional>
 
 namespace PrettyEngine {
 	enum class Request {
 		SAVE = 0,
 		EXIT,
+	};
+
+	#define SERIAL_FUNCTION(type, expr) [this](type x){return expr;}
+	#define DESERIAL_FUNCTION(expr) [this](std::string x){return expr;}
+
+	template<typename T>
+	class PublicProperty {
+	public:
+		PublicProperty(SerialObject* newContainer, std::string newName, T newValue, std::function<std::string(T)> newSerializeFunction, std::function<T(std::string)> newDeserializeFunction) {
+			this->Init(newContainer, newName, newValue, newSerializeFunction, newDeserializeFunction);
+		}
+
+		void Init(SerialObject* newContainer, std::string newName, T newValue, std::function<std::string(T)> newSerializeFunction, std::function<T(std::string)> newDeserializeFunction) {
+			this->_name = newName;
+
+			this->_value = newValue;
+
+			this->_serializeFunction = newSerializeFunction;
+			this->_deserializeFunction = newDeserializeFunction;
+
+			this->_container = newContainer;
+
+			this->_container->AddSerializedField(typeid(T).name(), this->_name, (this->_serializeFunction)(this->_value));
+			this->UpdateValue();
+		}
+
+		void UpdateValue() {
+			this->_value = this->_deserializeFunction(this->_container->GetSerializedFieldValue(this->_name));
+		}
+
+		void Save() {
+			this->_container->GetSerializedField(this->_name)->value = (this->_serializeFunction)(this->_value);
+		}
+
+		T* Get() {
+			return &this->_value;
+		}
+
+	private:
+		std::function<std::string(T)> _serializeFunction;
+		std::function<T(std::string)> _deserializeFunction;
+
+		SerialObject* _container;
+
+		std::string _name;
+
+		T _value;
 	};
 
  	/// Object dynamicly managed in the engine.
@@ -32,6 +80,10 @@ namespace PrettyEngine {
   		}
 
 		~DynamicObject() { this->OnDestroy(); }
+
+		void SetupDynamicObject(EngineContent* newEngineContent) {
+			this->engineContent = newEngineContent;
+		}
 
 		/// Called when the components loaded
 		virtual void OnUpdatePublicVariables() {}
