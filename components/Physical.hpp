@@ -45,7 +45,7 @@ namespace Custom {
 			this->_colliderA.name = this->GetSerializedFieldValue("name");
 			this->layer = this->GetSerializedFieldValue("layer");
 
-			this->_mesh = PrettyEngine::CreateRectMesh();
+			this->_mesh = PrettyEngine::CreatePhysicsRectMesh();
 			this->_colliderA.SetMesh(&this->_mesh);
 		}
 
@@ -54,22 +54,14 @@ namespace Custom {
 			this->engineContent->physicalSpace.AddCollider(this->layer, &this->_colliderA);
 
 			this->_colliderA.position = this->GetTransform()->position;
+			this->_colliderA.rotation = this->GetTransform()->rotation;
+			this->_colliderA.SetScale(this->GetTransform()->scale);
 		}
 
 		void OnEndUpdate() override {
 			this->_ownerEntity->position = this->_colliderA.position;
 			this->_colliderA.SetScale(this->_ownerEntity->scale);
 			this->_ownerEntity->rotation = this->_colliderA.rotation;
-		}
-
-		void OnRender() override { 
-			auto collisions = this->engineContent->physicalSpace.GetCollisions(this->GetCollider());
-			if (collisions != nullptr && !collisions->empty()) {
-				if (ImGui::Begin("Collisions ?")) {
-					ImGui::Text("COLLISION");
-				}
-				ImGui::End();
-			}
 		}
 
 		void OnDestroy() override {
@@ -89,7 +81,7 @@ namespace Custom {
 
 		PrettyEngine::Mesh _mesh;
 
-		PrettyEngine::Entity* _ownerEntity;
+		PrettyEngine::Entity* _ownerEntity = nullptr;
 
 		std::string layer;
 	};

@@ -2,6 +2,11 @@
 
 package main
 
+import {
+	"log"
+	"os/exec"
+}
+
 func main() {
 	CheckDependencies()
 }
@@ -9,12 +14,19 @@ func main() {
 func CheckDependencies() {
 	var links []string
 
-	links = append(links, "https://cmake.org/")
-	links = append(links, "https://llvm.org/")
+	cmd := exec.Command("cmake", "--version")
 
-	print("List of dependencies that are not safe to be installed from script:\n")
+    // Execute the command and capture its output
+    output, err := cmd.Output()
+    if err != nil {
+     	links = append(links, "https://cmake.org/")   
+    }
 
-	for _, link := range links {
-		print("- ", link, "\n")
+	if (len(links) != 0) {
+		log.Print("List of dependencies that are missing:\n")
+
+		for _, link := range links {
+			print("- ", link, "\n")
+		}
 	}
 }

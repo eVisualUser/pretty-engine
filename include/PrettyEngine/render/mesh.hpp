@@ -113,7 +113,39 @@ namespace PrettyEngine {
 		out.vertexCount = 6;
 
 		return out;
-	} 
+	}
+
+	static Mesh CreatePhysicsRectMesh(float width = 1.0f, float height = 1.0f) {
+		auto out = Mesh();
+
+		width = 0.5f * width;
+		height = 0.5f * height;
+
+		Vertex vA;
+		vA.position = glm::vec3(-width, height, 0.0f),
+		vA.textureCoord = glm::vec2(0.0f, 0.0f);
+
+		Vertex vB;
+		vB.position = glm::vec3(width, height, 0.0f),
+		vB.textureCoord = glm::vec2(1.0f, 0.0f);
+
+		Vertex vC;
+		vC.position = glm::vec3(width, -height, 0.0f),
+		vC.textureCoord = glm::vec2(1.0f, 1.0f);
+
+		Vertex vD;
+		vD.position = glm::vec3(-width, -height, 0.0f),
+		vD.textureCoord = glm::vec2(0.0f, 1.0f);
+
+		out.vertices.push_back(vA);
+		out.vertices.push_back(vB);
+		out.vertices.push_back(vC);
+		out.vertices.push_back(vD);
+
+		out.vertexCount = 4;
+
+		return out;
+	}
 }
 
 #endif

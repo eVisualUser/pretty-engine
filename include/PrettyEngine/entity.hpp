@@ -53,19 +53,17 @@ namespace PrettyEngine {
 		std::string GetGUID() {
 			return this->_entityGUID;
 		}
-	public:
 
   		/// True if start was never called.
 		bool worldFirst = true;
 
 		std::string entityName = DEFAULT_ENTITY_NAME;
 
-	public:
 		template<typename T>
 		T* AddComponent(std::string name) {
 			auto newComponent = std::make_shared<T>();
 
-			newComponent->SetupSerial(name, xg::newGuid());
+			newComponent->SetupSerial(typeid(T).name(), name);
 			newComponent->SetupDynamicObject(this->engineContent);
 			newComponent->SetupComponent(this);
 

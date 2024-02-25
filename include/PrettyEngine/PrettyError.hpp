@@ -23,7 +23,7 @@ namespace PrettyEngine {
 				exit(-1);
 			}
 
-			return this->value;
+			return this->_value;
 		}
 
 		T ShowError() {
@@ -45,8 +45,8 @@ namespace PrettyEngine {
 			return &this->_value;
 		}
 
-		bool state;
-		std::string message;
+		bool state = false;
+		std::string message = "Default error message.";
 
 	private:
 		T _value;

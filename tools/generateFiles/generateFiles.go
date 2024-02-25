@@ -86,6 +86,8 @@ func GenerateShadersHeader() {
 
 /// Generate the required function for object that will be generated in runtime
 func GenerateCustomObjectScript() {
+	log.Print("Generate PropertyEditor files...")
+
 	_, executable, _, _ := runtime.Caller(0)
 
 	directory := filepath.Dir(executable)
@@ -132,5 +134,7 @@ func GenerateCustomObjectScript() {
 
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		log.Print("Generated PropertyEditor.h (*.h files are for generated C++ files).")
 	}
 }

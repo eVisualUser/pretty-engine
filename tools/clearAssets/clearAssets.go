@@ -13,7 +13,9 @@ func main() {
 }
 
 func ClearAssets() {
-	targetDirectory := "../Assets/ENGINE_PUBLIC"
+	log.Print("Remove all uncompatible files with the engine...")
+
+	targetDirectory := "../../Assets/ENGINE_PUBLIC"
 	entries, err := os.ReadDir(targetDirectory)
 
 	if err != nil {
@@ -22,6 +24,18 @@ func ClearAssets() {
 		for _, entry := range entries {
 			ext := filepath.Ext(entry.Name())
 			realPath := filepath.Join(targetDirectory, entry.Name())
+
+			metaPath := filepath.Join(realPath, ".meta")
+
+			if _, err := os.Stat(metaPath); true {
+	        	if os.IsNotExist(err) {
+	        		if realInfo, _ := os.Stat(realPath); true {
+	        			if !realInfo.IsDir() {
+	            			log.Print("No meta file for: ", realPath, ", maybe an unused files.")
+	        			}
+	        		}
+	            }
+	        }
 
 			requireRemove := false
 
@@ -45,7 +59,7 @@ func ClearAssets() {
 				if err != nil {
 					log.Fatal(err)
 				} else {
-					log.Print(WarningColor, "Removed: ", realPath, ResetColor)
+					log.Print("Removed: ", realPath)
 				}
 			}
 

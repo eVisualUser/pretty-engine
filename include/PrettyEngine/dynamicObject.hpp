@@ -1,14 +1,9 @@
 #ifndef H_DYNAMIC_OBJECT
 #define H_DYNAMIC_OBJECT
 
-#include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/tags.hpp>
-#include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/localization.hpp>
-#include <PrettyEngine/PhysicalSpace.hpp>
-#include <PrettyEngine/event.hpp>
 #include <PrettyEngine/EngineContent.hpp>
 
 #include <Guid.hpp>
@@ -69,7 +64,7 @@ namespace PrettyEngine {
 		T _value;
 	};
 
- 	/// Object dynamicly managed in the engine.
+ 	/// Object that support being updated by the engine based on game events.
 	class DynamicObject: public Tagged, public virtual SerialObject {
 	public:
    		DynamicObject() {
@@ -160,8 +155,7 @@ namespace PrettyEngine {
 		void RemoveActionOnPublicVariableChanged(std::string name) { 
 			this->onPublicVariableChanged.erase(name);
 		}
-		
-	public:
+
 		EngineContent* engineContent;
 
 		std::unordered_map<std::string, std::string> publicMap;

@@ -71,7 +71,7 @@ namespace PrettyEngine {
 		}
 
 		bool GJKCheck(const Collider &colliderB, int maxIterations) { 
-			glm::vec3 direction = colliderB.position - this->position;
+			glm::vec3 direction = this->position - colliderB.position;
 			direction = glm::normalize(direction);
 
 			// Get default support
@@ -137,27 +137,19 @@ namespace PrettyEngine {
 				if (GJKSameDirection(ac, ao)) {
 					simplex = {a, c};
 					direction = cross(cross(ac, ao), ac);
-				}
-
-				else {
+				} else {
 					return GJKLine(simplex = {a, b}, direction);
 				}
-			}
-
-			else {
+			} else {
 				if (GJKSameDirection(cross(ab, abc), ao)) {
 					return GJKLine(simplex = {a, b}, direction);
 				}
 
-				else {
-					if (GJKSameDirection(abc, ao)) {
-						direction = abc;
-					}
-
-					else {
-						simplex = {a, c, b};
-						direction = -abc;
-					}
+				if (GJKSameDirection(abc, ao)) {
+					direction = abc;
+				} else {
+					simplex = {a, c, b};
+					direction = -abc;
 				}
 			}
 
@@ -191,7 +183,7 @@ namespace PrettyEngine {
 				return GJKTriangle(simplex = {a, d, b}, direction);
 			}
 
-			return true;
+			return false;
 		}
 
 		bool GJKNextSimplex(Simplex &simplex, glm::vec3 &direction) {
@@ -202,10 +194,10 @@ namespace PrettyEngine {
 				return GJKTriangle(simplex, direction);
 			case 4:
 				return GJKTetrahedron(simplex, direction);
+			default:
+				DebugLog(LOG_ERROR, "Physics simplex not supported", true);
+				return false;
 			}
-
-			// never should be here
-			return false;
 		}
 
 		#pragma endregion

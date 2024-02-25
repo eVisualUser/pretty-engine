@@ -1,55 +1,54 @@
 # Entities
 
-function(GenerateCustomFiles)
-	cmake_parse_arguments(
-		DIRECTORY,
+function(GenerateCustomEntities ARG_DIRECTORY ARG_HEADER_TEMPLATE)
+	set(CUSTOM_DIRECTORY "${ARG_DIRECTORY}")
 
-	)
+	file(GLOB customFiles "${CUSTOM_DIRECTORY}/*.hpp")
+	file(GLOB customSources "${CUSTOM_DIRECTORY}/*.cpp")
 
-endfunction(GenerateCustomFiles)
+	file(READ "${CUSTOM_DIRECTORY}/template.hxx" template)
 
-set(CUSTOM_DIRECTORY "${CMAKE_SOURCE_DIR}/entities")
+	include_directories("${CUSTOM_DIRECTORY}")
 
-file(GLOB customFiles "${CUSTOM_DIRECTORY}/*.hpp")
-file(GLOB customSources "${CUSTOM_DIRECTORY}/*.cpp")
+	set(customOut "#pragma once\n")
 
-file(READ "${CUSTOM_DIRECTORY}/template.hxx" template)
+	foreach(file ${customFiles})
+			file(RELATIVE_PATH relative "${CUSTOM_DIRECTORY}" ${file})
+			if(NOT(${relative} STREQUAL "custom.hpp"))
+				set(customOut "${customOut}\n#include <${relative}>")
+			endif()
+	endforeach()
 
-include_directories("${CUSTOM_DIRECTORY}")
+	set(customOut "${customOut}\n${template}")
 
-set(customOut "#pragma once\n")
+	set(customList "")
 
-foreach(file ${customFiles})
-		file(RELATIVE_PATH relative "${CUSTOM_DIRECTORY}" ${file})
-		if(NOT(${relative} STREQUAL "custom.hpp"))
-			set(customOut "${customOut}\n#include <${relative}>")
+	foreach(file ${customFiles})
+
+		get_filename_component(id ${file} NAME_WE)
+		if(NOT(${id} STREQUAL "custom"))
+			set(customOut "${customOut}    if(name == \"${id}\") {\n        world->RegisterEntity(std::make_shared<Custom::${id}>())\;\n    } ")
+			set(customList "${customList}${id}\;")
 		endif()
-endforeach()
 
-set(customOut "${customOut}\n${template}")
+	endforeach()
+	set(customOut "${customOut}\n}")
+	file(WRITE "${CUSTOM_DIRECTORY}/custom.hpp" ${customOut})
+	file(WRITE "${CUSTOM_DIRECTORY}/list.csv" ${customList})
 
-set(customList "")
+	project(custom)
 
-foreach(file ${customFiles})
+	add_library(custom
+		${customFiles}
+		${customSources}
+	)
+	target_link_libraries(custom PRIVATE pretty)
+endfunction(GenerateCustomEntities)
 
-	get_filename_component(id ${file} NAME_WE)
-	if(NOT(${id} STREQUAL "custom"))
-		set(customOut "${customOut}    if(name == \"${id}\") {\n        world->RegisterEntity(std::make_shared<Custom::${id}>())\;\n    } ")
-		set(customList "${customList}${id}\;")
-	endif()
-
-endforeach()
-set(customOut "${customOut}\n}")
-file(WRITE "${CUSTOM_DIRECTORY}/custom.hpp" ${customOut})
-file(WRITE "${CUSTOM_DIRECTORY}/list.csv" ${customList})
-
-project(custom)
-
-add_library(custom
-	${customFiles}
-	${customSources}
+GenerateCustomEntities(
+	"${CMAKE_SOURCE_DIR}/entities"
+	"${CMAKE_SOURCE_DIR}/template.hxx"
 )
-target_link_libraries(custom PRIVATE pretty)
 
 # Components
 
@@ -137,3 +136,17 @@ add_library(renderFeatures
 	${customSources}
 )
 target_link_libraries(renderFeatures PRIVATE pretty)
+
+# External GO
+
+execute_process(
+	COMMAND go run ./
+	OUTPUT_VARIABLE external_go
+	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tools/generateFiles"
+)
+
+execute_process(
+	COMMAND go run ./
+	OUTPUT_VARIABLE external_go
+	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tools/clearAssets"
+)
