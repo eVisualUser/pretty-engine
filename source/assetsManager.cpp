@@ -20,7 +20,9 @@ namespace PrettyEngine {
 			this->AddSerializedField(SERIAL_TOKEN(bool), "used", "false");
 			this->AddSerializedField(SERIAL_TOKEN(std::string), "version", this->version.ToString());
 
-			this->Deserialize(ReadFileToString(this->GetMetaPath()), SerializationFormat::Toml);
+			if (this->HaveMeta()) {
+				this->Deserialize(ReadFileToString(this->GetMetaPath()), SerializationFormat::Toml);
+			}
 
 			this->SetObjectSerializedName("Asset");
 			this->SetSerializedUnique(publicRelativeFilePath);

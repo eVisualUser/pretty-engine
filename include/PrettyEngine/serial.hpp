@@ -154,7 +154,7 @@ namespace PrettyEngine {
 		}
 
 		void Deserialize(std::string input, SerializationFormat serialFormat = SerializationFormat::Toml) {
-			if (serialFormat == SerializationFormat::Toml) {
+			if (!input.empty() && serialFormat == SerializationFormat::Toml) {
 				auto out = toml::parse(input);
 
 				this->serialObjectName = out["ObjectName"].value_or("Null");

@@ -96,7 +96,9 @@ namespace PrettyEngine {
 				}
 			}
 
-			collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+			if (collider->resetVelocity) {
+				collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+			}
 		}
 
 		void Update(float deltaTime) {

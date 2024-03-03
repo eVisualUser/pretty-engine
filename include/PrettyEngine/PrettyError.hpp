@@ -48,6 +48,14 @@ namespace PrettyEngine {
 		bool state = false;
 		std::string message = "Default error message.";
 
+		bool operator ==(Error* other) {
+			return (other->GetValue() == this->GetValue());
+		}
+
+		Error* operator =(T* other) {
+			return ( this->_value = other);
+		}
+
 	private:
 		T _value;
 	};
@@ -61,6 +69,11 @@ namespace PrettyEngine {
 
 		T* GetValue() {
 			return this->value;
+		}
+
+		Option<T>* operator =(T other) {
+			this->value = other;
+			return this;
 		}
 
 		bool HaveValue() {

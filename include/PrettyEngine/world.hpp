@@ -1,6 +1,7 @@
 #ifndef H_WORLD
 #define H_WORLD
 
+#include "PrettyEngine/debug/debug.hpp"
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/render/render.hpp>
@@ -187,12 +188,6 @@ namespace PrettyEngine {
 			}
 		}
 
-		void CallFunctionProcesses() {
-			for (auto & func: this->processList) {
-				func.second(this);
-			}
-		}
-
 		void RegisterEntity(std::shared_ptr<Entity> entity) {
 			this->UpdateLinks();
 			this->entities.insert(std::make_pair(entity->GetGUID(), entity));
@@ -273,26 +268,6 @@ namespace PrettyEngine {
 			}
 			return nullptr;
 		}
-
-		void AddSharedData(std::string id, void* data) {
-			this->sharedData.insert(std::make_pair(id, data));
-		}
-
-		void* GetSharedData(std::string id) {
-			return this->sharedData[id];
-		}
-
-		void RemoveSharedData(std::string id) {
-			this->sharedData.erase(id);
-		}
-		
-		void AddProcessFunction(std::string id, ProcessFunction function) {
-			this->processList.insert(std::make_pair(id, function));
-		}
-		
-		void RemoveProcessFunction(std::string id) {
-			this->processList.erase(id);
-		}
 		
 		void Clear() {
 			for(auto & entity: this->entities) {
@@ -315,10 +290,6 @@ namespace PrettyEngine {
 		std::string lastEntityRegistred;
 
 		EngineContent* engineContent;
-
-		std::unordered_map<std::string, void*> sharedData;
-
-		std::unordered_map<std::string, ProcessFunction> processList;
 
 		void* engine = nullptr;
 

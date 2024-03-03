@@ -13,7 +13,7 @@ using namespace PrettyEngine;
 namespace Custom {
 	class BaseCharacterController: public virtual Component {
 	public:
-		void OnUpdatePublicVariables() override {
+		void OnSetup() override {
 			this->AddSerializedField(SERIAL_TOKEN(std::string), "colliderName", "Collider");
 			this->AddSerializedField(SERIAL_TOKEN(float), "speed", "100");
 		}

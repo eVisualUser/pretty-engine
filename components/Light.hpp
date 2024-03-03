@@ -10,7 +10,7 @@
 namespace Custom {
 	class Light: public PrettyEngine::Component {
 	public:
-		void OnUpdatePublicVariables() override {
+		void OnSetup() override {
 			this->AddSerializedField(SERIAL_TOKEN(glm::vec3), "Color", "0;0;0");
 			this->AddSerializedField(SERIAL_TOKEN(float), "LightFactor", "0");
 			this->AddSerializedField(SERIAL_TOKEN(float), "DeferredFactor", "0");

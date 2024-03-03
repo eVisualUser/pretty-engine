@@ -110,6 +110,15 @@ namespace PrettyEngine {
 			}
 		}
 
+		void SetTexture(const TextureType& textureType, Texture* newTexture) {
+			for (auto & texture: this->textures) {
+				if (texture->textureType == textureType) {
+					newTexture->userCount++;
+					texture = newTexture;
+				}
+			}
+		}
+
 		bool HaveTexture(TextureType textureType) {
 			for(auto & texture: this->textures) {
 				if (texture->textureType == textureType) {

@@ -305,7 +305,7 @@ class Editor {
 								DebugLog(LOG_ERROR, "Failed to get custom component: " << componentName, true);
 							} else {
 								customComponent->serialObjectUnique = newComponentName;
-								customComponent->OnUpdatePublicVariables();
+								customComponent->OnSetup();
 								customComponent->owner = selectedEntity;
 								customComponent->serialObjectName = componentName;
 								customComponent->SetObjectSerializedName(componentName);

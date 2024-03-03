@@ -238,6 +238,9 @@ namespace PrettyEngine {
 		bool fixedCollisionOnly = false;
 
 		std::string layer = "Default";
+
+		/// Reset the velocity each update
+		bool resetVelocity = true;
 	};
 }
 

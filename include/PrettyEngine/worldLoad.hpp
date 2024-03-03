@@ -243,7 +243,7 @@ namespace PrettyEngine {
 													component->serialObjectUnique = component->GetObjectSerializedUnique();
 													component->owner = lastEntity.get();
 
-													component->OnUpdatePublicVariables();
+													component->OnSetup();
 
 													lastEntity->components.push_back(component);
 												}
@@ -254,7 +254,7 @@ namespace PrettyEngine {
 								
 								lastEntity->serialObjectName = newEntity;
 								lastEntity->serialObjectUnique = entity.first;
-								lastEntity->OnUpdatePublicVariables();
+								lastEntity->OnSetup();
 
 								auto transform = (*entity.second.as_table())["transform"];
 								if (transform.is_table() && target->GetLastEntityRegistred() != nullptr) {

@@ -21,23 +21,25 @@ namespace PrettyEngine {
 	    // Read the file content into the allocated memory
 	    fileStream.read(reinterpret_cast<char*>(fileContent), fileSize);
 
+	    std::vector<unsigned char> out;
+
 	    // Check if the file was read successfully
 	    if (!fileStream) {
 	        DebugLog(LOG_ERROR, "Error reading file: " << fileName, true);
 	        delete[] fileContent;
 	        std::exit(-1);
+	    } else {
+	    	// Close the file stream
+		    fileStream.close();
+
+		    for (int i = 0; i < fileSize; i++) {
+		    	out.push_back(fileContent[i]);
+		    }
+
+		    delete[] fileContent; 
+
+		    return out;
 	    }
-
-	    // Close the file stream
-	    fileStream.close();
-
-	    std::vector<unsigned char> out;
-
-	    for (int i = 0; i < fileSize; i++) {
-	    	out.push_back(fileContent[i]);
-	    }
-
-	    delete[] fileContent; 
 
 	    return out;
 	}

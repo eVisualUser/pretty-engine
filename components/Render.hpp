@@ -18,7 +18,7 @@ using namespace PrettyEngine;
 namespace Custom {
 class Render : public PrettyEngine::Component {
 public:
-	void OnUpdatePublicVariables() override {
+	void OnSetup() override {
 		
 		this->AddSerializedField(SERIAL_TOKEN(bool), "UseTexure", SERIAL_TOKEN(false));
 
@@ -46,26 +46,56 @@ public:
 			this->OnUpdate();
 		});
 
-		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshBaseTexture(); });
+		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshTextureBase(); });
 	}
 
 	void OnEditorStart() override {
 		this->OnStart();
-		this->RefreshBaseTexture();
 	}
 
 	void OnEditorUpdate() override { this->OnUpdate(); }
 
-	void RefreshBaseTexture() {
+	void RefreshTextureBase() {
 		if (this->GetSerializedFieldValue("UseTextureBase") == "true") {
-			const auto baseTexturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureBase"), true);
-			this->baseTexture = Asset(baseTexturePath);
-			
-			if (this->baseTexture.Exist()) {
-				this->visualObject->RemoveTexture(TextureType::Base);
-				this->engineContent->renderer.Clear();
-				this->texture = this->engineContent->renderer.AddTexture(baseTexturePath, &this->baseTexture, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
-				this->visualObject->AddTexture(this->texture);
+			const auto texturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureBase"), true);
+			this->baseTexture = Asset(baseTexture);
+
+			if (this->baseTexture.Exist() && this->visualObject != nullptr) {
+				if (this->visualObject->HaveTexture(TextureType::Base)) {
+					this->visualObject->RemoveTexture(TextureType::Base);
+				}
+				this->texture = this->engineContent->renderer.AddTexture(texturePath, &this->baseTexture, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->visualObject->SetTexture(TextureType::Base, this->texture);
+			}
+		}
+	}
+
+	void RefreshTextureTransparency() {
+		if (this->GetSerializedFieldValue("UseTextureTransparency") == "true") {
+			const auto texturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureTransparency"), true);
+			this->transparencyTexture = Asset(texturePath);
+
+			if (this->transparencyTexture.Exist() && this->visualObject != nullptr) {
+				if (this->visualObject->HaveTexture(TextureType::Transparency)) {
+					this->visualObject->RemoveTexture(TextureType::Transparency);
+				}
+				this->texture = this->engineContent->renderer.AddTexture(texturePath, &this->transparencyTexture, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->visualObject->SetTexture(TextureType::Transparency, this->textureTransparency);
+			}
+		}
+	}
+
+	void RefreshTextureNormal() {
+		if (this->GetSerializedFieldValue("UseTextureNormal") == "true") {
+			const auto texturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureTransparency"), true);
+			this->normalTexture = Asset(texturePath);
+
+			if (this->normalTexture.Exist() && this->visualObject != nullptr) {
+				if (this->visualObject->HaveTexture(TextureType::Normal)) {
+					this->visualObject->RemoveTexture(TextureType::Normal);
+				}
+				this->texture = this->engineContent->renderer.AddTexture(texturePath, &this->normalTexture, TextureType::Normal, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->visualObject->SetTexture(TextureType::Normal, this->textureNormal);
 			}
 		}
 	}
@@ -97,44 +127,14 @@ public:
 	    const auto shader = this->engineContent->renderer.AddShaderProgram("Default", defaultVertexShaderName, defaultFragmentShaderName);
 
 	    this->renderModel.SetShaderProgram(shader);
-
-		this->RefreshBaseTexture();
-
+	    
+		this->RefreshTextureBase();
+		this->RefreshTextureNormal();
+		this->RefreshTextureTransparency();
+		
 	    this->visualObject->AddRenderModel(&this->renderModel);
 
 	    this->renderModel.useTexture = (this->GetSerializedFieldValue("UseTexture") == "true");
-
-	    if (this->GetSerializedFieldValue("UseTextureTransparency") == "true") {
-			
-			const auto baseTexturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureTransparency"));
-			this->transparencyTexture = Asset(baseTexturePath);
-	      	
-	      	if (this->transparencyTexture.Exist()) {
-		        this->engineContent->renderer.RemoveTexture(this->textureTransparency);
-
-		        this->visualObject->RemoveTexture(this->textureTransparency);
-		        this->textureTransparency = this->engineContent->renderer.AddTexture(
-		            this->transparencyTexture.GetFilePath(), &this->transparencyTexture, TextureType::Transparency,
-		            TextureWrap::ClampToBorder, TextureFilter::Linear,
-		            TextureChannels::RGBA);
-
-		        this->visualObject->AddTexture(this->textureTransparency);
-	      	}
-	    }
-
-	    if (this->GetSerializedFieldValue("UseTextureNormal") == "true") {
-		  const auto baseTexturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureNormal"), true);
-		  this->normalTexture = Asset(baseTexturePath);
-	      if (this->normalTexture.Exist()) {
-	        this->engineContent->renderer.RemoveTexture(this->normalTexture.GetFilePath());
-	        this->visualObject->RemoveTexture(this->textureNormal);
-	        this->textureNormal = this->engineContent->renderer.AddTexture(
-	            this->normalTexture.GetFilePath(), &this->normalTexture, TextureType::Normal,
-	            TextureWrap::ClampToBorder, TextureFilter::Linear,
-	            TextureChannels::RGBA);
-	        this->visualObject->AddTexture(this->textureNormal);
-	      }
-	    }
 
 	    bool loadMesh = false;
 

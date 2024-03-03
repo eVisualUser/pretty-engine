@@ -35,13 +35,6 @@ using namespace PrettyEngine;
 namespace Custom {
 class Editor : public virtual Entity {
   public:
-    void OnUpdatePublicVariables() override {
-        this->localizationEditorPtr = Option(this->GetComponentAs<LocalizationEditor>("LocalizationEditor").Resolve([this](LocalizationEditor** value){
-            (*value) = this->AddComponent<LocalizationEditor>("LocalizationEditor");
-            return (*value) == nullptr;
-        })->ShowError());
-    }
-
     void OnEditorStart() override {
         keyUp.name = "EditorKeyUp";
         keyUp.key = KeyCode::UpArrow;
@@ -209,12 +202,6 @@ class Editor : public virtual Entity {
 
                 ImGui::Separator();
                 ImGui::Text("Tools");
-
-                this->localizationEditorPtr.HaveValue([this](LocalizationEditor* value){
-    				if (ImGui::Button("Localization Editor")) {
-                        value->Toggle();
-                    }
-                });
             }
             ImGui::End();
         }
@@ -321,8 +308,6 @@ class Editor : public virtual Entity {
 
     bool actionBox = false;
     ImVec2 actionBoxStartPos;
-
-    Option<LocalizationEditor*> localizationEditorPtr = Option<LocalizationEditor*>(nullptr);
 
     std::string file = "game.toml";
 

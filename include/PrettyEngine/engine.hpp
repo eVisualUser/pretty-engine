@@ -129,7 +129,6 @@ class Engine final: public EventListener {
 		auto worlds = this->_worldManager.GetWorlds();
 		this->engineContent.input.Update();
 
-		auto updatePhyics = std::async([this, worlds]{
 			for (auto &currentWorld : *worlds) {
 				if (!this->isEditor) {
 					currentWorld->PrePhysics();
@@ -137,7 +136,6 @@ class Engine final: public EventListener {
 			}
 
 			this->engineContent.physicalSpace.Update(this->engineContent.renderer.GetDeltaTime());
-		});
 
 		// Builtin fullscreen support (F11 is reserved)
 		if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
@@ -161,23 +159,18 @@ class Engine final: public EventListener {
 			}
 		}
 
-		this->engineContent.renderer.Draw();
-		this->engineContent.renderer.Show();
-
-		if (this->engineContent.renderer.WindowActive()) {
-			for (auto &currentWorld : *worlds) {
-				if (currentWorld != nullptr) {
-					if (!this->isEditor) {
-						currentWorld->Update();
-						currentWorld->CallFunctionProcesses();
-					} else {
-						currentWorld->EditorUpdate();
-					}
+		for (auto &currentWorld : *worlds) {
+			if (currentWorld != nullptr) {
+				if (!this->isEditor) {
+					currentWorld->Update();
+				} else {
+					currentWorld->EditorUpdate();
 				}
 			}
 		}
 
-		updatePhyics.get();
+		this->engineContent.renderer.Draw();
+		this->engineContent.renderer.Show();
 
 		for (auto &currentWorld : *worlds) {
 			if (currentWorld != nullptr) {

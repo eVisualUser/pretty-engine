@@ -12,7 +12,7 @@
 namespace Custom {
 	class Physical: public PrettyEngine::Component {
 	public:
-		void OnUpdatePublicVariables() override {
+		void OnSetup() override {
 			this->publicFuncions.insert(std::make_pair("Update gravity", ([this]() {
 				auto gravity = PrettyEngine::ParseCSVLine(this->GetSerializedFieldValue("Gravity"), ';');
 				for (int i = 0; i < gravity.size(); i++) {

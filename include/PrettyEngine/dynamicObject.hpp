@@ -5,6 +5,7 @@
 #include <PrettyEngine/tags.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/EngineContent.hpp>
+#include <PrettyEngine/PrettyError.hpp>
 
 #include <Guid.hpp>
 
@@ -37,16 +38,22 @@ namespace PrettyEngine {
 
 			this->_container = newContainer;
 
-			this->_container->AddSerializedField(typeid(T).name(), this->_name, (this->_serializeFunction)(this->_value));
+			this->_container.HaveValue([this](SerialObject* value) {
+				value->AddSerializedField(typeid(T).name(), this->_name, (this->_serializeFunction)(this->_value));
+			});
 			this->UpdateValue();
 		}
 
 		void UpdateValue() {
-			this->_value = this->_deserializeFunction(this->_container->GetSerializedFieldValue(this->_name));
+			this->_container.HaveValue([this](SerialObject* value) {
+				this->_value = this->_deserializeFunction(value->GetSerializedFieldValue(this->_name));
+			});
 		}
 
 		void Save() {
-			this->_container->GetSerializedField(this->_name)->value = (this->_serializeFunction)(this->_value);
+			this->_container.HaveValue([this](SerialObject* value) {
+				value->GetSerializedField(this->_name)->value = (this->_serializeFunction)(this->_value);
+			});
 		}
 
 		T* Get() {
@@ -57,7 +64,7 @@ namespace PrettyEngine {
 		std::function<std::string(T)> _serializeFunction;
 		std::function<T(std::string)> _deserializeFunction;
 
-		SerialObject* _container;
+		Option<SerialObject*> _container = Option<SerialObject*>(nullptr);
 
 		std::string _name;
 
@@ -68,20 +75,21 @@ namespace PrettyEngine {
 	class DynamicObject: public Tagged, public virtual SerialObject {
 	public:
    		DynamicObject() {
-   			this->publicFuncions.insert_or_assign("OnUpdatePublicVariables", [this]() { this->OnUpdatePublicVariables(); });
+   			this->publicFuncions.insert_or_assign("OnSetup", [this]() { this->OnSetup(); });
 			this->publicFuncions.insert_or_assign("OnStart", [this]() { this->OnStart(); });
 			this->publicFuncions.insert_or_assign("OnUpdate", [this]() { this->OnUpdate(); });
 			this->publicFuncions.insert_or_assign("OnRender", [this]() { this->OnRender(); });
   		}
 
-		~DynamicObject() { this->OnDestroy(); }
+		~DynamicObject() { this->DynamicObject::OnDestroy(); }
 
+		/// Minimum setup required by a dynamic object
 		void SetupDynamicObject(EngineContent* newEngineContent) {
 			this->engineContent = newEngineContent;
 		}
 
 		/// Called when the components loaded
-		virtual void OnUpdatePublicVariables() {}
+		virtual void OnSetup() {}
 		/// Called before the first frame.
 		virtual void OnStart() {}
 		/// Called before the first frame in the editor only.
