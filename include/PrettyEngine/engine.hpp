@@ -1,6 +1,7 @@
 #ifndef H_ENGINE
 #define H_ENGINE
 
+#include "PrettyEngine/command.hpp"
 #include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/debug/DebugDust.hpp>
 #include <PrettyEngine/EngineContent.hpp>
@@ -16,7 +17,6 @@
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 
-#include <future>
 #include <implot.h>
 #include <toml++/toml.h>
 
@@ -41,6 +41,8 @@ class Engine final: public EventListener {
 
 		this->engineContent.renderer.CreateWindow();
 		this->engineContent.renderer.Setup();
+
+		this->logLimit = customConfig["engine"]["logs_limit"].value_or(100.0f);
 
 		const auto windowTitle = customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 		this->engineContent.renderer.SetWindowTitle(windowTitle);
@@ -68,9 +70,20 @@ class Engine final: public EventListener {
 		this->engineContent.input.SetWindow(this->engineContent.renderer.GetWindow());
 
 		this->engineContent.eventManager.RegisterListener(this);
+
+		// Add a command to allow saving the worlds from the console
+		this->saveCommand.commandName = "save";
+		this->saveCommand.action = [this](std::vector<std::string> args){
+      DebugLog(LOG_DEBUG, "Save", false);
+			this->_worldManager.SaveWorlds();
+		};
+
+		CommandSystem::AddCommand(&this->saveCommand);
 	}
 
 	~Engine() {
+		CommandSystem::RemoveCommand(&this->saveCommand);
+
 		this->engineContent.eventManager.UnRegisterListener(this);
 
 		this->_worldManager.ClearWorldInstances();
@@ -111,9 +124,12 @@ class Engine final: public EventListener {
 		double currentTime = this->engineContent.renderer.GetTime();
 		if (this->lastEngineCleanUp + this->engineCleanup < currentTime) {
 			this->engineContent.renderer.Clear();
-			DebugDust::GenerateLogFile("logs.log");
-			logs.clear();
 			this->lastEngineCleanUp = currentTime;
+		}
+
+		if (logs.size() > 100) {
+			DebugDust::GenerateLogFile("logs.log");
+			logs.erase(logs.begin());
 		}
 
 #if ENGINE_EDITOR
@@ -226,22 +242,26 @@ class Engine final: public EventListener {
 	PrettyEngine::WorldManager *GetWorldManager() { return &this->_worldManager; }
 
   private:
-	EventManager eventManager;
+  	int logLimit;
 
-	PrettyEngine::WorldManager _worldManager;
+		EventManager eventManager;
 
-	bool exit = false;
+		PrettyEngine::WorldManager _worldManager;
 
-	bool showDebugUI = true;
+		bool exit = false;
 
-	bool _physicsEnabled = true;
+		bool showDebugUI = true;
 
-	EngineContent engineContent;
+		bool _physicsEnabled = true;
 
-	double lastEngineCleanUp = 0.0f;
-	double engineCleanup = 5.0f;
+		EngineContent engineContent;
 
-	Editor* editor;
+		double lastEngineCleanUp = 0.0f;
+		double engineCleanup = 5.0f;
+
+		Editor* editor;
+
+		Command saveCommand;
 
 #if ENGINE_EDITOR
 	bool isEditor = true;

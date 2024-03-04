@@ -25,9 +25,9 @@ namespace PrettyEngine {
 	public:
 		static void Execute(std::string command, bool systemCommand = false);
 
-		static void AddCommand(Command& command);
+		static void AddCommand(Command* command);
 
-		static void RemoveCommand(Command& commandToRemove);
+		static void RemoveCommand(Command* commandToRemove);
 	};
 }
 

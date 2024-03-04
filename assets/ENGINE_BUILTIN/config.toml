@@ -14,3 +14,4 @@ demo = [] # Preload meshes to allow world loading
 
 [engine]
 database = "public/data/engine.db"
+logs_limit = 100
