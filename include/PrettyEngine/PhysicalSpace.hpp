@@ -1,6 +1,7 @@
 #ifndef H_PHYSICAL_SPACE
 #define H_PHYSICAL_SPACE
 
+#include "glm/geometric.hpp"
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/Collision.hpp>
 
@@ -76,23 +77,22 @@ namespace PrettyEngine {
 		}
 
 		void UpdateRigidbodyPosition(std::vector<Collision>* collisions, Collider* collider, float deltaTime) {
-			collider->velocity += collider->gravity;
-
-			auto startPosition = collider->position;
 			collider->position += collider->velocity;
+			// collider->position += collider->gravity * collider->mass;
 
-			if (!collider->fixed) {
+			if (!collisions->empty() && !collider->fixed) {
 				for(auto & collision: *collisions) {
-
 					auto delta = collider->position - collision.colliderOther->position;
 
-					delta = glm::normalize(delta) * collider->bounce;
+					glm::vec3 direction = glm::normalize(collider->position - collision.colliderOther->position);
 
-					if (collider->reverseDelta) {
-						delta = -delta;
-					}
+					glm::vec3 supportA = collider->GJKSupport(*collision.colliderOther, direction) / 100.0f;
 
-					collider->position += delta * deltaTime;
+					float penetrationDepth = glm::length(supportA);
+
+					glm::vec3 separationVector = glm::normalize(supportA) * penetrationDepth;
+
+					collider->position += separationVector;
 				}
 			}
 
@@ -115,9 +115,7 @@ namespace PrettyEngine {
 
 		void UpdateRigidBody(Collider* collider, std::vector<Collision>* collisions, float deltaTime) {
 			if (collider->isRigidBody) {
-				for(auto & collision: *collisions) {
-					this->UpdateRigidbodyPosition(collisions, collider, deltaTime);
-				}
+				this->UpdateRigidbodyPosition(collisions, collider, deltaTime);
 			}
 		}
 

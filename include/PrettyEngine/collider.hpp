@@ -98,7 +98,7 @@ namespace PrettyEngine {
 				}
 			}
 
-			return false;
+			return true;
 		}
 
 		bool GJKSameDirection(const glm::vec3 &direction, const glm::vec3 &ao) {

@@ -6,7 +6,9 @@
 using namespace PrettyEngine;
 
 bool worldFilter(std::string name) {
-	/* Do nothing, this is more useful for the game build. */
+
+	// Add your filter logic here
+
 	return true;
 }
 
@@ -26,10 +28,6 @@ int main() {
 	engine.SetupWorlds();
 	
 	engine.Run();
-
-	engine.~Engine();
-
-
 
 	return 0;	
 }

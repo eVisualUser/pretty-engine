@@ -189,7 +189,6 @@ class Engine final: public EventListener {
 				this->Exit();
 			}
 		}
-
 	}
 
 	void OnEvent(Event *event) override { 

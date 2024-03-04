@@ -40,17 +40,19 @@ public:
 		this->AddSerializedField(SERIAL_TOKEN(glm::vec4), "Color", "1;1;1;1");
 
 		this->AddSerializedField(SERIAL_TOKEN(bool), "WireFrame", SERIAL_TOKEN(false));
-
-  		this->publicFuncions.insert_or_assign("UpdateRender", [this]() {
-			this->Init();
-			this->OnUpdate();
-		});
-
-		this->publicFuncions.insert_or_assign("Refresh Texture", [this]() { this->RefreshTextureBase(); });
 	}
 
 	void OnEditorStart() override {
 		this->OnStart();
+
+		this->publicFuncions.insert_or_assign("UpdateRender", [this]() {
+			this->Init();
+			this->OnUpdate();
+		});
+
+		this->publicFuncions.insert_or_assign("Refresh Base Texture", [this]() { this->RefreshTextureBase(); });
+		this->publicFuncions.insert_or_assign("Refresh Transparency Texture", [this]() { this->RefreshTextureTransparency(); });
+		this->publicFuncions.insert_or_assign("Refresh Normal Texture", [this]() { this->RefreshTextureNormal(); });
 	}
 
 	void OnEditorUpdate() override { this->OnUpdate(); }
@@ -58,7 +60,7 @@ public:
 	void RefreshTextureBase() {
 		if (this->GetSerializedFieldValue("UseTextureBase") == "true") {
 			const auto texturePath = GetEnginePublicPath(this->GetSerializedFieldValue("TextureBase"), true);
-			this->baseTexture = Asset(baseTexture);
+			this->baseTexture = Asset(texturePath);
 
 			if (this->baseTexture.Exist() && this->visualObject != nullptr) {
 				if (this->visualObject->HaveTexture(TextureType::Base)) {
@@ -79,7 +81,7 @@ public:
 				if (this->visualObject->HaveTexture(TextureType::Transparency)) {
 					this->visualObject->RemoveTexture(TextureType::Transparency);
 				}
-				this->texture = this->engineContent->renderer.AddTexture(texturePath, &this->transparencyTexture, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->textureTransparency = this->engineContent->renderer.AddTexture(texturePath, &this->transparencyTexture, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 				this->visualObject->SetTexture(TextureType::Transparency, this->textureTransparency);
 			}
 		}
@@ -94,7 +96,7 @@ public:
 				if (this->visualObject->HaveTexture(TextureType::Normal)) {
 					this->visualObject->RemoveTexture(TextureType::Normal);
 				}
-				this->texture = this->engineContent->renderer.AddTexture(texturePath, &this->normalTexture, TextureType::Normal, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
+				this->textureNormal = this->engineContent->renderer.AddTexture(texturePath, &this->normalTexture, TextureType::Normal, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
 				this->visualObject->SetTexture(TextureType::Normal, this->textureNormal);
 			}
 		}

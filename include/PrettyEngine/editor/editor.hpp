@@ -1,6 +1,7 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
+#include "PrettyEngine/EngineContent.hpp"
 #include <PrettyEngine/editor/PropertyEditor.hpp>
 #include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/Input.hpp>
@@ -371,6 +372,29 @@ class Editor {
 		ImGui::End();
 	}
 
+	void ShowCollisionDebugger(EngineContent* engineContent) {
+		if (ImGui::Begin("Collision Debugger")) {
+			for(auto & layer: *engineContent->physicalSpace.GetAllLayers()) {
+				if (ImGui::CollapsingHeader(layer.first.c_str())) {
+					for(auto & collider: layer.second) {
+						if (ImGui::CollapsingHeader(collider->name.c_str())) {
+							if (const auto collisions = engineContent->physicalSpace.GetCollisions(collider)) {
+								for(auto & collision: *collisions) {
+									ImGui::Text("%s", collision.colliderSource->name.c_str());
+									ImGui::SameLine();
+									ImGui::Text(" > ");
+									ImGui::SameLine();
+									ImGui::Text("%s", collision.colliderOther->name.c_str());
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		ImGui::End();
+	}
+
 	bool Update(EngineContent* engineContent, WorldManager* worldManager, bool *isEditor) {
 		auto changedState = false;
 		if (ImGui::Begin("Play Mode")) {
@@ -415,6 +439,7 @@ class Editor {
 		this->ShowSelectedEntities();
 		this->ShowRenderDebugger(&engineContent->renderer);
 		this->ShowToolScripts();
+		this->ShowCollisionDebugger(engineContent);
 
 		return changedState;
 	}
