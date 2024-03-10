@@ -1,5 +1,5 @@
-#ifndef H_EVENT
-#define H_EVENT
+#ifndef HPP_EVENT
+#define HPP_EVENT
 
 #include <PrettyEngine/tags.hpp>
 

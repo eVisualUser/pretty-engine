@@ -1,5 +1,5 @@
-#ifndef H_AUDIO
-#define H_AUDIO
+#ifndef HPP_PRETTY_AUDIO
+#define HPP_PRETTY_AUDIO
 
 #include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/transform.hpp>
@@ -7,8 +7,6 @@
 
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <AL/efx.h>
-#include <AL/efx-presets.h>
 #include <AL/efx-creative.h>
 
 #define DR_WAV_IMPLEMENTATION

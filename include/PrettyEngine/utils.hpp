@@ -29,7 +29,7 @@ namespace PrettyEngine {
 
 	/// Concat the path of the public directory.
 	static std::string GetEnginePublicPath(std::string base, bool editOriginal = false) {
-		#if _DEBUG
+		#if ENGINE_EDITOR
 			if (editOriginal) {
 				return std::string(PRETTY_ENGINE_PROJECT) + "/assets/ENGINE_PUBLIC/" + base;
 			} else {
@@ -66,6 +66,9 @@ namespace PrettyEngine {
 	    std::ifstream input_file(path);
 	    if (!input_file.is_open()) {
 	    	DebugLog(LOG_ERROR, "Could not open: " << path, true);
+	    	if (boxer::Selection::Yes == boxer::show("Failed to read file, retry ?", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
+				return ReadFileToString(path);
+			}
 	    	return "";
 	    }
 	    std::string out = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
@@ -85,6 +88,11 @@ namespace PrettyEngine {
 			outFile.close();
 
 			return true;
+		}
+
+		DebugLog(LOG_ERROR, "Failed to write: " << path, true);
+		if (boxer::Selection::Yes == boxer::show("Failed to write file, retry ? ", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
+			return WriteFileString(path, content);
 		}
 
 		return false;

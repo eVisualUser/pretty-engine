@@ -1,5 +1,5 @@
 
-#include <PrettyEngine/world.hpp>
+#include <PrettyEngine/entity.hpp>
 
 #include <string>
 #include <memory>
@@ -11,4 +11,4 @@
  * REGENERATED AUTOMATICALLY UPON THE NEXT BUILD.    *
  ******************************************************/
 
-static void CreateCustomEntity(std::string name, std::shared_ptr<PrettyEngine::World> world) {
+static std::shared_ptr<PrettyEngine::Entity> CreateCustomEntity(std::string name) {

@@ -311,7 +311,10 @@ namespace PrettyEngine {
 
         glfwDestroyWindow(this->_window);
         glfwTerminate();
-        this->Clear();
+
+    	this->_renderFeatures.clear();
+    	this->visualObjects.clear();
+        this->Clear(true);
     }
 
     void WindowCloseFunc() {

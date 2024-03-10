@@ -3,10 +3,6 @@
 
 #include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/PrettyError.hpp>
-#include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/render/render.hpp>
-#include <PrettyEngine/render/visualObject.hpp>
-#include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/tags.hpp>
 

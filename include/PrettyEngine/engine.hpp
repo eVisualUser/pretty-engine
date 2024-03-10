@@ -1,14 +1,13 @@
 #ifndef H_ENGINE
 #define H_ENGINE
 
-#include "PrettyEngine/command.hpp"
+#include <PrettyEngine/command.hpp>
 #include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/debug/DebugDust.hpp>
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/KeyCode.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
-#include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/editor/editor.hpp>
 #include <PrettyEngine/event.hpp>
@@ -30,7 +29,7 @@ class Engine final: public EventListener {
  	/// Initialize the engine based on a toml configuration
 	explicit Engine(std::string config) {
 
-		#ifdef ENGINE_EDITOR
+		#if ENGINE_EDITOR
 		this->editor = new Editor();
 		#endif
 
@@ -89,7 +88,7 @@ class Engine final: public EventListener {
 		this->_worldManager.ClearWorldInstances();
 		this->_worldManager.Clear();
 
-		#ifdef ENGINE_EDITOR
+		#if ENGINE_EDITOR
 		delete this->editor;
 		#endif
 	}
@@ -108,14 +107,17 @@ class Engine final: public EventListener {
 	}
 
  	/// Show UI for debug, and the integrated editor.
-	void UpdateDebugUI() {
+	bool UpdateEditorUI() {
+#if ENGINE_EDITOR
 		if (this->engineContent.input.GetKeyDown(KeyCode::F3)) {
 			this->showDebugUI = !showDebugUI;
 		}
 
 		if (this->showDebugUI) {
-			this->editor->Update(&this->engineContent, &this->_worldManager, &this->isEditor);
+			return this->editor->Update(&this->engineContent, &this->_worldManager, &this->isEditor);
 		}
+#endif
+		return false;
 	}
 
  	/// Update the content of the engine.
@@ -162,8 +164,7 @@ class Engine final: public EventListener {
 		this->engineContent.renderer.StartUIRendering();
 
 #if ENGINE_EDITOR
-			this->UpdateDebugUI();
-			this->SetupWorlds();
+		bool changedState = this->UpdateEditorUI();
 #endif
 
 		if (this->engineContent.renderer.GetCurrentCamera() != nullptr) {
@@ -205,6 +206,13 @@ class Engine final: public EventListener {
 				this->Exit();
 			}
 		}
+
+#if ENGINE_EDITOR
+		if (changedState) {
+			this->_worldManager.Reload();
+			this->SetupWorlds();
+		}
+#endif
 	}
 
 	void OnEvent(Event *event) override { 
@@ -259,7 +267,9 @@ class Engine final: public EventListener {
 		double lastEngineCleanUp = 0.0f;
 		double engineCleanup = 5.0f;
 
+#if ENGINE_EDITOR
 		Editor* editor;
+#endif
 
 		Command saveCommand;
 

@@ -1,6 +1,7 @@
 #ifndef HPP_ASSET_MANAGER
 #define HPP_ASSET_MANAGER
 
+#include "boxer/boxer.h"
 #include <PrettyEngine/version.hpp>
 #include <PrettyEngine/data.hpp>
 #include <PrettyEngine/tags.hpp>
@@ -51,6 +52,9 @@ namespace PrettyEngine {
 		~Asset() {
 			if (this->Exist() && !WriteFileString(this->GetMetaPath(), this->Serialize(SerializationFormat::Toml))) {
 				DebugLog(LOG_ERROR, "Failed to write meta file: " << this->GetMetaPath(), true);
+				if (boxer::Selection::Yes == boxer::show("Retry writing meta file, retry ?", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
+					this->~Asset();
+				}
 			}
 		}
 
@@ -61,6 +65,9 @@ namespace PrettyEngine {
 		void CreateMeta() { 
 			if (!this->HaveMeta() && !CreateFile(this->GetMetaPath())) {
 				DebugLog(LOG_ERROR, "Failed to create meta file: " << this->GetMetaPath(), true);
+				if (boxer::Selection::Yes == boxer::show("Retry create meta file ?", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
+					return CreateMeta();
+				}
 			}
 		}
 

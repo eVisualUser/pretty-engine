@@ -1,9 +1,10 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
-#include "PrettyEngine/EngineContent.hpp"
+#if ENGINE_EDITOR
+
+#include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/editor/PropertyEditor.hpp>
-#include <PrettyEngine/audio.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/debug/debug.hpp>
@@ -21,13 +22,11 @@
 
 #include <functional>
 #include <imgui.h>
-#include <implot.h>
 #include <memory>
 #include <string>
 #include <filesystem>
 
 namespace PrettyEngine {
-
 /// Builtin editor
 class Editor {
   public:
@@ -49,20 +48,19 @@ class Editor {
 		this->_propertyEditorList = GeneratePropertyEditorList();
 	}
 
-	~Editor() {
-		/*for (auto &propertyEditor : this->_propertyEditorList) {
-			propertyEditor.reset();
-		}
-
-		this->_propertyEditorList.clear();
-		this->_propertyEditorList.shrink_to_fit(); */
+	static void ImGuiInputString(const char* label, std::string* input) {
+		char buffer[100];
+		strcpy(buffer, input->c_str());
+		ImGui::InputText(label, buffer, 100);
+		*input = buffer;
 	}
 
 	void ShowWorldDebugInfo(Renderer *renderer) {
-		if (ImGui::Begin("Debug Tools", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoSavedSettings)) {
+		if (ImGui::Begin("Debug Tools", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoSavedSettings)) {
 			ImGui::Text("Visual Objects : %i", renderer->GetVisualObjectsCount());
 			ImGui::Text("Lights: %i", renderer->GetLightCount());
 		}
+
 		ImGui::End();
 	}
 
@@ -88,13 +86,14 @@ class Editor {
 	}
 
 	void ShowManualFunctionsCalls(DynamicObject *dynamicObject) {
-  		for (auto & publicFunction: dynamicObject->publicFuncions) {
-			std::string buttonName = "Call ";
-   			buttonName += publicFunction.first + " for ";
+		for (auto & publicFunction: dynamicObject->publicFuncions) {
+			std::string buttonName = "";
+ 			buttonName += publicFunction.first + " -> ";
 			buttonName += dynamicObject->serialObjectUnique;
-   			if (ImGui::Button(buttonName.c_str())) {
+
+ 			if (ImGui::Button(buttonName.c_str())) {
 				publicFunction.second();
-   			}
+ 			}
 		}
 	}
 
@@ -102,16 +101,16 @@ class Editor {
 		for (auto &entity : this->existingEntities) {
 			std::string buttonName = "Add Entity: ";
 			buttonName += entity;
-			if (ImGui::Button(buttonName.c_str())) {
-				CreateCustomEntity(entity, world);
+			if (ImGui::Button(buttonName.c_str())) {	
+					world->RegisterEntity(CreateCustomEntity(entity));
     			int entitiesWithSameName = 0;
     			for(auto & worldEntity: world->entities) {
 					if (worldEntity.second->serialObjectUnique == entity) {
 						entitiesWithSameName++;
      				}
     			}
-				world->GetLastEntityRegistred()->serialObjectUnique = entity;
-				world->GetLastEntityRegistred()->serialObjectUnique = entity;
+					world->GetLastEntityRegistred()->serialObjectUnique = entity;
+					world->GetLastEntityRegistred()->serialObjectUnique = entity;
     			if (entitiesWithSameName > 0) {
 					world->GetLastEntityRegistred()->serialObjectUnique += "_" + std::to_string(entitiesWithSameName);
     			}
@@ -209,15 +208,15 @@ class Editor {
 	}
 
 	void ShowSelectedEntities() {
+		int index = 0;
 		for (auto &selectedEntity : this->selectedEntities) {
-			int index = 0;
-			if (ImGui::Begin(selectedEntity->GetGUID().c_str(), NULL, ImGuiWindowFlags_MenuBar)) {
+			if (ImGui::Begin(selectedEntity->GetGUID().c_str(), nullptr, ImGuiWindowFlags_MenuBar)) {
 				if (ImGui::BeginMenuBar()) {
 					if (ImGui::Button("Close")) {
 						this->selectedEntities.erase(this->selectedEntities.begin() + index);
 						ImGui::EndMenuBar();
 						ImGui::End();
-						break;
+						return;
 					}
 				}
 				ImGui::EndMenuBar();
@@ -325,12 +324,35 @@ class Editor {
 
 	void ShowWorldEditor(WorldManager *worldManager) {
 		if (ImGui::Begin("World Editor")) {
-			if (ImGui::BeginTabBar("Worlds")) {
+			Editor::ImGuiInputString("New world file path:", &this->worldFileBuffer);
+
+			const auto realWorldPath = GetEnginePublicPath(this->worldFileBuffer, true);
+			if (!FileExist(realWorldPath)) {
+				Editor::ImGuiInputString("New world name:", &this->worldNameBuffer);
+				if (ImGui::Button("Create a new world")) {
+					if (CreateFile(realWorldPath)) {
+						DebugLog(LOG_DEBUG, "Created new world: " << realWorldPath, false);
+						worldManager->AddWorld(realWorldPath, this->worldNameBuffer);
+						return ImGui::End();
+					} else {
+						DebugLog(LOG_DEBUG, "Failed to create file: " << realWorldPath, true);
+					}
+				}
+			} else if (ImGui::Button("Open")) {
+				DebugLog(LOG_DEBUG, "Open world: " << realWorldPath, false);
+				worldManager->AddWorld(realWorldPath, this->worldNameBuffer);
+				return ImGui::End();
+			}
+			
+			if (ImGui::BeginTabBar("Worlds", ImGuiTabBarFlags_AutoSelectNewTabs)) {
 				// Iterate the worlds in the world manager
 				for (auto & world : *worldManager->GetWorlds()) {
 					// Show enities table
 					if (ImGui::BeginTabItem(world->worldName.c_str())) {
+						Editor::ImGuiInputString("World Name:", &world->worldName);
+
 						this->ShowCreateNewEntity(world);
+
 						ImGui::NewLine();
 						ImGui::Text("Entities: %lli", world->entities.size());
 						if (ImGui::BeginTable("Entities", 4)) {
@@ -350,21 +372,24 @@ class Editor {
 								ImGui::TableNextColumn();
 								ImGui::Text("%lli", entity.second->components.size());
 								ImGui::TableNextColumn();
+								
 								std::string buttonName = "Select " + entity.second->GetGUID();
+								
 								if (ImGui::Button(buttonName.c_str())) {
 									this->selectedEntities.push_back(entity.second.get());
 								}
-        						std::string buttonRemove = "Remove " + entity.second->entityName;
-        						if (ImGui::Button(buttonRemove.c_str())) {
+
+    						std::string buttonRemove = "Remove " + entity.second->entityName;
+    						if (ImGui::Button(buttonRemove.c_str())) {
 									world->entities.erase(entity.second->GetGUID());
-         							this->selectedEntities.clear();
-         							break;
-        						}
+     							this->selectedEntities.clear();
+     							break;
+      					}
 							}
 						}
 						ImGui::EndTable();
+						ImGui::EndTabItem();
 					}
-					ImGui::EndTabItem();
 				}
 			}
 			ImGui::EndTabBar();
@@ -397,55 +422,72 @@ class Editor {
 
 	bool Update(EngineContent* engineContent, WorldManager* worldManager, bool *isEditor) {
 		auto changedState = false;
-		if (ImGui::Begin("Play Mode")) {
-			if (*isEditor && ImGui::Button("Play")) {
-				DebugLog(LOG_DEBUG, "[EDITOR] -> Play", false);
+		if (worldManager != nullptr) {
+			if (isEditor != nullptr) {
+				if (ImGui::Begin("Play Mode")) {
+					if (isEditor != nullptr) {
+						if (*isEditor && ImGui::Button("Play")) {
+							DebugLog(LOG_DEBUG, "[EDITOR] -> Play", false);
 
-				worldManager->SaveWorlds();
+							worldManager->SaveWorlds();
 
-				*isEditor = false;
-				changedState = true;
-			}
-			ImGui::SameLine();
-			if (!*isEditor && ImGui::Button("Stop")) {
-				engineContent->renderer.visualObjects.clear();
-				engineContent->physicalSpace.Clear();
-				engineContent->audioEngine.Clear();
-				engineContent->input.Clear();
-				engineContent->renderer.Clear(true);
-    			this->selectedEntities.clear();
+							*isEditor = false;
+							changedState = true;
+						} else	if (!*isEditor && ImGui::Button("Stop")) {
+							engineContent->renderer.visualObjects.clear();
+							engineContent->physicalSpace.Clear();
+							engineContent->audioEngine.Clear();
+							engineContent->input.Clear();
+							engineContent->renderer.Clear(true);
+			    			this->selectedEntities.clear();
 
-				worldManager->Reload();
+							worldManager->Reload();
 
-				*isEditor = true;
-				changedState = true;
-			}
-		}
-		ImGui::End();
-		if (changedState) {
-			for (auto &worlds : *worldManager->GetWorlds()) {
-				for (auto &entity : *worlds->GetEntities()) {
-					entity.second->worldFirst = true;
-					for (auto &component : entity.second->components) {
-						component->worldFirst = true;
+							*isEditor = true;
+							changedState = true;
+						}
 					}
+				} else {
+					DebugLog(LOG_ERROR, "Nullptr of isEditor", true);
+					std::exit(-1);
 				}
 			}
-			return changedState;
+
+			ImGui::End();
+
+			if (changedState) {
+				for (auto & world : *worldManager->GetWorlds()) {
+					DebugLog(LOG_DEBUG, "Active world: " << world->worldName, false);
+					for (auto & entity : *world->GetEntities()) {
+						DebugLog(LOG_DEBUG, "Active entity: " << entity.second->entityName, false);
+						entity.second->worldFirst = true;
+						for (auto &component : entity.second->components) {
+							component->worldFirst = true;
+						}
+					}
+				}
+				return changedState;
+			}
+
+			this->ShowWorldDebugInfo(&engineContent->renderer);
+			this->ShowWorldEditor(worldManager);
+			this->ShowSelectedEntities();
+			this->ShowRenderDebugger(&engineContent->renderer);
+			this->ShowToolScripts();
+			this->ShowCollisionDebugger(engineContent);
+		} else {
+			DebugLog(LOG_ERROR, "Nullptr of WorldManager", true);
+			std::exit(-1);
 		}
-
-		this->ShowWorldDebugInfo(&engineContent->renderer);
-		this->ShowWorldEditor(worldManager);
-		this->ShowSelectedEntities();
-		this->ShowRenderDebugger(&engineContent->renderer);
-		this->ShowToolScripts();
-		this->ShowCollisionDebugger(engineContent);
-
+	
 		return changedState;
 	}
 
   private:
 	char textInputworldToLoad[100];
+
+	std::string worldFileBuffer = "/worlds/new_world.toml";
+	std::string worldNameBuffer = "NewWorld";
 
 	std::vector<Entity*> selectedEntities;
 
@@ -458,4 +500,5 @@ class Editor {
 };
 } // namespace PrettyEngine
 
+#endif
 #endif

@@ -81,7 +81,7 @@ namespace PrettyEngine {
 			this->publicFuncions.insert_or_assign("OnRender", [this]() { this->OnRender(); });
   		}
 
-		~DynamicObject() { this->DynamicObject::OnDestroy(); }
+		~DynamicObject() { this->DynamicObject::OnDestroy(); } // todo: check if it cause a crash
 
 		/// Minimum setup required by a dynamic object
 		void SetupDynamicObject(EngineContent* newEngineContent) {
@@ -162,6 +162,14 @@ namespace PrettyEngine {
 
 		void RemoveActionOnPublicVariableChanged(std::string name) { 
 			this->onPublicVariableChanged.erase(name);
+		}
+
+		void RemovePublicFunction(std::string& functionName) {
+			this->publicFuncions.erase(functionName);
+		}
+
+		void RemovePublicFunction(std::string functionName) {
+			this->publicFuncions.erase(functionName);
 		}
 
 		EngineContent* engineContent;

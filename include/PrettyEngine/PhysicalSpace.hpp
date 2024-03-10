@@ -79,7 +79,7 @@ namespace PrettyEngine {
 		void UpdateRigidbodyPosition(std::vector<Collision>* collisions, Collider* collider, float deltaTime) {
 			collider->position += collider->velocity;
 			collider->position += collider->gravity * collider->mass;
-			
+
 			if (!collisions->empty() && !collider->fixed) {
 				for(auto & collision: *collisions) {
 					auto delta = collider->position - collision.colliderOther->position;

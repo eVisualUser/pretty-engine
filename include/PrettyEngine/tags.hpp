@@ -1,5 +1,5 @@
-#ifndef H_TAGS
-#define H_TAGS
+#ifndef HPP_TAGS
+#define HPP_TAGS
 
 #include <string>
 #include <vector>

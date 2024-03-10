@@ -2,6 +2,8 @@
 #define H_WORLD
 
 #include "PrettyEngine/debug/debug.hpp"
+#include "components.hpp"
+#include "custom.hpp"
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/render/render.hpp>
@@ -13,50 +15,163 @@
 
 #include <unordered_map>
 #include <memory>
-#include <thread>
+#include <future>
 
 namespace PrettyEngine {
 	class World;
 
-	typedef void (*ProcessFunction)(World*);
-
-	static void MTUpdate(bool* alive, bool* update, std::unordered_map<std::string, std::shared_ptr<Entity>>* entities) {
-		while(*alive) {
-			if (*update) {
-				for (auto & entity: *entities) {
-					if (entity.second != nullptr) {
-						entity.second->OnMTUpdate(); 
-						for (auto & component: entity.second->components) {
-							component->OnMTUpdate();
-						}
-					}
-				}
-				*update = false;
-			}
-		}
-	}
-
  	/// Contain entities and manage their access.
 	class World {
 	public:
-		World() {
-			this->updateMTThreadAlive = true;
-			this->updateMT = new std::thread(MTUpdate, &this->updateMTThreadAlive, &this->update, &this->entities);
+		World(std::string path) {
+			this->worldAsset = Asset(path);
 
 			this->simulationCollider.SetScale(glm::vec3(100, 100, 100));
 		}
 		
 		~World() {
-			this->update = false;
-			this->updateMTThreadAlive = false;
-			this->StopMT();
 			this->Clear();
-			delete this->updateMT;
 		}
 
-		void StopMT() {
-			this->updateMTThreadAlive = false;
-			this->updateMT->join();
+		void Save() {
+			auto filePath = this->worldAsset.GetFilePath();
+
+			std::ofstream out;
+			out.open(filePath);
+
+			if (out.is_open()) {
+				auto base = toml::parse("");
+				base.insert_or_assign("meta", toml::table{});
+				base["meta"].as_table()->insert_or_assign("name", this->worldName);
+
+				base.insert_or_assign("entities", toml::table{});
+				for(auto & entity: this->entities) {
+					auto entitiesTable = base["entities"].as_table();
+					entitiesTable->insert_or_assign(entity.second->serialObjectUnique, toml::table{});
+					auto entityTable = (*entitiesTable)[entity.second->serialObjectUnique].as_table();
+					entityTable->insert_or_assign("name", entity.second->entityName);
+					entityTable->insert_or_assign("object", entity.second->serialObjectName);
+
+					entityTable->insert_or_assign("transform", toml::table{});
+					auto transformTable = (*entityTable)["transform"].as_table();
+					entity.second->GetTransform()->AddToToml(transformTable);
+
+					entityTable->insert_or_assign("serial", toml::table(toml::parse(entity.second->Serialize(SerializationFormat::Toml))));
+
+					auto componentTable = toml::table();
+					for(auto & component: entity.second->components) {
+						componentTable.insert_or_assign(component->serialObjectUnique, toml::table(toml::parse(component->Serialize(SerializationFormat::Toml))));
+					}
+					entityTable->insert_or_assign("components", componentTable);
+				}
+				out << base;
+				out.flush();
+				out.close();
+			}
+		}
+
+		void Load() {
+			this->Clear();
+
+			toml::parse_result parsedResult = toml::parse(this->worldAsset.ReadToString());
+			
+			this->worldName = parsedResult["meta"]["name"].value_or("World");
+
+			if (parsedResult["entities"].is_table()) {
+				for (auto &entity : *parsedResult["entities"].as_table()) {
+					std::string newEntityObject = (*entity.second.as_table())["object"].value_or("undefined");
+					std::string newEntityName = (*entity.second.as_table())["name"].value_or("undefined");
+
+					if (auto newEntity = CreateCustomEntity(newEntityObject)) {
+						this->RegisterEntity(newEntity);
+
+						if (this->lastEntityRegistred.empty()) {
+							DebugLog(LOG_DEBUG, "Failed to load entity: " << newEntity, true);
+							continue;
+						}
+
+						newEntity->entityName = newEntityName;
+
+						auto entitySerial = std::async([this, entity, newEntity]{
+							// Entity serial
+							if (entity.second.is_table()) {
+								if (entity.second.as_table()->contains("serial")) {
+									auto entityTable = entity.second.as_table();
+
+									auto serial = (*entityTable)["serial"]["fields"];
+									if (serial.is_table()) {
+										auto serialTable = serial.as_table();
+										for (auto &element : *serialTable) {
+											if (element.second.is_array()) {
+												auto array = element.second.as_array();
+												SerializedField serialField;
+												serialField.name = element.first;
+
+												if (array->size() > 0) {
+													serialField.type = array->at(0).value_or("null");
+												}
+
+												if (array->size() > 1) {
+													serialField.value = array->at(1).value_or("null");
+												}
+												newEntity->AddSerializedField(serialField);
+											}
+										}
+									}
+								}
+							}
+						});
+
+						// Components serial
+						auto componentSerial = std::async([this, entity, newEntity] {
+							if (entity.second.is_table()) {
+								auto entityTable = entity.second.as_table();
+								if (entityTable->contains("components")) {
+									auto serial = (*entityTable)["components"];
+									if (serial.is_table()) {
+										auto serialTable = serial.as_table();
+										for (auto &element : *serialTable) {
+											auto elementTable = element.second.as_table();
+
+											auto objectName = (*elementTable)["ObjectName"].value_or("null");
+
+											auto component = GetCustomComponent(objectName);
+
+											std::stringstream ss;
+											ss << *element.second.as_table();
+
+											component->Deserialize(ss.str());
+											component->serialObjectName = component->GetObjectSerializedName();
+											component->serialObjectUnique = component->GetObjectSerializedUnique();
+											component->owner = newEntity.get();
+
+											component->OnSetup();
+
+											newEntity->components.push_back(component);
+										}
+									}
+								}
+							}
+						});
+						
+						newEntity->serialObjectName = newEntityObject;
+						newEntity->serialObjectUnique = entity.first;
+						newEntity->OnSetup();
+
+						auto transform = (*entity.second.as_table())["transform"];
+						if (transform.is_table() && this->GetLastEntityRegistred() != nullptr) {
+							newEntity->FromToml(transform.as_table());
+						}
+
+						componentSerial.get();
+						entitySerial.get();
+
+						newEntity->components.shrink_to_fit();
+					} else {
+						DebugLog(LOG_ERROR, "Failed to load entity: " << newEntityObject << " " << newEntityName, true);
+					}
+				}
+			}
 		}
 		
 		void Start() {
@@ -119,18 +234,6 @@ namespace PrettyEngine {
 					}
 				}
 			#endif
-		}
-
-		void StartUpdateMT() {
-			this->update = true;
-		}
-
-		void WaitUpdateMT() {
-			while(update) {
-				// Wait to the thread to call the fucntions
-			}
-
-			this->EndUpdate();
 		}
 
 		void EndUpdate() {
@@ -281,10 +384,6 @@ namespace PrettyEngine {
 		}
 
 	public:
-		std::thread* updateMT = nullptr;
-		bool update = false;
-		bool updateMTThreadAlive = true;
-
 		std::unordered_map<std::string, std::shared_ptr<Entity>> entities;
 
 		std::string lastEntityRegistred;
@@ -296,6 +395,8 @@ namespace PrettyEngine {
 		std::string worldName = "DefaultWorldName";
 
 		bool loaded = false;
+
+		Asset worldAsset;
 
 	public:
 		Collider simulationCollider = Collider();

@@ -1,13 +1,11 @@
-#ifndef H_COMPONENT_RENDER
-#define H_COMPONENT_RENDER
+#ifndef HPP_COMPONENT_RENDER
+#define HPP_COMPONENT_RENDER
 
 #include <Guid.hpp>
-#include <PrettyEngine/debug/debug.hpp>
-#include <PrettyEngine/shaders.hpp>
 #include <PrettyEngine/render/texture.hpp>
-#include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/shaders.hpp>
 #include <PrettyEngine/render/visualObject.hpp>
 #include <PrettyEngine/assetManager.hpp>
 
@@ -53,6 +51,8 @@ public:
 		this->publicFuncions.insert_or_assign("Refresh Base Texture", [this]() { this->RefreshTextureBase(); });
 		this->publicFuncions.insert_or_assign("Refresh Transparency Texture", [this]() { this->RefreshTextureTransparency(); });
 		this->publicFuncions.insert_or_assign("Refresh Normal Texture", [this]() { this->RefreshTextureNormal(); });
+
+		this->RemovePublicFunction("OnStart");
 	}
 
 	void OnEditorUpdate() override { this->OnUpdate(); }
@@ -67,7 +67,7 @@ public:
 					this->visualObject->RemoveTexture(TextureType::Base);
 				}
 				this->texture = this->engineContent->renderer.AddTexture(texturePath, &this->baseTexture, TextureType::Base, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
-				this->visualObject->SetTexture(TextureType::Base, this->texture);
+				this->visualObject->AddTexture(this->texture);
 			}
 		}
 	}
@@ -82,7 +82,7 @@ public:
 					this->visualObject->RemoveTexture(TextureType::Transparency);
 				}
 				this->textureTransparency = this->engineContent->renderer.AddTexture(texturePath, &this->transparencyTexture, TextureType::Transparency, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
-				this->visualObject->SetTexture(TextureType::Transparency, this->textureTransparency);
+				this->visualObject->AddTexture(this->textureTransparency);
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public:
 					this->visualObject->RemoveTexture(TextureType::Normal);
 				}
 				this->textureNormal = this->engineContent->renderer.AddTexture(texturePath, &this->normalTexture, TextureType::Normal, TextureWrap::ClampToBorder, TextureFilter::Linear, TextureChannels::RGBA);
-				this->visualObject->SetTexture(TextureType::Normal, this->textureNormal);
+				this->visualObject->AddTexture(this->textureNormal);
 			}
 		}
 	}
@@ -159,8 +159,6 @@ public:
   	void OnStart() override {
 	    this->Init();
   	}
-
-	~Render() { this->OnDestroy();	}
 
   	void OnDestroy() override {
     	this->engineContent->renderer.UnRegisterVisualObject(visualObjectGuid);

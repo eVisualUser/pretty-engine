@@ -1,7 +1,6 @@
 /*
- * The tests use manual multithreading to avoid running multiple programe,
- * but keep to be as fast as possible.
- */
+ * The tests use manual multithreading to avoid running multiple program.
+*/
 
 #include <assert.h>
 

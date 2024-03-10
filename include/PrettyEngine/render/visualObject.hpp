@@ -115,8 +115,10 @@ namespace PrettyEngine {
 				if (texture->textureType == textureType) {
 					newTexture->userCount++;
 					texture = newTexture;
+					return;
 				}
 			}
+			this->AddTexture(newTexture);
 		}
 
 		bool HaveTexture(TextureType textureType) {
