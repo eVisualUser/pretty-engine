@@ -2,7 +2,7 @@
 #define H_ENGINE_CONTENT
 
 #include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/render.hpp>
+#include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/event.hpp>

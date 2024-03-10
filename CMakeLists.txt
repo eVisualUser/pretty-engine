@@ -4,16 +4,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 include("${CMAKE_SOURCE_DIR}/assets.cmake")
 
-file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "${CMAKE_BUILD_DIR}/public/")
+file(COPY "${CMAKE_SOURCE_DIR}/assets/ENGINE_PUBLIC/" DESTINATION "${CMAKE_BINARY_DIR}/public/")
+
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
-
-project(import)
-
-include("${CMAKE_SOURCE_DIR}/external.cmake")
-
-include("${CMAKE_SOURCE_DIR}/custom.cmake")
 
 project(pretty C CXX)
 
@@ -23,11 +20,15 @@ include_directories("include")
 
 include_directories("code")
 
+include_directories("PropertyEditor")
+
 file(GLOB code_sources "${CMAKE_SOURCE_DIR}/code/code/*.c" "${CMAKE_SOURCE_DIR}/code/code/*.cpp")
 
 add_library(pretty
 	"source/render.cpp"
 	"source/assetsManager.cpp"
+	"source/command.cpp"
+	"source/audio.cpp"
 	${code_sources}
 )
 
@@ -36,6 +37,10 @@ target_link_libraries(pretty PUBLIC
 )
 target_include_directories(pretty PRIVATE "${CMAKE_SOURCE_DIR}/external/openal-soft/include")
 
+include("${CMAKE_SOURCE_DIR}/external.cmake")
+
+include("${CMAKE_SOURCE_DIR}/custom.cmake")
+
 # Debug
 
 project(demo C CXX)
@@ -43,7 +48,7 @@ project(demo C CXX)
 add_executable(demo
 	"debug/main.cpp"
 )
-target_link_libraries(demo pretty custom components renderFeatures)
+target_link_libraries(demo custom components renderFeatures)
 
 # Game
 
@@ -63,10 +68,11 @@ add_executable(game
 )
 
 if(NOT ${extend} STREQUAL "")
-string(REPLACE "\n" " " extend ${extend})
+	string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(game pretty custom components renderFeatures ${extend})
+target_link_libraries(game custom components renderFeatures ${extend})
+target_compile_definitions(game PRIVATE ENGINE_EDITOR=0)
 
 # Editor
 
@@ -86,8 +92,10 @@ add_executable(editor
 )
 
 if(NOT ${extend} STREQUAL "")
-string(REPLACE "\n" " " extend ${extend})
+	string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(editor pretty custom components renderFeatures ${extend})
+target_link_libraries(editor custom components renderFeatures ${extend})
 target_compile_definitions(editor PRIVATE ENGINE_EDITOR=1)
+
+include("${CMAKE_SOURCE_DIR}/test.cmake")

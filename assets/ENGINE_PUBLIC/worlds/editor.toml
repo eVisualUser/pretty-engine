@@ -1,49 +1,128 @@
-[entities.editorEntity]
-components = [
-    [ 'LocalizationEditor', 'LocalizationEditor' ],
-    [
-        'Render',
-        'Render',
-        'UseTexture',
-        'true',
-        'UseTextureBase',
-        'true',
-        'TextureNormalGUID',
-        '3017c07f-9174-489b-b634-7ca9a3f031bd',
-        'TextureTransparency',
-        '',
-        'TextureBase',
-        'cpp_logo.png',
-        'UseTextureTransparency',
-        'false',
-        'UseTextureNormal',
-        'false',
-        'UseLight',
-        '',
-        'TextureBaseGUID',
-        'b166c7ac-44b5-432b-b1c6-91109568ca3f',
-        'TextureTransparencyGUID',
-        '558c98ee-37bd-4b94-9d37-2f3903868d81',
-        'TextureNormal',
-        '',
-        'Mesh',
-        'rect',
-        'MeshGUID',
-        '6912f526-0da3-4b4b-bb34-5a4878d776cc',
-        'SunLight',
-        '',
-        'ScreenObject',
-        'false'
-    ]
-]
-name = 'Editor'
+[entities.Editor]
+name = 'editorEntity'
 object = 'Editor'
-public_map = []
 
-    [entities.editorEntity.transform]
-    position = [ -0.3574382960796356, 0.43760937452316284, 0.0 ]
-    rotation = [ 0.0, 7.640509466000367e-06, 0.0, 1.0 ]
+    [entities.Editor.components.627f67b2-c9a2-4e44-9e46-799c258f39d6]
+    ObjectName = 'LocalizationEditor'
+    ObjectUnique = '627f67b2-c9a2-4e44-9e46-799c258f39d6'
+
+        [entities.Editor.components.627f67b2-c9a2-4e44-9e46-799c258f39d6.fields]
+
+    [entities.Editor.components.BaseCharacterController]
+    ObjectName = 'BaseCharacterController'
+    ObjectUnique = 'BaseCharacterController'
+
+        [entities.Editor.components.BaseCharacterController.fields]
+        colliderName = [ 'std::string', 'Collider' ]
+        speed = [ 'float', '10.000000' ]
+
+    [entities.Editor.components.Collider]
+    ObjectName = 'Physical'
+    ObjectUnique = 'Collider'
+
+        [entities.Editor.components.Collider.fields]
+        Gravity = [ 'glm::vec3', '0.000000;0.000000;0.000000;' ]
+        fixed = [ 'bool', 'false' ]
+        layer = [ 'std::string', 'Default' ]
+        mass = [ 'float', '1.000000' ]
+        model = [ 'std::string', 'rect' ]
+        name = [ 'std::string', '2e2b9d2e-1615-4d50-80eb-bb139cf77dbc' ]
+        rigidbody = [ 'bool', 'true' ]
+
+    [entities.Editor.components.Render]
+    ObjectName = 'Render'
+    ObjectUnique = 'Render'
+
+        [entities.Editor.components.Render.fields]
+        Color = [ 'glm::vec4', '1.000000;0.000000;0.000000;1.000000;' ]
+        Mesh = [ 'PrettyEngine::Mesh', '' ]
+        MeshGUID = [ 'std::string', 'a71ab2f6-640e-4ac1-ba60-64cc21633bde' ]
+        ScreenObject = [ 'bool', 'false' ]
+        SunLight = [ 'bool', 'false' ]
+        TextureBase = [ 'std::string', 'cpp_logo.png' ]
+        TextureNormal = [ 'std::string', '' ]
+        TextureTransparency = [ 'std::string', '' ]
+        UseLight = [ 'bool', 'true' ]
+        UseTexture = [ 'bool', 'true' ]
+        UseTextureBase = [ 'bool', 'true' ]
+        UseTextureNormal = [ 'bool', 'false' ]
+        UseTextureTransparency = [ 'bool', 'false' ]
+        UseTexure = [ 'bool', 'false' ]
+        WireFrame = [ 'bool', 'false' ]
+
+    [entities.Editor.serial]
+    ObjectName = 'Editor'
+    ObjectUnique = 'Editor'
+
+        [entities.Editor.serial.fields]
+        'Camera Speed' = [ 'float', '10.000000' ]
+
+    [entities.Editor.transform]
+    position = [ 0.22937899827957153, -1.1347949504852295, 0.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
+
+[entities.Empty]
+name = 'AnyEntity'
+object = 'Empty'
+
+    [entities.Empty.components.Light]
+    ObjectName = 'Light'
+    ObjectUnique = 'Light'
+
+        [entities.Empty.components.Light.fields]
+        Color = [ 'glm::vec3', '1.000000;1.000000;1.000000;' ]
+        DeferredFactor = [ 'float', '1.000000' ]
+        LightFactor = [ 'float', '2.000000' ]
+        LightLayer = [ 'int', '0' ]
+        Radius = [ 'float', '5.000000' ]
+        SpotDirection = [ 'glm::vec4', '0.000000;0.000000;0.000000;0.000000;' ]
+        SpotLightCutOff = [ 'float', '0.000000' ]
+        Type = [ 'PrettyEngine::LightType', 'point' ]
+
+    [entities.Empty.components.Physical]
+    ObjectName = 'Physical'
+    ObjectUnique = 'Physical'
+
+        [entities.Empty.components.Physical.fields]
+        Gravity = [ 'glm::vec3', '0.000000;9.810000;0.000000;' ]
+        fixed = [ 'bool', 'true' ]
+        layer = [ 'std::string', 'Default' ]
+        mass = [ 'float', '1.000000' ]
+        model = [ 'std::string', 'rect' ]
+        name = [ 'std::string', 'a14230b8-a675-4ac6-9517-5de9aed3df92' ]
+        rigidbody = [ 'bool', 'true' ]
+
+    [entities.Empty.components.Render]
+    ObjectName = 'Render'
+    ObjectUnique = 'Render'
+
+        [entities.Empty.components.Render.fields]
+        Color = [ 'glm::vec4', '1.000000;0.000000;0.000000;1.000000;' ]
+        Mesh = [ 'PrettyEngine::Mesh', '' ]
+        MeshGUID = [ 'std::string', '95ed72d6-f6f0-49b1-a556-7ab04903c634' ]
+        ScreenObject = [ 'bool', 'false' ]
+        SunLight = [ 'bool', 'false' ]
+        TextureBase = [ 'std::string', '' ]
+        TextureNormal = [ 'std::string', '' ]
+        TextureTransparency = [ 'std::string', '' ]
+        UseLight = [ 'bool', 'false' ]
+        UseTextureBase = [ 'bool', 'false' ]
+        UseTextureNormal = [ 'bool', 'false' ]
+        UseTextureTransparency = [ 'bool', 'false' ]
+        UseTexure = [ 'bool', 'false' ]
+        WireFrame = [ 'bool', 'true' ]
+
+    [entities.Empty.serial]
+    ObjectName = 'Empty'
+    ObjectUnique = 'Empty'
+
+        [entities.Empty.serial.fields]
+
+    [entities.Empty.transform]
+    position = [ 1.0, 0.0, 0.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
+    scale = [ 1.0, 1.0, 0.5 ]
 
 [meta]
 name = 'Editor'

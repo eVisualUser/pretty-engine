@@ -23,7 +23,7 @@ demo = [] # Preload meshes to allow world loading
 
 [engine]
 database = "public/data/engine.db"
-)";
+logs_limit = 100)";
 
 static const char* ASSET_BUILTIN_EDITOR_CONFIG = R"([engine.render]
 window_title = "Game Editor"

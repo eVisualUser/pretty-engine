@@ -34,6 +34,8 @@ namespace PrettyEngine {
 			return false;
 		}
 
+		std::unordered_map<std::string, std::vector<Collider*>>* GetAllLayers() { return &this->_colliders;}
+
 		std::vector<Collider*>* GetOrCreateLayer(std::string layerName) {
 			for(auto & layer: this->_colliders) {
 				if (layer.first == layerName) {
@@ -58,7 +60,7 @@ namespace PrettyEngine {
 
 		std::vector<Collision> FindCollisions(Collider* collider) {
 			std::vector<Collision> out;
-			
+
 			auto layer = this->FindColliderLayer(collider);
 			
 			for(auto & i: *layer) {
@@ -75,28 +77,28 @@ namespace PrettyEngine {
 		}
 
 		void UpdateRigidbodyPosition(std::vector<Collision>* collisions, Collider* collider, float deltaTime) {
-			collider->velocity += collider->gravity;
-
-			auto startPosition = collider->position;
 			collider->position += collider->velocity;
+			collider->position += collider->gravity * collider->mass;
 
-			if (!collider->fixed) {
+			if (!collisions->empty() && !collider->fixed) {
 				for(auto & collision: *collisions) {
-					float force = 100.0f;
-
 					auto delta = collider->position - collision.colliderOther->position;
 
-					delta = glm::normalize(delta);
+					glm::vec3 direction = glm::normalize(collider->position - collision.colliderOther->position);
 
-					if (collider->reverseDelta) {
-						delta = -delta;
-					}
+					glm::vec3 supportA = collider->GJKSupport(*collision.colliderOther, direction) / 100.0f;
 
-					collider->position += delta * deltaTime;
+					float penetrationDepth = glm::length(supportA);
+
+					glm::vec3 separationVector = glm::normalize(supportA) * penetrationDepth;
+
+					collider->position += separationVector;
 				}
 			}
 
-			collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+			if (collider->resetVelocity) {
+				collider->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+			}
 		}
 
 		void Update(float deltaTime) {
@@ -113,15 +115,13 @@ namespace PrettyEngine {
 
 		void UpdateRigidBody(Collider* collider, std::vector<Collision>* collisions, float deltaTime) {
 			if (collider->isRigidBody) {
-				for(auto & collision: *collisions) {
-					this->UpdateRigidbodyPosition(collisions, collider, deltaTime);
-				}
+				this->UpdateRigidbodyPosition(collisions, collider, deltaTime);
 			}
 		}
 
 		std::vector<Collision>* GetCollisions(Collider* collider) {
 			for(auto & collisions: this->_collisions) {
-				if (collisions.first->name == collider->name) {
+				if (collisions.first != nullptr && collisions.first->name == collider->name) {
 					return &collisions.second;
 				}
 			}

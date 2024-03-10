@@ -1,24 +1,23 @@
+#include "PrettyEngine/serial.hpp"
 #include <PrettyEngine/localization.hpp>
-#include <PrettyEngine/light.hpp>
+#include <PrettyEngine/render/light.hpp>
 #include <PrettyEngine/collider.hpp>
-#include <PrettyEngine/camera.hpp>
-#include <PrettyEngine/render.hpp>
-#include <PrettyEngine/Graphics.hpp>
+#include <PrettyEngine/render/camera.hpp>
+#include <PrettyEngine/render/render.hpp>
+#include <PrettyEngine/render/Graphics.hpp>
 #include <PrettyEngine/assets/builtin.hpp>
 
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/texture.hpp>
-#include <PrettyEngine/shaders.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/render/texture.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <RenderFeatures.hpp>
 
 // GLM
+#include <future>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtc/constants.hpp>
 
 // GLFW
 #include <GLFW/glfw3.h>
@@ -55,7 +54,14 @@ namespace PrettyEngine {
         return out;
     }
 
-    Mesh* Renderer::AddMesh(std::string name, Mesh mesh, MeshDrawType meshDrawType) {
+    Mesh* Renderer::AddMesh(std::string& name, Mesh mesh, MeshDrawType meshDrawType) {
+        /// Avoid loading multiple time the same mesh
+        for (auto &exisitingMesh : this->glMeshList) {
+			if (exisitingMesh.first == name) {
+				return &this->glMeshList[name];
+            }
+        }
+
         // Vertex Array Object
         unsigned int vao;
         glGenVertexArrays(1, &vao);
@@ -66,7 +72,7 @@ namespace PrettyEngine {
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        auto buffer = mesh.CreateBuffer();
+        auto buffer = mesh.CreateVertexBuffer();
 
         glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), (GLenum)meshDrawType);
 
@@ -85,7 +91,7 @@ namespace PrettyEngine {
         this->glMeshList.insert(std::make_pair(name, mesh));
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
 
         // Normals
         glEnableVertexAttribArray(1);
@@ -103,79 +109,101 @@ namespace PrettyEngine {
     void Renderer::UpdateMesh(Mesh* mesh) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 
-        auto data = mesh->CreateBuffer();
+        auto data = mesh->CreateVertexBuffer();
 
         glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), (GLenum)mesh->drawType);
     }
 
     GLShaderProgramRefs* Renderer::AddShaderProgram(std::string name, std::string vertexShaderName, std::string fragmentShaderName, std::vector<std::string> otherShaders) {
-        unsigned int shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, this->glShaders[vertexShaderName]);
-        glAttachShader(shaderProgram, this->glShaders[fragmentShaderName]);
+		if (!this->glShaderPrograms.contains(name)) {
+			if (GL_CHECK_ERROR()) {
+				DebugLog(LOG_ERROR, "OpengGL error before create ShaderProgram: " << name, true);
+			}
 
-        // Attack all bonus shaders
-        for (auto & shader: otherShaders) {
-            glAttachShader(shaderProgram, this->glShaders[shader]);
-        }
+			const unsigned int shaderProgram = glCreateProgram();
+			glAttachShader(shaderProgram, this->glShaders[vertexShaderName]);
+			glAttachShader(shaderProgram, this->glShaders[fragmentShaderName]);
 
-        glBindFragDataLocation(shaderProgram, 0, "outColor");
+			// Attack all bonus shaders
+			for (auto & shader: otherShaders) {
+				glAttachShader(shaderProgram, this->glShaders[shader]);
+			}
 
-        glLinkProgram(shaderProgram);
-        glUseProgram(shaderProgram);
+			glBindFragDataLocation(shaderProgram, 0, "outColor");
 
-        GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-        glEnableVertexAttribArray(posAttrib);
-        glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+			glLinkProgram(shaderProgram);
+			glUseProgram(shaderProgram);
 
-        GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
-        glEnableVertexAttribArray(colAttrib);
-        glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(float)));
+			const GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+			glEnableVertexAttribArray(posAttrib);
+			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
-        GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
-        glEnableVertexAttribArray(texAttrib);
-        glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE,
-                               8*sizeof(float), (void*)(6*sizeof(float)));
+			const GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+			glEnableVertexAttribArray(colAttrib);
+			glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(float)));
 
-        auto shaderProgramRefs = GLShaderProgramRefs();
-        shaderProgramRefs.shaderProgram = shaderProgram;
+			const GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+			glEnableVertexAttribArray(texAttrib);
+			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE,
+								   8*sizeof(float), reinterpret_cast<void *>(6 * sizeof(float)));
 
-        shaderProgramRefs.CreateUniformsFromCSV(ASSET_BUILTIN_UNIFORMS);
+			auto shaderProgramRefs = GLShaderProgramRefs();
+			shaderProgramRefs.shaderProgram = shaderProgram;
 
-        this->glShaderPrograms.insert(std::make_pair(name, shaderProgramRefs));
-        return &this->glShaderPrograms[name];
+			shaderProgramRefs.CreateUniformsFromCSV(ASSET_BUILTIN_UNIFORMS);
+
+			for (auto &renderFeature : this->_renderFeatures) {
+				renderFeature->OnShaderProgram(&shaderProgramRefs);
+			}
+
+			this->glShaderPrograms.insert(std::make_pair(name, shaderProgramRefs));
+
+			if (GL_CHECK_ERROR()) {
+				DebugLog(LOG_ERROR, "OpengGL error after create ShaderProgram: " << name, true);
+			}
+		}
+    	return &this->glShaderPrograms[name];
     }
 
     Texture* Renderer::AddTexture(
         std::string name,
-        std::string filePath,
+        Asset* asset,
         TextureType textureType,
         TextureWrap wrap,
         TextureFilter filter,
         TextureChannels channels
     ) {
-        auto textureExist = this->TextureExist(name);
+    	auto textureExist = this->TextureExist(name);
         if (!textureExist.first) {
-            Texture texture;
+			if (asset->Exist()) {
+				if (GL_CHECK_ERROR()) {
+					DebugLog(LOG_ERROR, "Opengl error happended before loading of: " << asset->GetFilePath(), true);
+				}
 
-            if (FileExist(filePath)) {
+				Texture texture;
+
+				asset->SetUsed(true);
+                asset->AddSerializedField(SERIAL_TOKEN(int), "textureChannels", std::to_string(static_cast<int>(channels)));
+                channels = static_cast<TextureChannels>(std::stoi(asset->GetSerializedFieldValue("textureChannels")));
+
                 unsigned int textureID;
                 glGenTextures(1, &textureID);
                 if (!textureID) {
-                    DebugLog(LOG_ERROR, "Failed to generate texture for: " << filePath, true);                
+					DebugLog(LOG_ERROR, "Failed to generate texture for: " << asset->GetFilePath(), true);                
                     std::exit(-1);
                 }
 
                 int width, height;
 
-                unsigned char* data = stbi_load(filePath.c_str(), &width, &height, nullptr, 0);
+                unsigned char *data = stbi_load(asset->GetFilePath().c_str(), &width, &height, nullptr, 0);
                 if (!data) {
-                    DebugLog(LOG_ERROR, "Failed to load image: " << filePath, true);
+					DebugLog(LOG_ERROR, "Failed to load image: " << asset->GetFilePath(), true);
                     std::exit(-1);
                 }
 
                 glBindTexture(GL_TEXTURE_2D, textureID);
 
-                glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)channels, width, height, 0, (GLenum)channels, GL_UNSIGNED_BYTE, data);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, width, height, 0, (GLint)channels, GL_UNSIGNED_BYTE, data);
 
                 stbi_image_free(data);
 
@@ -190,13 +218,24 @@ namespace PrettyEngine {
                 texture.filter = filter;
                 texture.name = name;
 
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				if (GL_CHECK_ERROR()) {
+					DebugLog(LOG_ERROR, "Error at texture loading of: " << asset->GetFilePath(), true);
+
+					glDeleteTextures(1, &textureID);
+
+					return nullptr;
+				}
+
                 this->glTextures.insert(std::make_pair(name, texture));
 
                 return &this->glTextures[name];
             } else {
-                DebugLog(LOG_ERROR, "File not found: " << filePath, true);
+				DebugLog(LOG_ERROR, "File not found: " << asset->GetFilePath(), true);
             }
         }
+    	DebugLog(LOG_DEBUG, "Tried to add existing texture", false);
         return textureExist.second;
     }
 
@@ -258,20 +297,9 @@ namespace PrettyEngine {
 
     Renderer::Renderer() {
     	if (!glfwInit()) {
+            DebugLog(LOG_ERROR, "Failed to open GLFW Window !", true);
     		std::exit(-1);
     	}
-
-        auto filePath = GetEnginePublicPath("RenderFeaturesList.csv", true);
-        if (FileExist(filePath)) {
-            auto features = ReadFileToString(filePath);
-
-            for (auto & feature: ParseCSVLine(features)) {
-                this->AddRenderFeature(GetRenderFeature(feature));
-                this->_renderFeatures.back()->OnCreated();
-            }
-        } else {
-            DebugLog(LOG_WARNING, "RenderFeature list not found", true);
-        }
     }
 
     Renderer::~Renderer() {
@@ -281,8 +309,12 @@ namespace PrettyEngine {
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
+        glfwDestroyWindow(this->_window);
         glfwTerminate();
-        this->Clear();
+
+    	this->_renderFeatures.clear();
+    	this->visualObjects.clear();
+        this->Clear(true);
     }
 
     void WindowCloseFunc() {
@@ -298,10 +330,12 @@ namespace PrettyEngine {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
 
-        glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE); 
+        glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
 
+#if ENGINE_EDITOR
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-        
+#endif
+
     	auto window = glfwCreateWindow(800, 600, PRETTY_ENGINE_DEFAULT_WINDOW_NAME, nullptr, nullptr);
 
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -313,13 +347,12 @@ namespace PrettyEngine {
         this->HideWindow();
     }
 
-    void Renderer::ShowWindow() {
+    void Renderer::ShowWindow() const {
     	glfwShowWindow(this->_window);
     }
 
     void Renderer::Setup(glm::vec3 renderCubeScale) {
         this->renderCube.scale = renderCubeScale;
-        this->renderCube.colliderModel = ColliderModel::AABB;
         this->renderCube.UpdateHalfScale();
 
         if (!gladLoadGL()) {
@@ -328,14 +361,27 @@ namespace PrettyEngine {
             std::exit(-1);
         }
 
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
             glfwTerminate();
             std::exit(-1);
         }
 
-        glEnable(GL_MULTISAMPLE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        auto syncRenderFeature = std::async([this] {
+			auto filePath = GetEnginePublicPath("RenderFeaturesList.csv", true);
+			if (FileExist(filePath)) {
+				auto features = ReadFileToString(filePath);
+
+				for (auto &feature : ParseCSVLine(features)) {
+					this->AddRenderFeature(GetRenderFeature(feature));
+					this->_renderFeatures.back()->OnCreated();
+				}
+			} else {
+				DebugLog(LOG_WARNING, "RenderFeature list not found", true);
+			}
+		});
 
         this->imGUIContext = ImGui::CreateContext();
 
@@ -343,10 +389,15 @@ namespace PrettyEngine {
         this->imGUIIO->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         this->imGUIIO->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-        GL_CHECK_ERROR();
-
         ImGui_ImplGlfw_InitForOpenGL(this->_window, true);
-        ImGui_ImplOpenGL3_Init();
+		ImGui_ImplOpenGL3_Init();
+
+        syncRenderFeature.get();
+
+    	if (GL_CHECK_ERROR()) {
+    		DebugLog(LOG_ERROR, "OpenGL Error during renderer setup !", true);
+    	}
+
     }
 
     void Renderer::UpdateIO() {
@@ -360,44 +411,52 @@ namespace PrettyEngine {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+    	if (GL_CHECK_ERROR()) {
+    		DebugLog(LOG_ERROR, "OpenGL Error during UI rendering startup !", true);
+    	}
     }
 
     void Renderer::Draw() {
-        float currentTime = static_cast<float>(glfwGetTime());
+#if ENGINE_EDITOR
+    	if (GL_CHECK_ERROR()) {
+    		DebugLog(LOG_ERROR, "OpenGL Error before drawing frame !", true);
+    	}
+#endif
 
-        bool isMinimized = glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
-        bool isFocused = glfwGetWindowAttrib(this->_window, GLFW_FOCUSED);
+        auto currentTime = static_cast<float>(glfwGetTime());
+
+        const bool isMinimized = glfwGetWindowAttrib(this->_window, GLFW_ICONIFIED);
+        const bool isFocused = glfwGetWindowAttrib(this->_window, GLFW_FOCUSED);
 
         if (!isMinimized && isFocused) {
             // Draw all VisualObjects filtered by the layers
             unsigned int layerCount = 0;
 
-            std::vector<Light*> lightsBuffer;
-
-            for (auto & light: this->lights) {
-                if (this->renderCube.PointIn(light->position)) {
-                    lightsBuffer.push_back(light);
-                }
-            }
-
-            for(auto & renderFeature: this->_renderFeatures) {
-                renderFeature->lights = &lightsBuffer;
-                renderFeature->OnInit();
-            }
+            for (auto &renderFeature : this->_renderFeatures) {
+				renderFeature->lights = &this->lights;
+				renderFeature->OnInit();
+			}
             
             int width, height;
             glfwGetFramebufferSize(this->_window, &width, &height);
 
             float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            auto renderImGUI = std::async([this]{
+                ImGui::Render();
+            });
+
             // Render for each camera
             for (auto & camera: this->cameraList) {
                 if (camera.active) {
+					glViewport(width * camera.viewportPositionRatio.x, height * camera.viewportPositionRatio.y, width * camera.viewportSizeRatio.x, height * camera.viewportSizeRatio.y);
+
                     auto currentCameraMatrix = camera.GetTransformMatrix();
                     auto cameraProjection = camera.projection;
                     this->renderCube.position = camera.position;
-
-                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
                     if (camera.renderToTexture) {
 						camera.Render();
@@ -405,13 +464,16 @@ namespace PrettyEngine {
 						camera.ResetRender();
                     }
 
-                    GL_CHECK_ERROR();
+                    if (GL_CHECK_ERROR()) {
+                        DebugLog(LOG_WARNING, "Got an OpenGL error before rendering !", false);
+                    }
 
-                    int layerId;
+                    int layerId = 0;
+                	unsigned int lastShaderProgram = UINT_MAX;
                     for (auto & layer: this->visualObjects) {
                         if (!CheckIfVectorContain(&this->hiddenLayers, &layerCount)) {
                             for(auto & visualObject: layer) {
-                                auto object = visualObject.second;
+                                auto & object = visualObject.second;
 
                                 if (object->d3) {
                                     this->SwitchTo3D();
@@ -420,49 +482,53 @@ namespace PrettyEngine {
                                 }
 
                                 if (object != nullptr && object->active) {
-                                    if (!object->allowRenderCube || this->renderCube.PointIn(object->position)) {
-                                        glm::mat4 proj = glm::identity<glm::mat4>();
+                                    auto projection = glm::identity<glm::mat4>();
+
+                                    if (!object->screenObject) {
                                         if (object->renderModel->overrideProjection) {
                                             object->renderModel->projection->aspectRatio = aspectRatio;
-                                            proj = glm::perspective(glm::radians(object->renderModel->projection->fov), object->renderModel->projection->aspectRatio, object->renderModel->projection->nearPlane, object->renderModel->projection->farPlane);
+                                            projection = glm::perspective(glm::radians(object->renderModel->projection->fov), object->renderModel->projection->aspectRatio, object->renderModel->projection->nearPlane, object->renderModel->projection->farPlane);
                                         } else {
                                             cameraProjection->aspectRatio = aspectRatio;
-                                            proj = glm::perspective(glm::radians(cameraProjection->fov), cameraProjection->aspectRatio, cameraProjection->nearPlane, cameraProjection->farPlane);
+                                            projection = glm::perspective(glm::radians(cameraProjection->fov), cameraProjection->aspectRatio, cameraProjection->nearPlane, cameraProjection->farPlane);
+                                        }
+                                    }
+
+                                    const auto mesh = object->renderModel->mesh;
+                                    const auto shaderProgram = object->renderModel->shaderProgram;
+
+                                    if (shaderProgram == nullptr) {
+                                        DebugLog(LOG_ERROR, "Missing shader program for: " << visualObject.first, false);
+                                    } else if (mesh == nullptr) {
+                                        DebugLog(LOG_ERROR, "Missing mesh for: " << visualObject.first, false);
+                                    } else {
+                                        glBindVertexArray(mesh->vao);
+                                        glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+                                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+
+                                    	if (shaderProgram->shaderProgram != lastShaderProgram) {
+                                    		glUseProgram(shaderProgram->shaderProgram);
+                                    		lastShaderProgram = shaderProgram->shaderProgram;
+                                    	}
+
+                                        auto modelTransform = object->GetTransformMatrix();
+                                        if (object->haveParent) {
+                                            modelTransform = modelTransform * object->parent->GetTransformMatrix();
                                         }
 
-                                        const auto mesh = object->renderModel->mesh;
-                                        const auto shaderProgram = object->renderModel->shaderProgram;
-                                        if (shaderProgram == nullptr) {
-                                            DebugLog(LOG_ERROR, "Missing shader program for: " << visualObject.first, false);
-                                        } else if (mesh == nullptr) {
-                                            DebugLog(LOG_ERROR, "Missing mesh for: " << visualObject.first, false);
-                                        } else {
-                                            glBindVertexArray(mesh->vao);
-                                            glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-                                            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-                                            GL_CHECK_ERROR();
+                                        for(auto & uniformMaker: this->_uniformMakers) {
+                                            uniformMaker(object.get(), &camera);
+                                        }
 
-                                            glUseProgram(shaderProgram->shaderProgram);
+                                        Graphics::BindVariable(shaderProgram->uniforms["Model"], modelTransform);
 
-                                            auto modelTransform = object->GetTransformMatrix();
-                                            if (object->haveParent) {
-                                                modelTransform = modelTransform * object->parent->GetTransformMatrix();
-                                            }
+                                        glm::mat4 view = currentCameraMatrix;
 
-                                            for(auto & uniformMaker: this->_uniformMakers) {
-                                                uniformMaker(object.get(), &camera);
-                                            }
+                                        if (object->screenObject) {
+                                            view = glm::identity<glm::mat4>();
+                                        }
 
-                                            Graphics::BindVariable(shaderProgram->uniforms["Model"], modelTransform);
-
-                                            glm::mat4 view = currentCameraMatrix;
-                                            glm::mat4 projection = proj;
-
-                                            if (object->screenObject) {
-                                                view = glm::identity<glm::mat4>();
-                                                projection = glm::identity<glm::mat4>();
-                                            }
-
+                                        if (object->render) {
                                             Graphics::BindVariable(shaderProgram->uniforms["View"], view);
                                             Graphics::BindVariable(shaderProgram->uniforms["Projection"], projection);
                                             Graphics::BindVariable(shaderProgram->uniforms["Time"], currentTime);
@@ -491,63 +557,77 @@ namespace PrettyEngine {
                                                 renderFeature->OnUniform(object.get());
                                             }
 
-                                            if (object->render) {
-                                                for(auto & renderFeature: this->_renderFeatures) {
-                                                    renderFeature->OnRender(object.get());
-                                                }
-
-                                                if (object->renderModel->useTexture) {
-                                                    if (baseTexture != nullptr) {
-                                                        glActiveTexture(GL_TEXTURE0);
-                                                                    
-                                                        glBindTexture(GL_TEXTURE_2D, baseTexture->textureID);
-                                                        
-                                                        glUniform1i(glGetUniformLocation(
-                                                            object->renderModel->shaderProgram->shaderProgram,
-                                                            "textureBase"
-                                                        ), 0);
-                                                    }
-                                                    if (transparencyTexture != nullptr) {
-                                                        glActiveTexture(GL_TEXTURE1);
-                                                                    
-                                                        glBindTexture(GL_TEXTURE_2D, transparencyTexture->textureID);
-                                                        
-                                                        glUniform1i(glGetUniformLocation(
-                                                            object->renderModel->shaderProgram->shaderProgram,
-                                                            "transparencyTexture"
-                                                        ), 0);
-                                                    }
-                                                    if (normalTexture != nullptr) {
-                                                        glActiveTexture(GL_TEXTURE3);
-                                                                    
-                                                        glBindTexture(GL_TEXTURE_2D, normalTexture->textureID);
-                                                        
-                                                        glUniform1i(glGetUniformLocation(
-                                                            object->renderModel->shaderProgram->shaderProgram,
-                                                            "normalTexture"
-                                                        ), 0);
-                                                    }
-                                                }
-
-                                                glDrawElements((GLenum)object->renderModel->drawMode, mesh->vertexCount, GL_UNSIGNED_INT, 0);
+                                            for(auto & renderFeature: this->_renderFeatures) {
+                                                renderFeature->OnRender(object.get());
                                             }
 
-                                            object->OnDraw((void*)this);
-                                            glBindVertexArray(0);
-                                            GL_CHECK_ERROR();
+                                            if (object->renderModel->useTexture) {
+                                                if (baseTexture != nullptr) {
+                                                    glActiveTexture(GL_TEXTURE0);
+
+                                                    glBindTexture(GL_TEXTURE_2D, baseTexture->textureID);
+
+                                                    glUniform1i(glGetUniformLocation(
+                                                        object->renderModel->shaderProgram->shaderProgram,
+                                                        "textureBase"
+                                                    ), 0);
+                                                }
+
+                                                if (transparencyTexture != nullptr) {
+                                                    glActiveTexture(GL_TEXTURE1);
+
+                                                    glBindTexture(GL_TEXTURE_2D, transparencyTexture->textureID);
+
+                                                    glUniform1i(glGetUniformLocation(
+                                                        object->renderModel->shaderProgram->shaderProgram,
+                                                        "transparencyTexture"
+                                                    ), 0);
+                                                }
+
+                                                if (normalTexture != nullptr) {
+                                                    glActiveTexture(GL_TEXTURE3);
+
+                                                    glBindTexture(GL_TEXTURE_2D, normalTexture->textureID);
+
+                                                    glUniform1i(glGetUniformLocation(
+                                                        object->renderModel->shaderProgram->shaderProgram,
+                                                        "normalTexture"
+                                                    ), 0);
+                                                }
+                                            }
+
+                                            if (object->wireFrame) {
+												glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                                            } else {
+                                                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                                            }
+
+                                            glDrawElements(static_cast<GLenum>(object->renderModel->drawMode), mesh->vertexCount, GL_UNSIGNED_INT, nullptr);
+                                        }
+
+                                        object->OnDraw((void*)this);
+                                        glBindVertexArray(0);
+
+                                        if (GL_CHECK_ERROR()) {
+                                            object->active = false;
+                                            DebugLog(LOG_WARNING, "OpenGL error triggered on: " << visualObject.first, false);
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    
+                    renderImGUI.wait();
+                    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
                     camera.ResetRender();
                 }
             }
         }
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        // End the frame even if the window is not rendered
+        ImGui::EndFrame();
     }
 
     void Renderer::Render() {
@@ -567,6 +647,6 @@ namespace PrettyEngine {
         const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
 
         glfwSwapBuffers(this->_window);
-        glFlush();
+    	glFlush();
     }
 }

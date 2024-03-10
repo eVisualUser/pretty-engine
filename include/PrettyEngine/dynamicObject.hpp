@@ -1,19 +1,16 @@
 #ifndef H_DYNAMIC_OBJECT
 #define H_DYNAMIC_OBJECT
 
-#include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/render.hpp>
 #include <PrettyEngine/serial.hpp>
 #include <PrettyEngine/tags.hpp>
-#include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/localization.hpp>
-#include <PrettyEngine/PhysicalSpace.hpp>
-#include <PrettyEngine/event.hpp>
 #include <PrettyEngine/EngineContent.hpp>
+#include <PrettyEngine/PrettyError.hpp>
 
 #include <Guid.hpp>
 
 #include <string>
+#include <functional>
 
 namespace PrettyEngine {
 	enum class Request {
@@ -21,18 +18,78 @@ namespace PrettyEngine {
 		EXIT,
 	};
 
- 	/// Object dynamicly managed in the engine.
-	class DynamicObject: public Tagged {
+	#define SERIAL_FUNCTION(type, expr) [this](type x){return expr;}
+	#define DESERIAL_FUNCTION(expr) [this](std::string x){return expr;}
+
+	template<typename T>
+	class PublicProperty {
+	public:
+		PublicProperty(SerialObject* newContainer, std::string newName, T newValue, std::function<std::string(T)> newSerializeFunction, std::function<T(std::string)> newDeserializeFunction) {
+			this->Init(newContainer, newName, newValue, newSerializeFunction, newDeserializeFunction);
+		}
+
+		void Init(SerialObject* newContainer, std::string newName, T newValue, std::function<std::string(T)> newSerializeFunction, std::function<T(std::string)> newDeserializeFunction) {
+			this->_name = newName;
+
+			this->_value = newValue;
+
+			this->_serializeFunction = newSerializeFunction;
+			this->_deserializeFunction = newDeserializeFunction;
+
+			this->_container = newContainer;
+
+			this->_container.HaveValue([this](SerialObject* value) {
+				value->AddSerializedField(typeid(T).name(), this->_name, (this->_serializeFunction)(this->_value));
+			});
+			this->UpdateValue();
+		}
+
+		void UpdateValue() {
+			this->_container.HaveValue([this](SerialObject* value) {
+				this->_value = this->_deserializeFunction(value->GetSerializedFieldValue(this->_name));
+			});
+		}
+
+		void Save() {
+			this->_container.HaveValue([this](SerialObject* value) {
+				value->GetSerializedField(this->_name)->value = (this->_serializeFunction)(this->_value);
+			});
+		}
+
+		T* Get() {
+			return &this->_value;
+		}
+
+	private:
+		std::function<std::string(T)> _serializeFunction;
+		std::function<T(std::string)> _deserializeFunction;
+
+		Option<SerialObject*> _container = Option<SerialObject*>(nullptr);
+
+		std::string _name;
+
+		T _value;
+	};
+
+ 	/// Object that support being updated by the engine based on game events.
+	class DynamicObject: public Tagged, public virtual SerialObject {
 	public:
    		DynamicObject() {
-   			this->publicFuncions.insert_or_assign("OnUpdatePublicVariables", [this]() { this->OnUpdatePublicVariables(); });
+   			this->publicFuncions.insert_or_assign("OnSetup", [this]() { this->OnSetup(); });
 			this->publicFuncions.insert_or_assign("OnStart", [this]() { this->OnStart(); });
 			this->publicFuncions.insert_or_assign("OnUpdate", [this]() { this->OnUpdate(); });
 			this->publicFuncions.insert_or_assign("OnRender", [this]() { this->OnRender(); });
   		}
 
+		~DynamicObject() { this->DynamicObject::OnDestroy(); } // todo: check if it cause a crash
+
+		/// Minimum setup required by a dynamic object
+		void SetupDynamicObject(EngineContent* newEngineContent) {
+			this->engineContent = newEngineContent;
+		}
+
 		/// Called when the components loaded
-		virtual void OnUpdatePublicVariables() {}
+		virtual void OnSetup() {}
 		/// Called before the first frame.
 		virtual void OnStart() {}
 		/// Called before the first frame in the editor only.
@@ -60,6 +117,9 @@ namespace PrettyEngine {
 		void CreatePublicVar(std::string name, std::string defaultValue = "") {
 			if (!this->publicMap.contains(name)) {
 				this->publicMap.insert(std::make_pair(name, defaultValue));
+				for (auto &action : this->onPublicVariableChanged) {
+					(action.second)(name);
+				}
 			}
 		}
 
@@ -72,7 +132,13 @@ namespace PrettyEngine {
 		}
 
 		void SetPublicVarValue(std::string name, std::string value) {
-			this->publicMap.insert_or_assign(name, value);
+			if (value != this->GetPublicVarValue(name)) {
+				this->publicMap.insert_or_assign(name, value);
+
+				for (auto &action : this->onPublicVariableChanged) {
+					(action.second)(name);
+				}
+			}
 		}
 
 		std::vector<float> GetPublicVarAsFloatVec(std::string name) {
@@ -84,8 +150,28 @@ namespace PrettyEngine {
 
 			return out;
 		}
-		
-	public:
+
+		std::string AddActionOnPublicVariableChanged(std::function<void(std::string)> function, std::string name = xg::newGuid()) { 
+			if (function == nullptr) {
+				DebugLog(LOG_ERROR, "Tried to add a null function in " << this->serialObjectUnique, true);
+			} else {
+				this->onPublicVariableChanged.insert_or_assign(name, function);
+			}
+			return name;
+		}
+
+		void RemoveActionOnPublicVariableChanged(std::string name) { 
+			this->onPublicVariableChanged.erase(name);
+		}
+
+		void RemovePublicFunction(std::string& functionName) {
+			this->publicFuncions.erase(functionName);
+		}
+
+		void RemovePublicFunction(std::string functionName) {
+			this->publicFuncions.erase(functionName);
+		}
+
 		EngineContent* engineContent;
 
 		std::unordered_map<std::string, std::string> publicMap;
@@ -94,9 +180,8 @@ namespace PrettyEngine {
 
   		std::unordered_map<std::string, std::function<void()>> publicFuncions;
 
-	public:
-		std::string unique;
-		std::string object;
+	private:
+		std::unordered_map<std::string, std::function<void(std::string)>> onPublicVariableChanged;
 	};
 }
 

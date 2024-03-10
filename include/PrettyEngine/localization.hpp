@@ -1,7 +1,7 @@
 #ifndef H_LOCALIZATION
 #define H_LOCALIZATION
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
 #include <cstddef>
@@ -124,6 +124,8 @@ namespace PrettyEngine {
 				return 0;
 			}
 
+			column++;
+
 			this->lastLangIndex = column;
  			return column;
 		}
@@ -178,6 +180,8 @@ namespace PrettyEngine {
 				this->content.erase(this->content.begin() + index);
 			}
 		}
+
+		void SetLangIndex(int newLangIndex) { this->lastLangIndex = newLangIndex; }
 		
 	private:
 		int lastLangIndex = 0;

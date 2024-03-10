@@ -1,7 +1,7 @@
-#ifndef H_UTILS
-#define H_UTILS
+#ifndef HPP_UTILS
+#define HPP_UTILS
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 
 #include <string>
 #include <vector>
@@ -29,7 +29,7 @@ namespace PrettyEngine {
 
 	/// Concat the path of the public directory.
 	static std::string GetEnginePublicPath(std::string base, bool editOriginal = false) {
-		#if _DEBUG
+		#if ENGINE_EDITOR
 			if (editOriginal) {
 				return std::string(PRETTY_ENGINE_PROJECT) + "/assets/ENGINE_PUBLIC/" + base;
 			} else {
@@ -66,6 +66,9 @@ namespace PrettyEngine {
 	    std::ifstream input_file(path);
 	    if (!input_file.is_open()) {
 	    	DebugLog(LOG_ERROR, "Could not open: " << path, true);
+	    	if (boxer::Selection::Yes == boxer::show("Failed to read file, retry ?", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
+				return ReadFileToString(path);
+			}
 	    	return "";
 	    }
 	    std::string out = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
@@ -87,6 +90,11 @@ namespace PrettyEngine {
 			return true;
 		}
 
+		DebugLog(LOG_ERROR, "Failed to write: " << path, true);
+		if (boxer::Selection::Yes == boxer::show("Failed to write file, retry ? ", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
+			return WriteFileString(path, content);
+		}
+
 		return false;
 	}
 
@@ -96,6 +104,24 @@ namespace PrettyEngine {
 				c = replacement;
 			}
 		}
+	}
+
+	static std::vector<std::string> StringSplit(std::string* source, char separator) { 
+		std::vector<std::string> out;
+
+		std::string buffer;
+		for (auto &c : *source) {
+			if (c != separator) {
+				buffer += c;
+			} else {
+				out.push_back(buffer);
+			}
+		}
+		if (!buffer.empty()) {
+			out.push_back(buffer);
+		}
+
+		return out;
 	}
 
 	static void StringReplace(std::string* str, std::string base, std::string replacement) {

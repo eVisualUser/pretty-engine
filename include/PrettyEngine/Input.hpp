@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace PrettyEngine {
 	enum class CursorState {
@@ -54,12 +55,14 @@ namespace PrettyEngine {
     }
 
  	/// Safe way to manage inputs and share them between objects.
-    struct KeyWatcher {
+    class KeyWatcher {
     public:
     	std::string name = "?";
     	KeyCode key;
     	KeyWatcherMode mode;
     	bool state;
+
+    	std::function<void()> actionOnKey;
     };
 
  	/// Manage the inputs of the game.
@@ -139,6 +142,10 @@ namespace PrettyEngine {
         			watcher->state = this->GetKeyDown(watcher->key);
         		} else if (watcher->mode == KeyWatcherMode::Up) {
         			watcher->state = this->GetKeyUp(watcher->key);
+        		}
+
+        		if (watcher->state) {
+        			(watcher->actionOnKey)();
         		}
         	}
 	    }

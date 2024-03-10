@@ -2,73 +2,28 @@
 #define H_COLLIDER
 
 // Pretty Engine
-#include <PrettyEngine/mesh.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/render/mesh.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/tags.hpp>
-
-// LibCCD
-#include <ccd/ccd.h>
-#include <ccd/quat.h>
+#include <PrettyEngine/simplex.hpp>
 
 // GLM
-#include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/matrix.hpp>
 #include <glm/geometric.hpp>
 #include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
 
 namespace PrettyEngine {
-	enum class ColliderModel {
-		/// Only trigger point in
-		AABB,
-		/// Simple Sphere collision detection
-		Sphere,
-		/// Mesh based collisions
-		Convex,
-	};
-
 	/// Repsesent an object in a world that react/affect the physics
 	class Collider: public Transform, public virtual Tagged {
 	public:
-		bool PointIn(glm::vec3 point) { 
-			if (this->colliderModel == ColliderModel::AABB) {
-				auto min = (-this->position) - this->halfScale;
-				auto max = (-this->position) + this->halfScale;
-
-				return (Vec3Greater(point, min) && Vec3Lower(point, max));
-			} else if (this->colliderModel == ColliderModel::Sphere) {
-				return glm::distance(this->position, point) < this->radius;
-			}
-
-			return this->BadSetup();
-		}
+		Collider() = default;
 
 		bool OtherIn(Collider* other) { 
-			if (this->colliderModel == ColliderModel::AABB) {
-				if (other->colliderModel == ColliderModel::AABB && other->layer == this->layer) {
-					if (this->fixed || (!this->fixed && !other->fixedCollisionOnly)) {
-						auto basePoints = (this->PointIn(other->GetMinHalf()) || this->PointIn(other->GetMaxHalf()) || this->PointIn(other->position));
-						auto inversePoints = (this->PointIn(other->GetInverseMin(true)) || this->PointIn(other->GetInverseMax(true)) || other->PointIn(this->position));
-
-						return (basePoints || inversePoints);
-					}
-				}
-				return false;
-			} else if (this->colliderModel == ColliderModel::Sphere) {
-				if (other->colliderModel == ColliderModel::Sphere) {
-					if (glm::distance(other->position, this->position) < other->radius + this->radius) {
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-
-			return this->BadSetup();
+			return this->GJKCheck((*other), 100);
 		}
+
+		void SetMesh(Mesh* newMesh) { this->mesh = newMesh;	}
 
 		/// Return the minimum position
 		glm::vec3 GetMin() {
@@ -89,64 +44,183 @@ namespace PrettyEngine {
 			return result;
 		}
 
-		/// Return the minimum position based on half of the scale
-		glm::vec3 GetMinHalf() {
-			return (this->position) - this->halfScale;
-		}
+		#pragma region GJK
 
-		/// Return the maximum position
-		glm::vec3 GetMax() {
-			return (this->position) + this->scale;
-		}
+		glm::vec3 GJKFindFurthestPoint(glm::vec3 direction) const {
+			glm::vec3 maxPoint;
+			float maxDistance = -FLT_MAX;
 
-		glm::vec3 GetInverseMax(bool halfScale = false) {
-			auto scale = this->scale;
+			for (Vertex vertex : this->mesh->vertices) {
+				glm::vec4 rotatedVertex = this->rotation * glm::vec4(vertex.position, 1.0f);
+				glm::vec3 scaledVertex = glm::vec3(rotatedVertex) * this->scale;
+				glm::vec3 transformedVertex = glm::vec3(scaledVertex) + this->position;
 
-			if (halfScale) {
-				scale = this->halfScale;
+				float distance = glm::dot(transformedVertex, direction);
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					maxPoint = transformedVertex;
+				}
 			}
 
-			auto result = (this->position) + scale;
-
-			result.x -= scale.x * 2;
-
-			return result;
+			return maxPoint;
 		}
 
-		/// Return the maxime position based on half of the scale
-		glm::vec3 GetMaxHalf() {
-			return (this->position) + this->halfScale;
+		/// Return the vertex on the Minkowski difference
+		glm::vec3 GJKSupport(const Collider &colliderB, glm::vec3 direction) { 
+			return this->GJKFindFurthestPoint(direction) - colliderB.GJKFindFurthestPoint(-direction); 
 		}
+
+		bool GJKCheck(const Collider &colliderB, int maxIterations) { 
+			glm::vec3 direction = this->position - colliderB.position;
+			direction = glm::normalize(direction);
+
+			// Get default support
+			auto support = this->GJKSupport(colliderB, direction);
+
+			// Create the simplex
+			auto simplex = Simplex();
+			simplex.PushFront(support);
+
+			// Direction toward the origin
+			glm::vec3 directionTowardOrigin = -direction;
+
+			for (int iteration = 0; iteration < maxIterations; ++iteration) {
+				support = this->GJKSupport(colliderB, directionTowardOrigin);
+
+				if (glm::dot(support, directionTowardOrigin) <= 0) {
+					return false; // no collision
+				}
+
+				simplex.PushFront(support);
+
+				if (GJKNextSimplex(simplex, directionTowardOrigin)) {
+					return true;
+				}
+			}
+
+			return true;
+		}
+
+		bool GJKSameDirection(const glm::vec3 &direction, const glm::vec3 &ao) {
+			return dot(direction, ao) > 0; 
+		}
+
+		bool GJKLine(Simplex &simplex, glm::vec3 &direction) {
+			glm::vec3 a = simplex[0];
+			glm::vec3 b = simplex[1];
+
+			glm::vec3 ab = b - a;
+			glm::vec3 ao = -a;
+
+			if (GJKSameDirection(ab, ao)) {
+				direction = glm::cross(glm::cross(ab, ao), ab);
+			} else {
+				simplex = {a};
+				direction = ao;
+			}
+
+			return false;
+		}
+
+		bool GJKTriangle(Simplex &simplex, glm::vec3 &direction) {
+			glm::vec3 a = simplex[0];
+			glm::vec3 b = simplex[1];
+			glm::vec3 c = simplex[2];
+
+			glm::vec3 ab = b - a;
+			glm::vec3 ac = c - a;
+			glm::vec3 ao = -a;
+
+			glm::vec3 abc = cross(ab, ac);
+
+			if (GJKSameDirection(cross(abc, ac), ao)) {
+				if (GJKSameDirection(ac, ao)) {
+					simplex = {a, c};
+					direction = cross(cross(ac, ao), ac);
+				} else {
+					return GJKLine(simplex = {a, b}, direction);
+				}
+			} else {
+				if (GJKSameDirection(cross(ab, abc), ao)) {
+					return GJKLine(simplex = {a, b}, direction);
+				}
+
+				if (GJKSameDirection(abc, ao)) {
+					direction = abc;
+				} else {
+					simplex = {a, c, b};
+					direction = -abc;
+				}
+			}
+
+			return false;
+		}
+
+		bool GJKTetrahedron(Simplex &simplex, glm::vec3 &direction) {
+			glm::vec3 a = simplex[0];
+			glm::vec3 b = simplex[1];
+			glm::vec3 c = simplex[2];
+			glm::vec3 d = simplex[3];
+
+			glm::vec3 ab = b - a;
+			glm::vec3 ac = c - a;
+			glm::vec3 ad = d - a;
+			glm::vec3 ao = -a;
+
+			glm::vec3 abc = cross(ab, ac);
+			glm::vec3 acd = cross(ac, ad);
+			glm::vec3 adb = cross(ad, ab);
+
+			if (GJKSameDirection(abc, ao)) {
+				return GJKTriangle(simplex = {a, b, c}, direction);
+			}
+
+			if (GJKSameDirection(acd, ao)) {
+				return GJKTriangle(simplex = {a, c, d}, direction);
+			}
+
+			if (GJKSameDirection(adb, ao)) {
+				return GJKTriangle(simplex = {a, d, b}, direction);
+			}
+
+			return false;
+		}
+
+		bool GJKNextSimplex(Simplex &simplex, glm::vec3 &direction) {
+			switch (simplex.size()) {
+			case 2:
+				return GJKLine(simplex, direction);
+			case 3:
+				return GJKTriangle(simplex, direction);
+			case 4:
+				return GJKTetrahedron(simplex, direction);
+			default:
+				DebugLog(LOG_ERROR, "Physics simplex not supported", true);
+				return false;
+			}
+		}
+
+		#pragma endregion
 
 		void SetRigidbody(bool state = true) {
 			this->isRigidBody = state;
 		}
 
+		/// Move based on the velocity
 		void Move(glm::vec3 direction) {
 			this->velocity += direction;
 		}
-		
-	// LibCCD specific
-	public:
-		// Function required by LibCCD
-		void Support(const void* obj, const ccd_vec3_t *dir, ccd_vec3_t *vec) {
-			Collider* collider = (Collider*)obj;
-		}
-
 	private:
-		bool BadSetup() {
+		void BadSetup() const {
 			DebugLog(LOG_ERROR, "Collider: " << this->name << " have no detection model set", true);
-			return false;
 		}
 		
 	public:
-		ColliderModel colliderModel;
+		Mesh* mesh = nullptr;
 
-		float radius = 1.0f;
-		
 		std::string name = "DefaultColliderName";
 
-		bool isRigidBody;
+		bool isRigidBody = false;
 
 		float mass = 1.0f;
 
@@ -154,7 +228,7 @@ namespace PrettyEngine {
 		
 		glm::vec3 gravity = glm::vec3(0.0f, 0.0f, 0.0f);
 
-		glm::vec3 velocity;
+		glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		bool reverseDelta = false;
 
@@ -164,6 +238,9 @@ namespace PrettyEngine {
 		bool fixedCollisionOnly = false;
 
 		std::string layer = "Default";
+
+		/// Reset the velocity each update
+		bool resetVelocity = true;
 	};
 }
 

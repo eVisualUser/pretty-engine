@@ -1,0 +1,9 @@
+ObjectName = 'Asset'
+ObjectUnique = 'C:/Users/sylva/Desktop/custom game engine/pretty-engine/assets/ENGINE_PUBLIC/c#.png'
+
+[fields]
+exist = [ 'bool', 'true' ]
+local = [ 'std::string', 'any' ]
+metaCreationDate = [ 'std::string', '2024-02-25 17:38:25' ]
+used = [ 'bool', 'false' ]
+version = [ 'std::string', '0.0.0' ]

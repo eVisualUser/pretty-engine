@@ -26,29 +26,35 @@ foreach(file ${customFiles})
 
 	get_filename_component(id ${file} NAME_WE)
 	if(NOT(${id} STREQUAL "custom"))
-		set(customOut "${customOut}    if(name == \"${id}\") {\n        world->RegisterEntity(std::make_shared<Custom::${id}>())\;\n    } ")
+		set(customOut "${customOut}    if(name == \"${id}\") {\n        return std::make_shared<Custom::${id}>()\;\n    } ")
 		set(customList "${customList}${id}\;")
 	endif()
 
 endforeach()
-set(customOut "${customOut}\n}")
+set(customOut "${customOut}\n 	return nullptr\;\n}")
 file(WRITE "${CUSTOM_DIRECTORY}/custom.hpp" ${customOut})
 file(WRITE "${CUSTOM_DIRECTORY}/list.csv" ${customList})
 
 project(custom)
 
+message("Found entities sources:")
+foreach(element ${customSources})
+	message("- ${element}")
+endforeach()
+
 add_library(custom
 	${customFiles}
 	${customSources}
 )
-target_link_libraries(custom PRIVATE pretty)
+set_target_properties(custom PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+target_link_libraries(custom PUBLIC pretty)
 
 # Components
 
 set(customFiles "")
 
 file(GLOB customFiles "${CMAKE_SOURCE_DIR}/components/*.hpp")
-file(GLOB customSources "${CMAKE_SOURCE_DIR}/components/*.cpp")
+file(GLOB componentCustomSources "${CMAKE_SOURCE_DIR}/components/*.cpp")
 
 file(READ "${CMAKE_SOURCE_DIR}/components/template.hxx" template)
 
@@ -80,18 +86,23 @@ file(WRITE "${CMAKE_SOURCE_DIR}/components/list.csv" ${componentList})
 
 project(components)
 
+message("Found components sources:")
+foreach(element ${componentCustomSources})
+	message("- ${element}")
+endforeach()
+
 add_library(components
 	${customFiles}
-	${customSources}
+	${componentCustomSources}
 )
-target_link_libraries(components PRIVATE pretty)
+target_link_libraries(components PUBLIC pretty)
 
 # Render Features
 
 set(customFiles "")
 
 file(GLOB customFiles "${CMAKE_SOURCE_DIR}/RenderFeatures/*.hpp")
-file(GLOB customSources "${CMAKE_SOURCE_DIR}/RenderFeatures/*.cpp")
+file(GLOB customSourcesRender "${CMAKE_SOURCE_DIR}/RenderFeatures/*.cpp")
 
 file(READ "${CMAKE_SOURCE_DIR}/RenderFeatures/template.hxx" template)
 
@@ -124,8 +135,27 @@ file(COPY "${CMAKE_SOURCE_DIR}/RenderFeatures/RenderFeaturesList.csv" DESTINATIO
 
 project(renderFeatures)
 
+message("Found render features sources:")
+foreach(element ${customSourcesRender})
+	message("- ${element}")
+endforeach()
+
 add_library(renderFeatures
 	${customFiles}
-	${customSources}
+	${customSourcesRender}
 )
-target_link_libraries(renderFeatures PRIVATE pretty)
+target_link_libraries(renderFeatures PUBLIC pretty)
+
+# External GO
+
+execute_process(
+	COMMAND go run ./
+	OUTPUT_VARIABLE external_go
+	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tools/generateFiles"
+)
+
+execute_process(
+	COMMAND go run ./
+	OUTPUT_VARIABLE external_go
+	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tools/clearAssets"
+)

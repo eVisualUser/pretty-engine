@@ -1,7 +1,8 @@
 #pragma once
 
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/light.hpp>
+#include <PrettyEngine/render/light.hpp>
+#include <PrettyEngine/localization.hpp>
 
 #include <Guid.hpp>
 #include <string>
@@ -9,71 +10,71 @@
 namespace Custom {
 	class Light: public PrettyEngine::Component {
 	public:
-		void OnUpdatePublicVariables() override {
-			this->CreatePublicVar("Color");
-			this->CreatePublicVar("LightFactor");
-			this->CreatePublicVar("DeferredFactor");
-			this->CreatePublicVar("LightLayer");
-			this->CreatePublicVar("Radius");
-			this->CreatePublicVar("Type");
-			this->CreatePublicVar("SpotLightCutOff");
-			this->CreatePublicVar("SpotDirection");
+		void OnSetup() override {
+			this->AddSerializedField(SERIAL_TOKEN(glm::vec3), "Color", "0;0;0");
+			this->AddSerializedField(SERIAL_TOKEN(float), "LightFactor", "0");
+			this->AddSerializedField(SERIAL_TOKEN(float), "DeferredFactor", "0");
+			this->AddSerializedField(SERIAL_TOKEN(int), "LightLayer", "0");
+			this->AddSerializedField(SERIAL_TOKEN(float), "Radius", "0");
+			this->AddSerializedField(SERIAL_TOKEN(PrettyEngine::LightType), "Type", "point");
+			this->AddSerializedField(SERIAL_TOKEN(float), "SpotLightCutOff", "0");
+			this->AddSerializedField(SERIAL_TOKEN(glm::vec4), "SpotDirection", "0;0;0;0");
 		}
 
 		void OnStart() override {
-			auto radius = this->GetPublicVarValue("Radius");
+			auto radius = this->GetSerializedFieldValue("Radius");
 			if (!radius.empty()) {
 				this->light.radius = stof(radius);
 			}
 
-			auto lightType = this->GetPublicVarValue("Type");
+			auto lightType = this->GetSerializedFieldValue("Type");
 			if (!lightType.empty()) {
 				if (lightType == "spot") {
 					this->light.lightType = PrettyEngine::LightType::SpotLight;
 
 					// Load spot light specific public variables
 
-					auto cutoff = this->GetPublicVarValue("SpotLightCutOff");
+					auto cutoff = this->GetSerializedFieldValue("SpotLightCutOff");
 					if (!cutoff.empty()) {
 						this->light.spotLightCutOff = stof(cutoff);
 					}
-
-					auto spotLightDir = this->GetPublicVarAsFloatVec("SpotDirection");
+					
+					auto spotLightDir = PrettyEngine::ParseCSVLine(this->GetSerializedFieldValue("SpotDirection"));
 					if (spotLightDir.size() >= 3) {
-						this->light.spotDirection.x = spotLightDir[0];
-						this->light.spotDirection.y = spotLightDir[1];
-						this->light.spotDirection.z = spotLightDir[2];
+						this->light.spotDirection.x = std::stof(spotLightDir[0]);
+						this->light.spotDirection.y = std::stof(spotLightDir[1]);
+						this->light.spotDirection.z = std::stof(spotLightDir[2]);
 					}
+					
 				} else {
 					this->light.lightType = PrettyEngine::LightType::PointLight;
 				}
 			}
 
-			auto lightLayer = this->GetPublicVarValue("LightLayer");
+			auto lightLayer = this->GetSerializedFieldValue("LightLayer");
 			if (!lightLayer.empty()) {
 				this->light.lightLayer = std::stoi(lightLayer);
 			}
 
-			auto deferredFactor = this->GetPublicVarValue("DeferredFactor");
+			auto deferredFactor = this->GetSerializedFieldValue("DeferredFactor");
 			if (!deferredFactor.empty()) {
 				this->light.deferredFactor = std::stof(deferredFactor);
 			}
 
-			auto lightFactor = this->GetPublicVarValue("LightFactor");
+			auto lightFactor = this->GetSerializedFieldValue("LightFactor");
 			if (!lightFactor.empty()) {
 				this->light.lightFactor = std::stof(lightFactor);
 			}
 
-			auto color = this->GetPublicVarAsFloatVec("Color");
-			if (color.size() == 3) {
-				this->light.color.r = color[0];
-				this->light.color.g = color[1];
-				this->light.color.b = color[2];
-			}
+			auto color = PrettyEngine::ParseCSVLine(this->GetSerializedFieldValue("Color"));
 			if (color.size() == 4) {
-				this->light.opacityFactorEffect = color[3];
+				this->light.color.r = std::stof(color[0]);
+				this->light.color.g = std::stof(color[1]);
+				this->light.color.b = std::stof(color[2]);
+				this->light.opacityFactorEffect = std::stof(color[3]);
 			}
 
+			this->engineContent->renderer.UnRegisterLight(&this->light);
 			this->engineContent->renderer.RegisterLight(this->lightID, &this->light);
 		}
 
@@ -84,6 +85,9 @@ namespace Custom {
 		void OnDestroy() override {
 			this->engineContent->renderer.UnRegisterLight(&this->light);
 		}
+
+		void OnEditorStart() override { this->OnStart(); }
+		void OnEditorUpdate() override { this->OnUpdate();	}
 
 	private:
 		PrettyEngine::Light light;

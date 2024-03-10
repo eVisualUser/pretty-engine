@@ -2,30 +2,31 @@
 #define H_ENTITY
 
 #include <PrettyEngine/dynamicObject.hpp>
-#include <PrettyEngine/debug.hpp>
-#include <PrettyEngine/audio.hpp>
-#include <PrettyEngine/render.hpp>
-#include <PrettyEngine/visualObject.hpp>
-#include <PrettyEngine/collider.hpp>
+#include <PrettyEngine/PrettyError.hpp>
 #include <PrettyEngine/transform.hpp>
 #include <PrettyEngine/tags.hpp>
 
 #include <Guid.hpp>
-#include <toml++/toml.h>
 
 #include <memory>
 
 namespace PrettyEngine {
-	#define DefaultEntityName "AnyEntity"
+	class World;
+
+	#define DEFAULT_ENTITY_NAME "AnyEntity"
 
 	class Component: public DynamicObject {
 	public:
-		virtual void OnStart() {}
-		virtual void OnUpdate() {}
-		virtual void OnDestroy() {}
+		~Component() {
+			this->OnDestroy();
+		}
 
-		Transform* GetTransform() {
+		Transform* GetTransform() const {
 			return dynamic_cast<Transform*>(this->owner);
+		}
+
+		void SetupComponent(DynamicObject* newOwner) {
+			this->owner = newOwner; 
 		}
 
 	public:
@@ -40,6 +41,7 @@ namespace PrettyEngine {
 	class Entity: public virtual DynamicObject, public virtual Transform {
 	public:
 		~Entity() {
+			this->OnDestroy();
 			this->publicMap.clear();
 			this->components.clear();
 		}
@@ -47,24 +49,28 @@ namespace PrettyEngine {
 		std::string GetGUID() {
 			return this->_entityGUID;
 		}
-	public:
-		void* engine;
 
   		/// True if start was never called.
 		bool worldFirst = true;
 
-		std::string entityName = DefaultEntityName;
+		std::string entityName = DEFAULT_ENTITY_NAME;
 
-	public:
 		template<typename T>
-		Component* AddComponent() {
-			T component;
-			this->components.push_back(component);
+		T* AddComponent(std::string name) {
+			auto newComponent = std::make_shared<T>();
+
+			newComponent->SetupSerial(typeid(T).name(), name);
+			newComponent->SetupDynamicObject(this->engineContent);
+			newComponent->SetupComponent(this);
+
+			this->components.push_back(newComponent);
+
+			return dynamic_cast<T*>(this->components.back().get());
 		}
 
 		void RemoveComponent(Component* component) {
 			for(int i = 0; i < this->components.size(); i++) {
-				if (this->components[i]->unique == component->unique) {
+				if (this->components[i]->serialObjectUnique == component->GetObjectSerializedUnique()) {
 					this->components.erase(this->components.begin() + i);
 					break;
 				}
@@ -72,19 +78,22 @@ namespace PrettyEngine {
 		}
 
 		template<typename T>
-		T* GetComponentAs(std::string unique) {
+		Error<T*> GetComponentAs(std::string unique) {
 			for(auto & component: this->components) {
-				if (component->unique == unique) {
-					return dynamic_cast<T*>(component.get());
+				if (component->serialObjectUnique == unique) {
+					return Error<T*>("Component found", false, dynamic_cast<T*>(component.get()));
 				}
 			}
-			DebugLog(LOG_ERROR, this->entityName << " Component not found: " << unique, true);
-			return nullptr;
+
+			return Error<T*>("Component not found", true, nullptr);
 		}
 
 		std::vector<std::shared_ptr<Component>> components;
 	private:
 		std::string _entityGUID = xg::newGuid();
+	
+	public:
+		World *world;
 	};
 };
 

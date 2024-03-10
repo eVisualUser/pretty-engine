@@ -2,8 +2,8 @@
 
 #include <RF_Light.hpp>
 
-#include <PrettyEngine/render.hpp>
-#include <PrettyEngine/RenderFeature.hpp>
+#include <PrettyEngine/render/render.hpp>
+#include <PrettyEngine/render/RenderFeature.hpp>
 
 static std::shared_ptr<PrettyEngine::RenderFeature> GetRenderFeature(std::string name) {
     if(name == "RF_Light") {

@@ -3,41 +3,50 @@
 #include <PrettyEngine/Collision.hpp>
 #include <PrettyEngine/collider.hpp>
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
+#include <PrettyEngine/localization.hpp>
+#include <PrettyEngine/render/mesh.hpp>
 
 #include <Guid.hpp>
 
 namespace Custom {
 	class Physical: public PrettyEngine::Component {
 	public:
-		void OnUpdatePublicVariables() override {
-			this->CreatePublicVar("rigidbody", "false");
-			this->CreatePublicVar("model", "AABB");
-			this->CreatePublicVar("layer", "Default");
-			this->CreatePublicVar("name", xg::newGuid());
-			this->CreatePublicVar("mass", "1");
-			this->CreatePublicVar("fixed", "false");
+		void OnSetup() override {
+			this->publicFuncions.insert(std::make_pair("Update gravity", ([this]() {
+				auto gravity = PrettyEngine::ParseCSVLine(this->GetSerializedFieldValue("Gravity"), ';');
+				for (int i = 0; i < gravity.size(); i++) {
+					float axisValue = std::stof(gravity[i]);
+					if (i < this->GetCollider()->gravity.length()) {
+						this->GetCollider()->gravity[i] = axisValue;
+					}
+				}
+			})));
 
-			if (this->GetPublicVarValue("fixed") == "false") {
+			this->AddSerializedField(SERIAL_TOKEN(bool), "rigidbody", SERIAL_TOKEN(false));
+			this->AddSerializedField(SERIAL_TOKEN(std::string), "layer", "Default");
+			this->AddSerializedField(SERIAL_TOKEN(std::string), "name", xg::newGuid());
+			this->AddSerializedField(SERIAL_TOKEN(float), "mass", "1");
+			this->AddSerializedField(SERIAL_TOKEN(bool), "fixed", "false");
+			this->AddSerializedField(SERIAL_TOKEN(glm::vec3), "Gravity", "0;9.81;0");
+
+			if (this->GetSerializedFieldValue("fixed") == "false") {
 				this->_colliderA.fixed = false;
 			} else {
 				this->_colliderA.fixed = true;
 			}
 
-			if (this->GetPublicVarValue("model") == "Sphere") {
-				this->_colliderA.colliderModel = PrettyEngine::ColliderModel::Sphere;
-			} else {
-				this->_colliderA.colliderModel = PrettyEngine::ColliderModel::AABB;
-			}
-
-			if (this->GetPublicVarValue("rigidbody") == "true") {
+			if (this->GetSerializedFieldValue("rigidbody") == "true") {
 				this->_colliderA.SetRigidbody(true);
 			} else {
 				this->_colliderA.SetRigidbody(false);
 			}
 
-			this->_colliderA.name = this->GetPublicVarValue("name");
-			this->layer = this->GetPublicVarValue("layer");
+			this->_colliderA.name = this->GetSerializedFieldValue("name");
+			this->layer = this->GetSerializedFieldValue("layer");
+
+			this->_mesh = PrettyEngine::CreatePhysicsRectMesh();
+			this->_colliderA.SetMesh(&this->_mesh);
 		}
 
 		void OnStart() override {
@@ -45,13 +54,12 @@ namespace Custom {
 			this->engineContent->physicalSpace.AddCollider(this->layer, &this->_colliderA);
 
 			this->_colliderA.position = this->GetTransform()->position;
+			this->_colliderA.rotation = this->GetTransform()->rotation;
+			this->_colliderA.SetScale(this->GetTransform()->scale);
 		}
 
-		void OnUpdate() override {
+		void OnEndUpdate() override {
 			this->_ownerEntity->position = this->_colliderA.position;
-			if (this->_colliderA.colliderModel == PrettyEngine::ColliderModel::Sphere) {
-				this->_colliderA.radius = this->_ownerEntity->halfScale.x;
-			}
 			this->_colliderA.SetScale(this->_ownerEntity->scale);
 			this->_ownerEntity->rotation = this->_colliderA.rotation;
 		}
@@ -71,7 +79,9 @@ namespace Custom {
 	private:
 		PrettyEngine::Collider _colliderA;
 
-		PrettyEngine::Entity* _ownerEntity;
+		PrettyEngine::Mesh _mesh;
+
+		PrettyEngine::Entity* _ownerEntity = nullptr;
 
 		std::string layer;
 	};

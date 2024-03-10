@@ -1,6 +1,6 @@
 #pragma once
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/entity.hpp>
 #include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/localization.hpp>
@@ -15,33 +15,34 @@ namespace Custom {
 		void OnRender() override {
 			if (this->active) {
 				if (ImGui::Begin("Localization Editor")) {
-					ImGui::Checkbox(this->localization->Get("Save on close").c_str(), &this->saveLoclizationOnClose);
-					if (ImGui::Button(this->localization->Get("Save").c_str())) {
+					ImGui::Checkbox("Save on close", &this->saveLoclizationOnClose);
+					if (ImGui::Button("Save")) {
 						if (this->currentLocalization.get() != nullptr) {
 							this->currentLocalization->Save();
 							DebugLog(LOG_INFO, "Save localization", false);
 						}
 					}
 					ImGui::Separator();					
-					ImGui::InputText(this->localization->Get("Path").c_str(), this->localizationFileBuffer, 100);
+					ImGui::InputText("Path", this->localizationFileBuffer, 100);
 					std::string path = GetEnginePublicPath(this->localizationFileBuffer, true);
-					if (FileExist(path) && ImGui::Button(this->localization->Get("Open File").c_str())) {
+					if (FileExist(path) && ImGui::Button("Open File")) {
 						this->currentLocalization.reset();
 						this->currentLocalization = std::make_shared<Localization>();
 						this->currentLocalization->LoadFile(path);
 					}
 
-					if (!FileExist(path) && ImGui::Button(this->localization->Get("Create File").c_str())) {
+					if (!FileExist(path) && ImGui::Button("Create File")) {
 						CreateFile(path);
 					}
 					
-					if (this->currentLocalization.get() != nullptr) {
+					if (this->currentLocalization != nullptr) {
 						for(auto & index: this->localizationsToRemove) {
+							DebugLog(LOG_DEBUG, "To Remove: " << index, false);
 							this->currentLocalization->RemoveLocalizationUsingIndex(index);
 						}
 						this->localizationsToRemove.clear();
 
-						if (ImGui::Button(this->localization->Get("New").c_str())) {
+						if (ImGui::Button("New")) {
 							this->currentLocalization->CreateLocalization();
 						}
 						
@@ -49,40 +50,43 @@ namespace Custom {
 						
 						auto languages = this->currentLocalization->GetAllLanguages();
 						
-						if(ImGui::BeginTable(this->localization->Get("Localization Table").c_str(), languages->size())) {
+						if(ImGui::BeginTable("Localization Table", languages->size() + 1)) {
+							ImGui::TableSetupColumn("Key");
 							for (auto & lang: *languages) {
 								ImGui::TableSetupColumn(lang.c_str());
 							}
 							ImGui::TableHeadersRow();
 
 							int lineIndex = 0;
- 							for (auto & line: *content) {
-								ImGui::TableNextRow();
-								int columnIndex = 0;
-								for (auto & column: line) {
-									ImGui::TableNextColumn();
-									char buffer[1000] = "";
-									std::strcpy(buffer, column.c_str());
-									
-									ImGui::InputTextMultiline((std::to_string(columnIndex) + std::to_string(lineIndex)).c_str(), buffer, 1000);
-									
-									column = buffer;
-									
-									columnIndex++;
-								}
-								
-								for(int i = columnIndex; i < languages->size(); i++) {
-									std::string addButtonName = "+ ";
-									addButtonName += line.front();
-									if (ImGui::Button(addButtonName.c_str())) {
-										line.push_back("");
-									}
-								}
+							for (auto &line : *content) {
+								if (lineIndex > 0) {
+									ImGui::TableNextRow();
+									int columnIndex = 0;
+									for (auto &column : line) {
+										ImGui::TableNextColumn();
+										char buffer[1000] = "";
+										strcpy_s(buffer, column.c_str());
 
-								std::string removeButtonName = "- ";
-								removeButtonName += line.front();
-								if (ImGui::Button(removeButtonName.c_str())) {
-									this->localizationsToRemove.push_back(columnIndex);
+										ImGui::InputTextMultiline((std::to_string(columnIndex) + '.' + std::to_string(lineIndex)).c_str(), buffer, 1000);
+
+										column = buffer;
+
+										columnIndex++;
+									}
+
+									for (int i = columnIndex; i < languages->size() + 1; i++) {
+										std::string addButtonName = "+ ";
+										addButtonName += line.front();
+										if (ImGui::Button(addButtonName.c_str())) {
+											line.push_back("");
+										}
+									}
+
+									std::string removeButtonName = "Remove ";
+									removeButtonName += line.front();
+									if (ImGui::Button(removeButtonName.c_str())) {
+										this->localizationsToRemove.push_back(lineIndex);
+									}
 								}
 								
 								lineIndex++;
@@ -108,8 +112,6 @@ namespace Custom {
 
 	public:
 		bool active = false;
-
-		std::shared_ptr<Localization> localization;		
 
 		std::shared_ptr<Localization> currentLocalization;
 

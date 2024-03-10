@@ -1,7 +1,7 @@
 #ifndef H_DATA
 #define H_DATA
 
-#include <PrettyEngine/debug.hpp>
+#include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/utils.hpp>
 
 #include <cstring>
@@ -22,6 +22,7 @@ namespace PrettyEngine {
 	}
 
 	struct SQLBlobData {
+	  public:
 		std::vector<unsigned char> data;
 		int bytes;
 	};

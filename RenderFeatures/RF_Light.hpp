@@ -1,8 +1,8 @@
 #pragma once
 
-#include <PrettyEngine/RenderFeature.hpp>
-#include <PrettyEngine/debug.hpp>
-#include <PrettyEngine/light.hpp>
+#include <PrettyEngine/render/RenderFeature.hpp>
+#include <PrettyEngine/debug/debug.hpp>
+#include <PrettyEngine/render/light.hpp>
 
 namespace Custom {
 	class RF_Light: public PrettyEngine::RenderFeature {
@@ -20,10 +20,8 @@ namespace Custom {
             _flattenedLightsSpotLight.clear();
             _flattenedLightsDirection.clear();
             _flattenedLightsCutOff.clear();
-
-            size_t lightsCount = this->lights->size();
             
-            for (auto light : *this->lights) {
+            for (auto  & light : *this->lights) {
                 _flattenedLightsOpacityFactorEffect.push_back(light->opacityFactorEffect);
 
                 _flattenedLightsPosition.push_back(light->position.x);
@@ -53,6 +51,7 @@ namespace Custom {
 
 		void OnUniform(PrettyEngine::VisualObject *visualObject) override {
 			auto shaderProgram = visualObject->renderModel->shaderProgram;
+
 			glUniform1i(shaderProgram->uniforms["UseLight"], visualObject->useLight);
             if (visualObject->useLight) {
                 glUniform1i(shaderProgram->uniforms["LightsCount"], this->lights->size());

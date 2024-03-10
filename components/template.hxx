@@ -1,6 +1,5 @@
 
 #include <PrettyEngine/entity.hpp>
-#include <PrettyEngine/world.hpp>
 
 #include <string>
 #include <memory>
