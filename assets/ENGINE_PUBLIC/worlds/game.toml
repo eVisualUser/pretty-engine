@@ -2,7 +2,25 @@
 name = 'AnyEntity'
 object = 'Empty'
 
-    [entities.Empty_1.components]
+    [entities.Empty_1.components.Render]
+    ObjectName = 'Render'
+    ObjectUnique = 'Render'
+
+        [entities.Empty_1.components.Render.fields]
+        Color = [ 'glm::vec4', '1.000000;1.000000;1.000000;1.000000;' ]
+        Mesh = [ 'PrettyEngine::Mesh', '' ]
+        MeshGUID = [ 'std::string', 'fc3ce0ca-4e26-45ac-8c31-9f95f573c7e5' ]
+        ScreenObject = [ 'bool', 'false' ]
+        SunLight = [ 'bool', 'false' ]
+        TextureBase = [ 'std::string', '/c#.png' ]
+        TextureNormal = [ 'std::string', '' ]
+        TextureTransparency = [ 'std::string', '' ]
+        UseLight = [ 'bool', 'false' ]
+        UseTextureBase = [ 'bool', 'true' ]
+        UseTextureNormal = [ 'bool', 'false' ]
+        UseTextureTransparency = [ 'bool', 'false' ]
+        UseTexure = [ 'bool', 'true' ]
+        WireFrame = [ 'bool', 'true' ]
 
     [entities.Empty_1.serial]
     ObjectName = 'Empty'

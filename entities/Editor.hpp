@@ -36,6 +36,8 @@ namespace Custom {
 class Editor : public virtual Entity {
   public:
     void OnEditorStart() override {
+    	this->CreateTextureCamera();
+
         keyUp.name = "EditorKeyUp";
         keyUp.key = KeyCode::UpArrow;
         keyUp.mode = KeyWatcherMode::Press;
@@ -74,6 +76,8 @@ class Editor : public virtual Entity {
         this->engineContent->input.RemoveKeyWatcher(&keyDown);
         this->engineContent->input.RemoveKeyWatcher(&keyLeft);
         this->engineContent->input.RemoveKeyWatcher(&keyRight);
+
+    	this->engineContent->renderer.RemoveCamera(this->secondCamera);
     }
 
     void MenuBar() {
@@ -103,7 +107,39 @@ class Editor : public virtual Entity {
     #endif
     }
 
+	void OnStart() override {
+#if ENGINE_EDITOR
+	    this->engineContent->input.RemoveKeyWatcher(&keyUp);
+	    this->engineContent->input.RemoveKeyWatcher(&keyDown);
+	    this->engineContent->input.RemoveKeyWatcher(&keyLeft);
+	    this->engineContent->input.RemoveKeyWatcher(&keyRight);
+#endif
+
+    	this->CreateTextureCamera();
+	}
+
+	void CreateTextureCamera() {
+    	this->secondCamera = this->engineContent->renderer.AddCamera();
+    	this->secondCamera->active = true;
+    	this->secondCamera->SetTextureResolution(glm::vec2(1920, 1080));
+    	this->secondCamera->SetRenderToTexture(true);
+    }
+
     void OnRender() override {
+    	if (this->secondCamera != nullptr) {
+    		auto render = *this->GetComponentAs<Render>("Render").Resolve([this](Render** render) {
+				this->AddComponent<Render>("Render");
+				return true;
+			})->GetValue();
+    		if (render != nullptr) {
+    			render->GetVisualObject()->RemoveTexture(TextureType::Base);
+    			this->secondCamera->GetTexture()->textureType = TextureType::Base;
+    			render->GetVisualObject()->AddTexture(this->secondCamera->GetTexture());
+    		} else {
+    			DebugLog(LOG_ERROR, "Failed to get Render component", false);
+    		}
+    	}
+
         this->MenuBar();
 
         this->cameraZ += this->engineContent->renderer.GetDeltaTime() * this->engineContent->input.GetMouseWheelDelta() * (*this->_cameraSpeed.Get());
@@ -214,7 +250,7 @@ class Editor : public virtual Entity {
 
         if (actionBox) {
             ImGui::SetNextWindowPos(actionBoxStartPos);
-            if (ImGui::Begin("actionBox", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
+            if (ImGui::Begin("actionBox", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
                 if (ImGui::Button("Save Editor")) {
                     this->requests.push_back(Request::SAVE);
                 }

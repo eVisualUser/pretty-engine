@@ -27,8 +27,11 @@ namespace PrettyEngine {
     }
 
     enum class KeyWatcherMode {
+		/// Trigger on a constant pression during multiple frames.
     	Press = 0,
+		/// Trigger on a single frame push on the key.
     	Down,
+		/// Trigger when the key is not used.
     	Up,
     };
 
@@ -57,10 +60,12 @@ namespace PrettyEngine {
  	/// Safe way to manage inputs and share them between objects.
     class KeyWatcher {
     public:
+		KeyWatcher() = default;
+
     	std::string name = "?";
-    	KeyCode key;
-    	KeyWatcherMode mode;
-    	bool state;
+    	KeyCode key = KeyCode::A;
+    	KeyWatcherMode mode = KeyWatcherMode::Press;
+    	bool state = false;
 
     	std::function<void()> actionOnKey;
     };

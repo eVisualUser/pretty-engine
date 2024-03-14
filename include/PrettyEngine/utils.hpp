@@ -46,12 +46,21 @@ namespace PrettyEngine {
 	}
 
 	static bool CreateFile(const std::string& path) {
-		if (!FileExist(path)) {
-			std::ofstream file(path);
-			bool out = file.is_open();
-			file.close();
+		const auto fsPath = std::filesystem::path(path);
+		std::filesystem::create_directories(fsPath.root_directory());
 
-			return out;
+		if (!FileExist(path)) {
+			try {
+				std::ofstream file(path, std::ios::out | std::ios::trunc);
+				bool out = file.is_open();
+
+				file.close();
+
+				return out;
+			} catch (const std::exception& e) {
+				DebugLog(LOG_ERROR, "Fail: " << e.what(), true);
+				return false;
+			}
 		} else {
 			DebugLog(LOG_ERROR, "File already exists: " << path, true);
 
@@ -69,6 +78,7 @@ namespace PrettyEngine {
 			out.append(buf, 0, stream.gcount());
 		}
 		out.append(buf, 0, stream.gcount());
+
 		return out;
 	}
 

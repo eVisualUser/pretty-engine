@@ -58,6 +58,14 @@ namespace Custom {
 			this->_colliderA.SetScale(this->GetTransform()->scale);
 		}
 
+		void OnPrePhysics() override {
+			if (this->_ownerEntity != nullptr) {
+				this->_colliderA.position = this->GetTransform()->position;
+				this->_colliderA.rotation = this->GetTransform()->rotation;
+				this->_colliderA.SetScale(this->GetTransform()->scale);
+			}
+		}
+
 		void OnEndUpdate() override {
 			if (this->_ownerEntity != nullptr) {
 				this->_ownerEntity->position = this->_colliderA.position;

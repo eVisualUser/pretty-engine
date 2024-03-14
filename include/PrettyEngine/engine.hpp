@@ -147,7 +147,7 @@ class Engine final: public EventListener {
 
 			this->engineContent.input.Update();
 
-			for (auto & currentWorld : *worlds) {
+			for (auto &currentWorld : *worlds) {
 				if (!this->isEditor) {
 					currentWorld->Update();
 				} else {
@@ -155,7 +155,7 @@ class Engine final: public EventListener {
 				}
 			}
 
-			for (const auto & currentWorld : *worlds) {
+			for (const auto &currentWorld : *worlds) {
 				if (!this->isEditor) {
 					currentWorld->PrePhysics();
 				}

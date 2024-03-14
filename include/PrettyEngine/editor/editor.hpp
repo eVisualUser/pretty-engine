@@ -70,9 +70,11 @@ class Editor {
 			ImGui::InputFloat("Pos Z", &transform->position.z);
 
 			auto rotationEuler = transform->GetEulerRotation();
+			rotationEuler = glm::degrees(rotationEuler);
 			ImGui::InputFloat("Rot X", &rotationEuler.x);
 			ImGui::InputFloat("Rot Y", &rotationEuler.y);
 			ImGui::InputFloat("Rot Z", &rotationEuler.z);
+			rotationEuler = glm::radians(rotationEuler);
 			transform->SetRotationUsingEuler(rotationEuler);
 
 			glm::vec3 scale = transform->scale;
@@ -442,17 +444,17 @@ class Editor {
 						ImGui::SetTooltip("It can cause more loading time to play but provide a more accurate result, avoiding editor artefacts.");
 					}
 
+					ImGui::Checkbox("Save a copy on stop", &this->saveCopyWhenStop);
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("Save a copy of the worlds to allow testing later on them.");
+					}
+
 					if (*isEditor && ImGui::Button("Play")) {
 						DebugLog(LOG_DEBUG, "[EDITOR] -> Play", false);
 
 						worldManager->SaveWorlds();
 
 						if (this->reloadOnPlay) {
-							engineContent->renderer.visualObjects.clear();
-							engineContent->physicalSpace.Clear();
-							engineContent->audioEngine.Clear();
-							engineContent->input.Clear();
-							engineContent->renderer.Clear(true);
 							this->selectedEntities.clear();
 
 							worldManager->Reload();
@@ -461,6 +463,22 @@ class Editor {
 						changedState = true;
 					} else	if (!*isEditor && ImGui::Button("Stop")) {
 						DebugLog(LOG_DEBUG, "[EDITOR] -> Stop", false);
+
+						if (this->saveCopyWhenStop) {
+							int index = 0;
+							for(auto & world: *worldManager->GetWorlds()) {
+								auto timeAsString = GetTimeAsString();
+								StringReplaceChar(&timeAsString, ':', '_');
+								auto filePath = GetEnginePublicPath(this->worldCopyDir, true) + "/" + world->worldName + "/" + std::move(timeAsString) + "(" + std::to_string(index) + ")" + ".toml";
+								StringReplaceChar(&filePath, ' ', '_');
+								if (CreateFile(filePath)) {
+									world->Save(WorldSavingFormat::Toml, filePath);
+								} else {
+									DebugLog(LOG_DEBUG, "Failed to save copy of world:  " << world->worldName << " to " << filePath, true);
+								}
+								index++;
+							}
+						}
 
 			    		this->selectedEntities.clear();
 
@@ -502,6 +520,9 @@ class Editor {
 
 	bool createComponent = false;
 	bool reloadOnPlay = false;
+	bool saveCopyWhenStop = false;
+
+	std::string worldCopyDir = "../WorldsCopies";
 };
 } // namespace PrettyEngine
 

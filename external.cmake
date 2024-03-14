@@ -37,6 +37,7 @@ message("-- Boxer")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/Boxer")
 message("-- TomlPlusPlus")
 set(TOML_EXCEPTIONS 0)
+set(TOML_HEADER_ONLY 0)
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/tomlplusplus")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/crossguid")
 

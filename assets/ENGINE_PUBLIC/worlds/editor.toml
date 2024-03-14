@@ -34,7 +34,7 @@ object = 'Editor'
     ObjectUnique = 'Render'
 
         [entities.Editor.components.Render.fields]
-        Color = [ 'glm::vec4', '1.000000;0.000000;0.000000;1.000000;' ]
+        Color = [ 'glm::vec4', '1.000000;1.000000;1.000000;1.000000;' ]
         Mesh = [ 'PrettyEngine::Mesh', '' ]
         MeshGUID = [ 'std::string', 'a71ab2f6-640e-4ac1-ba60-64cc21633bde' ]
         ScreenObject = [ 'bool', 'false' ]
@@ -58,8 +58,8 @@ object = 'Editor'
         'Camera Speed' = [ 'f', '10.000000' ]
 
     [entities.Editor.transform]
-    position = [ 0.22937899827957153, -1.1347949504852295, 0.0 ]
-    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
+    position = [ -0.34460815787315369, -0.48629587888717651, 0.0 ]
+    rotation = [ -0.0, 0.0, 1.0, -4.3711388286737929e-08 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [entities.Empty]

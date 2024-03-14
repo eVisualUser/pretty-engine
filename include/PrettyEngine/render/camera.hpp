@@ -32,7 +32,7 @@ namespace PrettyEngine {
 		Camera() {
 			this->texture.textureID = 0;
 			this->texture.textureType = TextureType::Base;
-			this->texture.colorChannels = (int)TextureChannels::RGBA;
+			this->texture.colorChannels = static_cast<int>(TextureChannels::RGBA);
 			this->texture.filter = TextureFilter::Linear;
 			this->texture.useGC = false;
 			this->texture.wrap = TextureWrap::ClampToBorder;
@@ -45,16 +45,17 @@ namespace PrettyEngine {
 				glDeleteFramebuffers(1, &this->glFrameBufferID);
 				this->renderToTexture = false;
 			} else {
-				// Generate Texture
-				glGenTextures(1, &this->texture.textureID);
-				glBindTexture(GL_TEXTURE_2D, this->texture.textureID);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->resolution.x, this->resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 				// Generate Framebuffer
 				glGenFramebuffers(1, &this->glFrameBufferID);
 				glBindFramebuffer(GL_FRAMEBUFFER, this->glFrameBufferID);
+
+				// Generate Texture
+				glGenTextures(1, &this->texture.textureID);
+				glBindTexture(GL_TEXTURE_2D, this->texture.textureID);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->resolution.x, this->resolution.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->texture.textureID, 0);
 
 				// Handle frame buffer errors
@@ -68,9 +69,9 @@ namespace PrettyEngine {
 
 		void SetTextureResolution(glm::vec2 newResolution) {
 			this->resolution = newResolution;
-			this->SetRenderToTexture(false);
 			if (this->renderToTexture) {
-				this->SetRenderToTexture(this->renderToTexture);
+				this->SetRenderToTexture(false);
+				this->SetRenderToTexture(true);
 			}
 		}
 
@@ -81,9 +82,11 @@ namespace PrettyEngine {
 			if (this->glFrameBufferID == 0) {
 				DebugLog(LOG_ERROR, "Camera: " << this->id << " have no framebuffer generated.", true);
 			}
-				
+
 			if (this->texture.textureID != 0 && this->glFrameBufferID != 0) {
 				glBindFramebuffer(GL_FRAMEBUFFER, this->glFrameBufferID);
+				glViewport(0, 0, this->resolution.x, this->resolution.y);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			}
 		}
 

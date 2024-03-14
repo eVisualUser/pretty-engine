@@ -120,9 +120,9 @@ namespace PrettyEngine {
 			for(auto & layer: this->_colliders) {
 				for(auto & collider: layer.second) {
 					auto collisions = this->FindCollisions(collider);
+					this->UpdateRigidBody(collider, &collisions, deltaTime);
+					this->UpdateRigidbodyPosition(&collisions, collider, deltaTime);
 					if (!collisions.empty()) {
-						this->UpdateRigidBody(collider, &collisions, deltaTime);
-						this->UpdateRigidbodyPosition(&collisions, collider, deltaTime);
 						this->_collisions.insert(std::make_pair(collider, collisions));
 					}
 				}

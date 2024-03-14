@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PrettyEngine/utils.hpp"
 #include <PrettyEngine/KeyCode.hpp>
 #include <Physical.hpp>
 #include <PrettyEngine/serial.hpp>
@@ -18,28 +17,82 @@ namespace Custom {
 			this->AddSerializedField(SERIAL_TOKEN(float), "speed", "100");
 		}
 
-		void OnPrePhysics() override {
-			auto rigidbody = dynamic_cast<Entity*>(this->owner)->GetComponentAs<Physical>(this->GetSerializedFieldValue("colliderName")).ShowError();
-			
-			auto speed = std::stof(this->GetSerializedFieldValue("speed"));
-
-			if (rigidbody != nullptr) {
-				auto movement = glm::vec3(0.0f, 0.0f, 0.0f);
-				
-				if (this->engineContent->input.GetKeyPress(KeyCode::LeftArrow)) {
-					movement.x -= speed * this->engineContent->renderer.GetDeltaTime();
-				} else if (this->engineContent->input.GetKeyPress(KeyCode::RightArrow)) {
-					movement.x += speed * this->engineContent->renderer.GetDeltaTime();
+		void OnStart() override {
+			this->keyWatcherUp.key = KeyCode::UpArrow;
+			this->keyWatcherUp.mode = KeyWatcherMode::Press;
+			this->keyWatcherUp.name = "BaseCharacter-KeyWatcherUp";
+			this->keyWatcherUp.actionOnKey = [this] {
+				if (auto collider = this->GetCollider()) {
+					const auto speed = std::stof(this->GetSerializedFieldValue("speed"));
+					auto direction = glm::vec3(0, 1, 0);
+					direction *= (speed * this->engineContent->renderer.GetDeltaTime());
+					collider->Move(direction);
 				}
+			};
 
-				if (this->engineContent->input.GetKeyPress(KeyCode::UpArrow)) {
-					movement.y += speed * this->engineContent->renderer.GetDeltaTime();
-				} else if (this->engineContent->input.GetKeyPress(KeyCode::DownArrow)) {
-					movement.y -= speed * this->engineContent->renderer.GetDeltaTime();
+			this->keyWatcherDown.key = KeyCode::DownArrow;
+			this->keyWatcherDown.mode = KeyWatcherMode::Press;
+			this->keyWatcherDown.name = "BaseCharacter-KeyWatcherDown";
+			this->keyWatcherDown.actionOnKey = [this] {
+				if (auto collider = this->GetCollider()) {
+					const auto speed = std::stof(this->GetSerializedFieldValue("speed"));
+					auto direction = glm::vec3(0, -1, 0);
+					direction *= (speed * this->engineContent->renderer.GetDeltaTime());
+					collider->Move(direction);
 				}
+			};
 
-				rigidbody->GetCollider()->Move(movement);
-			}
+			this->keyWatcherLeft.key = KeyCode::LeftArrow;
+			this->keyWatcherLeft.mode = KeyWatcherMode::Press;
+			this->keyWatcherLeft.name = "BaseCharacter-KeyWatcherLeft";
+			this->keyWatcherLeft.actionOnKey = [this] {
+				if (auto collider = this->GetCollider()) {
+					const auto speed = std::stof(this->GetSerializedFieldValue("speed"));
+					auto direction = glm::vec3(-1, 0, 0);
+					direction *= (speed * this->engineContent->renderer.GetDeltaTime());
+					collider->Move(direction);
+				}
+			};
+
+			this->keyWatcherRight.key = KeyCode::RightArrow;
+			this->keyWatcherRight.mode = KeyWatcherMode::Press;
+			this->keyWatcherRight.name = "BaseCharacter-KeyWatcherRight";
+			this->keyWatcherRight.actionOnKey = [this] {
+				if (auto collider = this->GetCollider()) {
+					const auto speed = std::stof(this->GetSerializedFieldValue("speed"));
+					auto direction = glm::vec3(1, 0, 0);
+					direction *= (speed * this->engineContent->renderer.GetDeltaTime());
+					collider->Move(direction);
+				}
+			};
+
+			this->engineContent->input.AddKeyWatcher(&this->keyWatcherUp);
+			this->engineContent->input.AddKeyWatcher(&this->keyWatcherDown);
+			this->engineContent->input.AddKeyWatcher(&this->keyWatcherLeft);
+			this->engineContent->input.AddKeyWatcher(&this->keyWatcherRight);
 		}
+
+		void OnDestroy() override {
+			this->engineContent->input.RemoveKeyWatcher(&this->keyWatcherUp);
+			this->engineContent->input.RemoveKeyWatcher(&this->keyWatcherDown);
+			this->engineContent->input.RemoveKeyWatcher(&this->keyWatcherLeft);
+			this->engineContent->input.RemoveKeyWatcher(&this->keyWatcherRight);
+		}
+
+		Physical* GetCollider() {
+			const auto colliderName = this->GetSerializedFieldValue("colliderName");
+			return dynamic_cast<Entity*>(this->owner)->GetComponentAs<Physical>(colliderName).Resolve([this, colliderName](Physical** physical) {
+				if (const auto owner = dynamic_cast<Entity*>(this->owner)) {
+					owner->AddComponent<Physical>(colliderName);
+				}
+				return true;
+			})->ShowError();
+		}
+
+	private:
+		KeyWatcher keyWatcherUp;
+		KeyWatcher keyWatcherDown;
+		KeyWatcher keyWatcherLeft;
+		KeyWatcher keyWatcherRight;
 	};
 }

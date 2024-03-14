@@ -99,14 +99,14 @@ namespace PrettyEngine {
 		void Load() {
 			this->Clear();
 			if (this->worldAsset.Exist()) {
-				toml::parse_result parsedResult = toml::parse("");
+				toml::parse_result parsedResult;
 				try {
 					const auto fileContent = worldAsset.ReadToString();
 					const auto filePath = worldAsset.GetFilePath();
 
 					parsedResult = toml::parse(fileContent, filePath);
-				} catch (toml::parse_error& err) {
-					DebugLog(LOG_ERROR, err.description(), true);
+				} catch (const std::bad_alloc& err) {
+					DebugLog(LOG_ERROR, err.what(), true);
 				}
 
 				if (parsedResult.empty()) {

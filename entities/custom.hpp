@@ -15,7 +15,7 @@
  * REGENERATED AUTOMATICALLY UPON THE NEXT BUILD.    *
  ******************************************************/
 
-static std::shared_ptr<PrettyEngine::Entity> CreateCustomEntity(std::string name) {
+static std::shared_ptr<PrettyEngine::Entity> CreateCustomEntity(const std::string& name) {
     if(name == "Editor") {
         return std::make_shared<Custom::Editor>();
     }     if(name == "Empty") {

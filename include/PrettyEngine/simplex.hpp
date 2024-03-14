@@ -13,10 +13,9 @@ namespace PrettyEngine {
 			}
 		}
 
-		Simplex& operator=(std::initializer_list<glm::vec3> list) { 
+		Simplex& operator=(std::initializer_list<glm::vec3> list) {
 			for (auto &point: list) {
-				this->_points[this->_size] = point;
-				this->_size++;
+				this->_points[this->_size++] = point;
 			}
 			this->_size = std::min(this->_size + 1, 4);
 			
