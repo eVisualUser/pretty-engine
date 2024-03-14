@@ -3,10 +3,11 @@
 **/.vs
 **/.idea
 **/cmake-build-debug
+**/cmake-build-debug-clang
 
 **/__pycache__
 **/.scriptcs_cache
 **/.fleet
 
-**/.sublime-project
-**/.sublime-workspace
+**/*.sublime-project
+**/*.sublime-workspace

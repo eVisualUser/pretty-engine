@@ -1,5 +1,5 @@
 ObjectName = 'Asset'
-ObjectUnique = 'C:/Users/sylva/Desktop/custom game engine/pretty-engine/assets/ENGINE_PUBLIC/worlds/game.toml'
+ObjectUnique = 'C:/Users/sylva/Desktop/custom game engine/pretty-engine/assets/ENGINE_PUBLIC//worlds/game.toml'
 
 [fields]
 exist = [ 'bool', 'true' ]

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 #include <fstream>
 
 #include <glm/vec3.hpp>
@@ -40,15 +41,11 @@ namespace PrettyEngine {
 		#endif
 	}
 
-	static bool FileExist(std::string path) {
-		std::ifstream file(path);
-		bool out = file.is_open();
-		file.close();
-
-		return out;
+	static bool FileExist(const std::string& path) {
+		return std::filesystem::exists(path);
 	}
 
-	static bool CreateFile(std::string path) {
+	static bool CreateFile(const std::string& path) {
 		if (!FileExist(path)) {
 			std::ofstream file(path);
 			bool out = file.is_open();
@@ -57,24 +54,22 @@ namespace PrettyEngine {
 			return out;
 		} else {
 			DebugLog(LOG_ERROR, "File already exists: " << path, true);
-			
+
 			return false;
 		}
 	}
 
-	static std::string ReadFileToString(std::string path) {
-	    std::ifstream input_file(path);
-	    if (!input_file.is_open()) {
-	    	DebugLog(LOG_ERROR, "Could not open: " << path, true);
-	    	if (boxer::Selection::Yes == boxer::show("Failed to read file, retry ?", "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo)) {
-				return ReadFileToString(path);
-			}
-	    	return "";
-	    }
-	    std::string out = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+	static std::string ReadFileToString(const std::string& path, size_t readSize = 4096) {
+		auto stream = std::ifstream{path.data()};
+		stream.exceptions(std::ios_base::badbit);
 
-	    input_file.close();
-	    return out;
+		auto out = std::string{};
+		auto buf = std::string(readSize, '\0');
+		while (stream.read(& buf[0], static_cast<std::streamsize>(readSize))) {
+			out.append(buf, 0, stream.gcount());
+		}
+		out.append(buf, 0, stream.gcount());
+		return out;
 	}
 
 	static bool WriteFileString(std::string path, std::string content) {

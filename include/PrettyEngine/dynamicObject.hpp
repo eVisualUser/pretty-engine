@@ -71,6 +71,21 @@ namespace PrettyEngine {
 		T _value;
 	};
 
+	#define PUBLIC_INT(owner, name, input_value) \
+	PublicProperty<int>(owner, name, input_value, [this](int value){ return std::to_string(value); }, [this](std::string value){ return std::stoi(value); })
+
+	#define PUBLIC_FLOAT(owner, name, input_value) \
+	PublicProperty<float>(owner, name, input_value, [this](float value){ return std::to_string(value); }, [this](std::string value){ return std::stof(value); })
+
+	#define PUBLIC_DOUBLE(owner, name, input_value) \
+	PublicProperty<double>(owner, name, input_value, [this](double value){ return std::to_string(value); }, [this](std::string value){ return std::stod(value); })
+
+	#define PUBLIC_STRING(owner, name, input_value) \
+	PublicProperty<std::string>(owner, name, input_value, [this](std::string value){ return value; }, [this](std::string value){ return value; })
+
+	#define PUBLIC_BOOL(owner, name, input_value) \
+	PublicProperty<bool>(owner, name, input_value, [this](std::string value){ return value == "true"; }, [this](std::string value){ return value == true ? "true" : "false"; })
+
  	/// Object that support being updated by the engine based on game events.
 	class DynamicObject: public Tagged, public virtual SerialObject {
 	public:
@@ -80,8 +95,6 @@ namespace PrettyEngine {
 			this->publicFuncions.insert_or_assign("OnUpdate", [this]() { this->OnUpdate(); });
 			this->publicFuncions.insert_or_assign("OnRender", [this]() { this->OnRender(); });
   		}
-
-		~DynamicObject() { this->DynamicObject::OnDestroy(); } // todo: check if it cause a crash
 
 		/// Minimum setup required by a dynamic object
 		void SetupDynamicObject(EngineContent* newEngineContent) {
@@ -172,7 +185,7 @@ namespace PrettyEngine {
 			this->publicFuncions.erase(functionName);
 		}
 
-		EngineContent* engineContent;
+		EngineContent* engineContent = nullptr;
 
 		std::unordered_map<std::string, std::string> publicMap;
 

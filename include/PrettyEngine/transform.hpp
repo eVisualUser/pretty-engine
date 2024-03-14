@@ -13,12 +13,6 @@ namespace PrettyEngine {
 	/// Represent an object in a space.
 	class Transform: public virtual SerialObject {
 	public:
-		Transform() {
-			this->UpdateHalfScale();
-		}
-
-		virtual ~Transform() = default;
-
 		Transform* GetTransform() {
 			return this;
 		}

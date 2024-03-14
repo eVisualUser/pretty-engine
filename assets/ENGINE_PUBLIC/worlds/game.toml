@@ -1,2 +1,19 @@
+[entities.Empty_1]
+name = 'AnyEntity'
+object = 'Empty'
+
+    [entities.Empty_1.components]
+
+    [entities.Empty_1.serial]
+    ObjectName = 'Empty'
+    ObjectUnique = 'Empty_1'
+
+        [entities.Empty_1.serial.fields]
+
+    [entities.Empty_1.transform]
+    position = [ 0.0, 0.0, 0.0 ]
+    rotation = [ 0.0, 0.0, 0.0, 1.0 ]
+    scale = [ 1.0, 1.0, 1.0 ]
+
 [meta]
-name = "Game"
+name = 'NewWorld'

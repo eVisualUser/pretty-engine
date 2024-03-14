@@ -6,10 +6,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <sstream>
 #include <ctime>
+#include <sstream>
 
 namespace PrettyEngine {
+	static bool Retry(const std::string& message) {
+		return boxer::Selection::Yes == boxer::show(message.c_str(), "Retry ?", boxer::Style::Question, boxer::Buttons::YesNo);
+	}
+
 	struct Log {
 	public:
 		std::string type;

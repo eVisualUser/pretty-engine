@@ -1,6 +1,9 @@
 #ifndef HPP_FILE_UTILS
 #define HPP_FILE_UTILS
 
+#include <string>
+#include <vector>
+
 namespace PrettyEngine {
 	class FileUtils {
 	public:

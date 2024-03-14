@@ -8,15 +8,12 @@
 #include <PrettyEngine/Input.hpp>
 #include <PrettyEngine/KeyCode.hpp>
 #include <PrettyEngine/PhysicalSpace.hpp>
-#include <PrettyEngine/data.hpp>
 #include <PrettyEngine/editor/editor.hpp>
 #include <PrettyEngine/event.hpp>
 #include <PrettyEngine/render/render.hpp>
-#include <PrettyEngine/render/texture.hpp>
-#include <PrettyEngine/utils.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 
-#include <implot.h>
+#include <stdexcept>
 #include <toml++/toml.h>
 
 #include <memory>
@@ -41,12 +38,12 @@ class Engine final: public EventListener {
 		this->engineContent.renderer.CreateWindow();
 		this->engineContent.renderer.Setup();
 
-		this->logLimit = customConfig["engine"]["logs_limit"].value_or(100.0f);
+		this->logLimit = customConfig["engine"]["logs_limit"].value_or(100);
 
 		const auto windowTitle = customConfig["engine"]["render"]["window_title"].value_or("Pretty Engine - Game");
 		this->engineContent.renderer.SetWindowTitle(windowTitle);
 
-		double backgroundColor[4] = {0.0, 0.0, 0.0, 0.0};
+		float backgroundColor[4] = {0.0, 0.0, 0.0, 0.0};
 		backgroundColor[0] = customConfig["engine"]["render"]["opengl"]["background_color"][0].value_or(0.0f);
 		backgroundColor[1] = customConfig["engine"]["render"]["opengl"]["background_color"][1].value_or(0.0f);
 		backgroundColor[2] = customConfig["engine"]["render"]["opengl"]["background_color"][2].value_or(0.0f);
@@ -56,7 +53,7 @@ class Engine final: public EventListener {
 		const bool setDefaultCameraAsMain = customConfig["engine"]["render"]["camera"]["set_default_camera_as_main"].value_or(true);
 
 		if (createDefaultCamera) {
-			auto newCamera = this->engineContent.renderer.AddCamera();
+			const auto newCamera = this->engineContent.renderer.AddCamera();
 			if (setDefaultCameraAsMain) {
 				newCamera->active = true;
 			}
@@ -73,7 +70,7 @@ class Engine final: public EventListener {
 		// Add a command to allow saving the worlds from the console
 		this->saveCommand.commandName = "save";
 		this->saveCommand.action = [this](std::vector<std::string> args){
-      DebugLog(LOG_DEBUG, "Save", false);
+			DebugLog(LOG_DEBUG, "[ENGINE:Command] -> Save", false);
 			this->_worldManager.SaveWorlds();
 		};
 
@@ -107,7 +104,7 @@ class Engine final: public EventListener {
 	}
 
  	/// Show UI for debug, and the integrated editor.
-	bool UpdateEditorUI() {
+	bool UpdateEditorUI()  {
 #if ENGINE_EDITOR
 		if (this->engineContent.input.GetKeyDown(KeyCode::F3)) {
 			this->showDebugUI = !showDebugUI;
@@ -144,75 +141,92 @@ class Engine final: public EventListener {
 			}
 		}
 #endif
-		auto worlds = this->_worldManager.GetWorlds();
-		this->engineContent.input.Update();
 
-			for (auto &currentWorld : *worlds) {
-				if (!this->isEditor) {
-					currentWorld->PrePhysics();
-				}
-			}
+		if (const auto worlds = this->_worldManager.GetWorlds()) {
+			this->SetupWorlds();
 
-			this->engineContent.physicalSpace.Update(this->engineContent.renderer.GetDeltaTime());
+			this->engineContent.input.Update();
 
-		// Builtin fullscreen support (F11 is reserved)
-		if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
-			this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
-		}
-
-		this->engineContent.renderer.UpdateIO();
-		this->engineContent.renderer.StartUIRendering();
-
-#if ENGINE_EDITOR
-		bool changedState = this->UpdateEditorUI();
-#endif
-
-		if (this->engineContent.renderer.GetCurrentCamera() != nullptr) {
-			for (auto &currentWorld : *worlds) {
-				currentWorld->simulationCollider.position = this->engineContent.renderer.GetCurrentCamera()->position;
-				if (currentWorld != nullptr) {
-					currentWorld->CallRenderFunctions();
-				}
-			}
-		}
-
-		for (auto &currentWorld : *worlds) {
-			if (currentWorld != nullptr) {
+			for (auto & currentWorld : *worlds) {
 				if (!this->isEditor) {
 					currentWorld->Update();
 				} else {
 					currentWorld->EditorUpdate();
 				}
 			}
-		}
 
-		this->engineContent.renderer.Draw();
-		this->engineContent.renderer.Show();
-
-		for (auto &currentWorld : *worlds) {
-			if (currentWorld != nullptr) {
-				currentWorld->AlwayUpdate();
+			for (const auto & currentWorld : *worlds) {
 				if (!this->isEditor) {
-					currentWorld->EndUpdate();
+					currentWorld->PrePhysics();
 				}
 			}
-		}
 
-		auto requests = this->GetWorldManager()->GetAllDynamicObjectsRequests();
-		for (auto &request : requests) {
-			if (request == Request::SAVE) {
-				this->GetWorldManager()->SaveWorlds();
-			} else if (request == Request::EXIT) {
-				this->Exit();
-			}
-		}
+			this->engineContent.physicalSpace.Update(static_cast<float>(this->engineContent.renderer.GetDeltaTime()));
+
+			this->engineContent.renderer.UpdateIO();
+			this->engineContent.renderer.StartUIRendering();
 
 #if ENGINE_EDITOR
-		if (changedState) {
-			this->_worldManager.Reload();
-			this->SetupWorlds();
-		}
+			bool changedState = this->UpdateEditorUI();
+
+			if (changedState) {
+				this->SetupWorlds();
+			}
 #endif
+
+			// Builtin fullscreen support (F11 is reserved)
+			if (this->engineContent.input.GetKeyDown(KeyCode::F11)) {
+				this->engineContent.renderer.SetFullscreen(!this->engineContent.renderer.GetFullscreen());
+			}
+
+			if (this->engineContent.renderer.GetCurrentCamera() != nullptr) {
+				for (auto & currentWorld : *worlds) {
+					if (const auto currentCamera = this->engineContent.renderer.GetCurrentCamera()) {
+						currentWorld->simulationCollider.position = currentCamera->position;
+						currentWorld->CallRenderFunctions();
+					}
+				}
+			}
+
+			this->engineContent.renderer.Draw();
+			this->engineContent.renderer.Show();
+
+			for (auto &currentWorld : *worlds) {
+				if (currentWorld != nullptr) {
+					currentWorld->AlwayUpdate();
+					if (!this->isEditor) {
+						currentWorld->EndUpdate();
+					}
+				}
+			}
+
+			auto requests = this->GetWorldManager()->GetAllDynamicObjectsRequests();
+			for (auto &request : requests) {
+				if (request == Request::SAVE) {
+					this->GetWorldManager()->SaveWorlds();
+				} else if (request == Request::EXIT) {
+					this->Exit();
+				}
+			}
+
+#if ENGINE_EDITOR
+			if (changedState) {
+				this->isEditor = !this->isEditor;
+				this->SetupWorlds();
+
+				for (auto & world : *worlds) {
+					DebugLog(LOG_DEBUG, "Active world: " << world->worldName, false);
+					for (auto & entity : *world->GetEntities()) {
+						DebugLog(LOG_DEBUG, "Active entity: " << entity.second->entityName, false);
+						entity.second->worldFirst = true;
+						for (auto &component : entity.second->components) {
+							component->worldFirst = true;
+						}
+					}
+				}
+			}
+#endif
+		}
 	}
 
 	void OnEvent(Event *event) override { 
@@ -250,7 +264,7 @@ class Engine final: public EventListener {
 	PrettyEngine::WorldManager *GetWorldManager() { return &this->_worldManager; }
 
   private:
-  	int logLimit;
+  		int logLimit;
 
 		EventManager eventManager;
 

@@ -3,7 +3,7 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "tests.h"
+#include "tests.hpp"
 
 // this file is about testing user misc. repros submitted via github issues, et cetera.
 
@@ -392,5 +392,56 @@ b = []
 			[a]
 			y = 2
 		)"sv);
+	}
+
+	SECTION("tomlplusplus/issues/207") // https://github.com/marzer/tomlplusplus/issues/207
+	{
+		enum class an_enum
+		{
+			zero,
+			one,
+			two,
+			three
+		};
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   "val = 2\n",
+							   [](auto&& tbl)
+							   {
+								   const auto val = tbl["val"].template value_or<an_enum>(an_enum::zero);
+								   CHECK(val == an_enum::two);
+							   });
+	}
+
+	SECTION("tomlplusplus/issues/176") // https://github.com/marzer/tomlplusplus/issues/176
+	{
+		parsing_should_succeed(FILE_LINE_ARGS, "  a      = \"x\\ty\""sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "\"a\"    = \"x\\ty\""sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "\"a\tb\" = \"x\\ty\""sv);
+		parsing_should_fail(FILE_LINE_ARGS, "\"a\nb\" = \"x\\ty\""sv); // literal newline in single-line key
+
+		static constexpr auto input = R"(
+								"a"    = "x\ty"
+								"a\tb" = "x\ty"
+								"a\nb" = "x\ty"
+								)"sv;
+
+		static constexpr auto output = "a = 'x\ty'\n"
+									   "\"a\\tb\" = 'x\ty'\n" // tab and newlines in keys should be emitted
+									   "\"a\\nb\" = 'x\ty'"	  // as escapes, not literals
+									   ""sv;
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   input,
+							   [&](auto&& tbl)
+							   {
+								   CHECK(tbl["a"]);
+								   CHECK(tbl["a\tb"]);
+								   CHECK(tbl["a\nb"]);
+
+								   std::stringstream ss;
+								   ss << tbl;
+								   CHECK(ss.str() == output);
+							   });
 	}
 }

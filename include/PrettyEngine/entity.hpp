@@ -4,7 +4,6 @@
 #include <PrettyEngine/dynamicObject.hpp>
 #include <PrettyEngine/PrettyError.hpp>
 #include <PrettyEngine/transform.hpp>
-#include <PrettyEngine/tags.hpp>
 
 #include <Guid.hpp>
 
@@ -17,10 +16,6 @@ namespace PrettyEngine {
 
 	class Component: public DynamicObject {
 	public:
-		~Component() {
-			this->OnDestroy();
-		}
-
 		Transform* GetTransform() const {
 			return dynamic_cast<Transform*>(this->owner);
 		}

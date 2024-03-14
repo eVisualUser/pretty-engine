@@ -1,8 +1,6 @@
 #ifndef H_INTERN_EDITOR
 #define H_INTERN_EDITOR
 
-#if ENGINE_EDITOR
-
 #include <PrettyEngine/EngineContent.hpp>
 #include <PrettyEngine/editor/PropertyEditor.hpp>
 #include <PrettyEngine/Input.hpp>
@@ -110,7 +108,7 @@ class Editor {
      				}
     			}
 					world->GetLastEntityRegistred()->serialObjectUnique = entity;
-					world->GetLastEntityRegistred()->serialObjectUnique = entity;
+					world->GetLastEntityRegistred()->serialObjectName = entity;
     			if (entitiesWithSameName > 0) {
 					world->GetLastEntityRegistred()->serialObjectUnique += "_" + std::to_string(entitiesWithSameName);
     			}
@@ -332,15 +330,16 @@ class Editor {
 				if (ImGui::Button("Create a new world")) {
 					if (CreateFile(realWorldPath)) {
 						DebugLog(LOG_DEBUG, "Created new world: " << realWorldPath, false);
-						worldManager->AddWorld(realWorldPath, this->worldNameBuffer);
+						worldManager->AddWorld(realWorldPath, this->worldNameBuffer)->Load();
+
 						return ImGui::End();
 					} else {
 						DebugLog(LOG_DEBUG, "Failed to create file: " << realWorldPath, true);
 					}
 				}
-			} else if (ImGui::Button("Open")) {
-				DebugLog(LOG_DEBUG, "Open world: " << realWorldPath, false);
-				worldManager->AddWorld(realWorldPath, this->worldNameBuffer);
+			} else if (ImGui::Button("Load")) {
+				DebugLog(LOG_DEBUG, "Load world: " << realWorldPath, false);
+				worldManager->AddWorld(realWorldPath, this->worldNameBuffer)->Load();
 				return ImGui::End();
 			}
 			
@@ -351,8 +350,21 @@ class Editor {
 					if (ImGui::BeginTabItem(world->worldName.c_str())) {
 						Editor::ImGuiInputString("World Name:", &world->worldName);
 
+						if (ImGui::Button("Unload")) {
+							worldManager->RemoveWorld(world->worldName);
+							ImGui::EndTabItem();
+							break;
+						} else if (ImGui::Button("Save & Unload")) {
+							world->Save();
+							worldManager->RemoveWorld(world->worldName);
+							ImGui::EndTabItem();
+							break;
+						} else if (ImGui::Button("Save")) {
+							world->Save();
+						}
+						
 						this->ShowCreateNewEntity(world);
-
+						
 						ImGui::NewLine();
 						ImGui::Text("Entities: %lli", world->entities.size());
 						if (ImGui::BeginTable("Entities", 4)) {
@@ -425,49 +437,41 @@ class Editor {
 		if (worldManager != nullptr) {
 			if (isEditor != nullptr) {
 				if (ImGui::Begin("Play Mode")) {
-					if (isEditor != nullptr) {
-						if (*isEditor && ImGui::Button("Play")) {
-							DebugLog(LOG_DEBUG, "[EDITOR] -> Play", false);
+					ImGui::Checkbox("Reload on Play", &this->reloadOnPlay);
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("It can cause more loading time to play but provide a more accurate result, avoiding editor artefacts.");
+					}
 
-							worldManager->SaveWorlds();
+					if (*isEditor && ImGui::Button("Play")) {
+						DebugLog(LOG_DEBUG, "[EDITOR] -> Play", false);
 
-							*isEditor = false;
-							changedState = true;
-						} else	if (!*isEditor && ImGui::Button("Stop")) {
+						worldManager->SaveWorlds();
+
+						if (this->reloadOnPlay) {
 							engineContent->renderer.visualObjects.clear();
 							engineContent->physicalSpace.Clear();
 							engineContent->audioEngine.Clear();
 							engineContent->input.Clear();
 							engineContent->renderer.Clear(true);
-			    			this->selectedEntities.clear();
+							this->selectedEntities.clear();
 
 							worldManager->Reload();
-
-							*isEditor = true;
-							changedState = true;
 						}
+
+						changedState = true;
+					} else	if (!*isEditor && ImGui::Button("Stop")) {
+						DebugLog(LOG_DEBUG, "[EDITOR] -> Stop", false);
+
+			    		this->selectedEntities.clear();
+
+						worldManager->Reload();
+
+						changedState = true;
 					}
-				} else {
-					DebugLog(LOG_ERROR, "Nullptr of isEditor", true);
-					std::exit(-1);
-				}
+				}					
 			}
 
 			ImGui::End();
-
-			if (changedState) {
-				for (auto & world : *worldManager->GetWorlds()) {
-					DebugLog(LOG_DEBUG, "Active world: " << world->worldName, false);
-					for (auto & entity : *world->GetEntities()) {
-						DebugLog(LOG_DEBUG, "Active entity: " << entity.second->entityName, false);
-						entity.second->worldFirst = true;
-						for (auto &component : entity.second->components) {
-							component->worldFirst = true;
-						}
-					}
-				}
-				return changedState;
-			}
 
 			this->ShowWorldDebugInfo(&engineContent->renderer);
 			this->ShowWorldEditor(worldManager);
@@ -497,8 +501,8 @@ class Editor {
 	std::vector<std::shared_ptr<PropertyEditor>> _propertyEditorList;
 
 	bool createComponent = false;
+	bool reloadOnPlay = false;
 };
 } // namespace PrettyEngine
 
-#endif
 #endif

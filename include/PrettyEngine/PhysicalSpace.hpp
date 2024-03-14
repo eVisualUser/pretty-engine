@@ -17,13 +17,13 @@ namespace PrettyEngine {
 	class PhysicalSpace {
 	public:
 		void AddCollider(std::string layerName, Collider* collider) {
-			auto layer = this->GetOrCreateLayer(layerName);
+			auto layer = this->GetOrCreateLayer(std::move(layerName));
 			layer->push_back(collider);
 		}
 
 		bool RemoveCollider(std::string layerName, Collider* collider) {
-			auto layer = this->GetOrCreateLayer(layerName);
-			size_t index = 0;
+			auto layer = this->GetOrCreateLayer(std::move(layerName));
+			int index = 0;
 			for(auto & i: *layer) {
 				if (i->name == collider->name) {
 					layer->erase(layer->begin() + index);
@@ -43,14 +43,16 @@ namespace PrettyEngine {
 				}
 			}
 			this->_colliders.insert_or_assign(layerName, std::vector<Collider*>());
-			return GetOrCreateLayer(layerName);
+			return &this->_colliders[layerName];
 		}
 
 		std::vector<Collider*>* FindColliderLayer(Collider* collider) {
-			for(auto & layer: this->_colliders) {
-				for(auto & i: layer.second) {
-					if (i->name == collider->name) {
-						return &layer.second;
+			if (collider != nullptr) {
+				for(auto & layer: this->_colliders) {
+					for(auto i: layer.second) {
+						if (i != nullptr && i->name == collider->name) {
+							return &layer.second;
+						}
 					}
 				}
 			}
@@ -61,22 +63,34 @@ namespace PrettyEngine {
 		std::vector<Collision> FindCollisions(Collider* collider) {
 			std::vector<Collision> out;
 
-			auto layer = this->FindColliderLayer(collider);
-			
-			for(auto & i: *layer) {
-				if (i->name != collider->name && i->OtherIn(collider)) {
-					Collision collision;
-					collision.colliderSource = collider;
-					collision.colliderOther = i;
+			const auto layer = this->FindColliderLayer(collider);
 
-					out.push_back(collision);
+			if (collider != nullptr) {
+				if (layer != nullptr) {
+					for(auto & otherCollider: *layer) {
+						if (otherCollider != nullptr) {
+							if (otherCollider->name.c_str() != collider->name.c_str() && otherCollider->OtherIn(collider)) {
+								Collision collision;
+								collision.colliderSource = collider;
+								collision.colliderOther = otherCollider;
+
+								out.push_back(collision);
+							}
+						} else {
+							DebugLog(LOG_ERROR, "Null collider registred.", true);
+						}
+					}
+				} else {
+					DebugLog(LOG_ERROR, "Failed to find collider layer of: " << collider->name, true);
 				}
+			} else {
+				DebugLog(LOG_ERROR, "Collider is nullptr.", true);
 			}
 
 			return out;
 		}
 
-		void UpdateRigidbodyPosition(std::vector<Collision>* collisions, Collider* collider, float deltaTime) {
+		void UpdateRigidbodyPosition(const std::vector<Collision>* collisions, Collider* collider, float deltaTime) const {
 			collider->position += collider->velocity;
 			collider->position += collider->gravity * collider->mass;
 
@@ -106,14 +120,16 @@ namespace PrettyEngine {
 			for(auto & layer: this->_colliders) {
 				for(auto & collider: layer.second) {
 					auto collisions = this->FindCollisions(collider);
-					this->UpdateRigidBody(collider, &collisions, deltaTime);
-					this->UpdateRigidbodyPosition(&collisions, collider, deltaTime);
-					this->_collisions.insert(std::make_pair(collider, collisions));
+					if (!collisions.empty()) {
+						this->UpdateRigidBody(collider, &collisions, deltaTime);
+						this->UpdateRigidbodyPosition(&collisions, collider, deltaTime);
+						this->_collisions.insert(std::make_pair(collider, collisions));
+					}
 				}
 			}
 		}
 
-		void UpdateRigidBody(Collider* collider, std::vector<Collision>* collisions, float deltaTime) {
+		void UpdateRigidBody(Collider* collider, std::vector<Collision>* collisions, float deltaTime) const {
 			if (collider->isRigidBody) {
 				this->UpdateRigidbodyPosition(collisions, collider, deltaTime);
 			}

@@ -83,14 +83,16 @@ namespace PrettyEngine {
 			this->_worlds.push_back(newWorld);
 		}
 
-		void AddWorld(std::string path, std::string name = "NewWorld") {
+		World* AddWorld(std::string path, std::string name = "NewWorld") {
 			this->_worlds.push_back(std::make_shared<World>(path));
 
 			if (const auto addedWorld = this->_worlds.back()) {
 				addedWorld->worldName = std::move(name);
-			} else {
-				DebugLog(LOG_ERROR, "Failed to get back added world.", true);
+				return addedWorld.get();
 			}
+
+			DebugLog(LOG_ERROR, "Failed to get back added world.", true);
+			return nullptr;
 		}
 
 		std::vector<Request> GetAllDynamicObjectsRequests() {
@@ -109,8 +111,8 @@ namespace PrettyEngine {
 		}
 
 		// Reload the worlds
-  		void Reload() {
-   			for(auto & world: this->_worlds) {
+  		void Reload() const {
+   			for(const auto & world: this->_worlds) {
    				world->Clear();
    				world->Load();
    			}

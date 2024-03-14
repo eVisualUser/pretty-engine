@@ -481,13 +481,15 @@ namespace PrettyEngine {
                                     this->SwitchTo2D();
                                 }
 
-                                if (object != nullptr && object->active) {
+                                if (object != nullptr && object->renderModel != nullptr && object->active) {
                                     auto projection = glm::identity<glm::mat4>();
 
                                     if (!object->screenObject) {
-                                        if (object->renderModel->overrideProjection) {
-                                            object->renderModel->projection->aspectRatio = aspectRatio;
-                                            projection = glm::perspective(glm::radians(object->renderModel->projection->fov), object->renderModel->projection->aspectRatio, object->renderModel->projection->nearPlane, object->renderModel->projection->farPlane);
+                                        if (object->renderModel->projection != nullptr) {
+                                        	if (object->renderModel->overrideProjection) {
+                                        		object->renderModel->projection->aspectRatio = aspectRatio;
+                                        		projection = glm::perspective(glm::radians(object->renderModel->projection->fov), object->renderModel->projection->aspectRatio, object->renderModel->projection->nearPlane, object->renderModel->projection->farPlane);
+                                        	}
                                         } else {
                                             cameraProjection->aspectRatio = aspectRatio;
                                             projection = glm::perspective(glm::radians(cameraProjection->fov), cameraProjection->aspectRatio, cameraProjection->nearPlane, cameraProjection->farPlane);
@@ -517,7 +519,7 @@ namespace PrettyEngine {
                                         }
 
                                         for(auto & uniformMaker: this->_uniformMakers) {
-                                            uniformMaker(object.get(), &camera);
+                                            uniformMaker(object, &camera);
                                         }
 
                                         Graphics::BindVariable(shaderProgram->uniforms["Model"], modelTransform);
@@ -554,11 +556,11 @@ namespace PrettyEngine {
                                             }
 
                                             for(auto & renderFeature: this->_renderFeatures) {
-                                                renderFeature->OnUniform(object.get());
+                                                renderFeature->OnUniform(object);
                                             }
 
                                             for(auto & renderFeature: this->_renderFeatures) {
-                                                renderFeature->OnRender(object.get());
+                                                renderFeature->OnRender(object);
                                             }
 
                                             if (object->renderModel->useTexture) {

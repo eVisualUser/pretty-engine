@@ -36,6 +36,7 @@ set(PORTAUDIO_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/portaudio/include")
 message("-- Boxer")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/Boxer")
 message("-- TomlPlusPlus")
+set(TOML_EXCEPTIONS 0)
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/tomlplusplus")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/crossguid")
 
@@ -98,7 +99,7 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/external/openal-soft")
 
 project(external)
 
-add_library(external "${CMAKE_SOURCE_DIR}/source/external.cpp")
+add_library(external SHARED "${CMAKE_SOURCE_DIR}/source/external.cpp")
 target_link_libraries(external PUBLIC
 	Boxer
  	glfw

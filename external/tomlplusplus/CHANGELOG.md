@@ -21,6 +21,34 @@ template:
 
 -->
 
+## v3.4.0
+
+#### Fixes
+
+-   fixed `value_flags` not being preserved correctly when inserting into tables and arrays (#108) (@LebJe)
+-   fixed `toml::value::flags()` not being cleared when `std::move`-ing a value
+-   fixed error in README (#195) (@andrewkcorcoran)
+-   fixed compiler error when using NVCC (#198) (@thompsonnoahe)
+-   fixed `noexcept(...)` sometimes being incorrectly derived on `for_each()`
+-   fixed `for_each()` compilation error on GCC &lt;= 7 (#197) (@sagi-ottopia, @damirbarr)
+-   fixed `FLT_RADIX` check getting broken by Intel MKL headers (#202) (@iago-lito)
+-   fixed keys containing `\t` incorrectly formatting as bare keys (@jasmine-zhu, @arp242)
+-   fixed keys containing `\t` and `\n` not round-tripping correctly (@arp242)
+
+#### Additions
+
+-   added support for using enums with `value_or()`
+
+#### Changes:
+
+-   renamed header files to have `.hpp` extension (`toml.h` is still present for backwards-compatibility)
+
+#### Build system:
+
+-   fixed meson builds with `-Ddefault_library=static` having hidden symbols on GNU compilers (#201) (@vlad0x00)
+
+<br><br>
+
 ## v3.3.0
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.3.0) 2023-01-29

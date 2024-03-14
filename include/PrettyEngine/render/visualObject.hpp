@@ -16,6 +16,12 @@ namespace PrettyEngine {
 	/// Define the shape and way to render of a VisualObject.
 	class RenderModel {
 	public:
+		~RenderModel() {
+			if (this->shaderProgram != nullptr) {
+				this->shaderProgram->userCount--;
+			}
+		}
+
 		void SetMesh(Mesh* newMesh) {
 			this->mesh = newMesh;
 			this->mesh->userCount++;
@@ -29,6 +35,7 @@ namespace PrettyEngine {
 		}
 		
 		void SetShaderProgram(GLShaderProgramRefs* newShaderProgram) {
+			newShaderProgram->userCount++;
 			this->shaderProgram = newShaderProgram;
 		}
 	
@@ -94,6 +101,7 @@ namespace PrettyEngine {
 				if (texture->textureType == textureType) {
 					texture->userCount--;
 					this->textures.erase(this->textures.begin() + index);
+					return;
 				}
 				index++;
 			}
@@ -164,7 +172,6 @@ namespace PrettyEngine {
 			}
 		}
 
-	public:
 		bool render = true;
 		bool active = true;
 		bool d3 = false;
@@ -173,9 +180,9 @@ namespace PrettyEngine {
 
 		unsigned int renderLayer = 0;
 
-		RenderModel* renderModel;
+		RenderModel* renderModel = nullptr;
 
-		VisualObject* parent;
+		VisualObject* parent = nullptr;
 		bool haveParent = false;
 
 		std::vector<Texture*> textures;

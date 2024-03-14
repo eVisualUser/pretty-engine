@@ -33,7 +33,6 @@ namespace Custom {
 					this->light.lightType = PrettyEngine::LightType::SpotLight;
 
 					// Load spot light specific public variables
-
 					auto cutoff = this->GetSerializedFieldValue("SpotLightCutOff");
 					if (!cutoff.empty()) {
 						this->light.spotLightCutOff = stof(cutoff);

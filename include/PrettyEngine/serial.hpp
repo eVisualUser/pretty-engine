@@ -4,12 +4,10 @@
 #include <PrettyEngine/debug/debug.hpp>
 
 #include <sstream>
-#include <toml++/toml.h>
+#include <toml++/toml.hpp>
 #include <Guid.hpp>
 
 #include <string>
-#include <unordered_map>
-#include <future>
 
 namespace PrettyEngine {
 	#define SERIAL_TOKEN(token) #token
@@ -18,15 +16,15 @@ namespace PrettyEngine {
 		Toml,
 	};
 
-	struct SerializedField {
+	class SerializedField {
 	  public:
 		SerializedField(std::string newType, std::string newName, std::string newValue) { 
-			this->type = newType;
-			this->name = newName;
-			this->value = newValue;
+			this->type = std::move(newType);
+			this->name = std::move(newName);
+			this->value = std::move(newValue);
 		}
 
-		SerializedField() {}
+		SerializedField() = default;
 
 		std::string type;
 		std::string name;
@@ -36,16 +34,18 @@ namespace PrettyEngine {
  	/// Serialized object
 	class SerialObject {
 	public:
+		virtual ~SerialObject() = default;
+
 		virtual void AddToToml(toml::table* table) { DebugLog(LOG_DEBUG, "To do", false); }
 		virtual void FromToml(toml::table* table) { DebugLog(LOG_DEBUG, "To do", false); }
 
 		void SetObjectSerializedName(std::string newName) {
-			this->serialObjectName = newName;
+			this->serialObjectName = std::move(newName);
 		}
 
 		void SetupSerial(std::string newObjectName, std::string newUnique) {
-			this->SetSerializedUnique(newUnique);
-			this->SetObjectSerializedName(newObjectName);
+			this->SetSerializedUnique(std::move(newUnique));
+			this->SetObjectSerializedName(std::move(newObjectName));
 		}
 
 		std::string GetObjectSerializedName() { return this->serialObjectName; }

@@ -24,7 +24,7 @@ namespace PrettyEngine {
 		void Initialize(std::string& publicRelativeFilePath);
 
 		std::string GetFilePath() {
-			return this->GetObjectSerializedUnique();
+			return this->path;
 		}
 
 		void SetUsed(bool state) {

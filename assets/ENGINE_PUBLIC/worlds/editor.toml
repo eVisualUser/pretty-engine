@@ -55,7 +55,7 @@ object = 'Editor'
     ObjectUnique = 'Editor'
 
         [entities.Editor.serial.fields]
-        'Camera Speed' = [ 'float', '10.000000' ]
+        'Camera Speed' = [ 'f', '10.000000' ]
 
     [entities.Editor.transform]
     position = [ 0.22937899827957153, -1.1347949504852295, 0.0 ]

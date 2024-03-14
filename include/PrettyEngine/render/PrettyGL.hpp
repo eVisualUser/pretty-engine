@@ -1,6 +1,7 @@
 #ifndef H_PRETTY_GL
 #define H_PRETTY_GL
 
+#include <PrettyEngine/gc.hpp>
 #include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/localization.hpp>
 #include <PrettyEngine/utils.hpp>
@@ -9,7 +10,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <iostream>
 
 namespace PrettyEngine {
 	#define GLENUM (GLenum)
@@ -32,14 +32,14 @@ namespace PrettyEngine {
 		TessEval = GL_TESS_EVALUATION_SHADER,
 		Compute = GL_COMPUTE_SHADER,
 	};
-        
+
     enum class MeshDrawType {
         Dynamic = GL_DYNAMIC_DRAW,
         Static = GL_STATIC_DRAW,
         Stream = GL_STREAM_DRAW,
     };
 
-	class GLShaderProgramRefs {
+	class GLShaderProgramRefs: public GCObject {
 	public:
 		unsigned int shaderProgram;
 

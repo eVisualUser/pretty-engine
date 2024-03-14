@@ -59,9 +59,11 @@ namespace Custom {
 		}
 
 		void OnEndUpdate() override {
-			this->_ownerEntity->position = this->_colliderA.position;
-			this->_colliderA.SetScale(this->_ownerEntity->scale);
-			this->_ownerEntity->rotation = this->_colliderA.rotation;
+			if (this->_ownerEntity != nullptr) {
+				this->_ownerEntity->position = this->_colliderA.position;
+				this->_colliderA.SetScale(this->_ownerEntity->scale);
+				this->_ownerEntity->rotation = this->_colliderA.rotation;
+			}
 		}
 
 		void OnDestroy() override {

@@ -185,7 +185,7 @@ class Editor : public virtual Entity {
 
         if (this->engineContent->input.GetKeyPress(KeyCode::LeftControl) &&
             this->engineContent->input.GetKeyDown(KeyCode::S)) {
-            DebugLog(LOG_DEBUG, "Save to file: " << this->file, false);
+            DebugLog(LOG_DEBUG, "Save World", false);
 			Event saveEvent; 
 			saveEvent.AddTag("save");
 			this->engineContent->eventManager.SendEvent(&saveEvent);
@@ -299,17 +299,10 @@ class Editor : public virtual Entity {
     }
 
   private:
-    PublicProperty<float> _cameraSpeed = PublicProperty<float>(this,
-        "Camera Speed",
-        10.0f,
-        SERIAL_FUNCTION(float, std::to_string(x)),
-        DESERIAL_FUNCTION(std::stof(x))
-    );
+    PublicProperty<float> _cameraSpeed = PUBLIC_FLOAT(this, "Camera Speed", 10.0f);
 
     bool actionBox = false;
     ImVec2 actionBoxStartPos;
-
-    std::string file = "game.toml";
 
     float _speed = 3.0f;
 

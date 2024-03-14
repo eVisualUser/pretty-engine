@@ -3,7 +3,7 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "tests.h"
+#include "tests.hpp"
 
 TEST_CASE("tables - moving")
 {
@@ -403,6 +403,23 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 0u);
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+	// insert with value_flags
+	{
+		tbl.clear();
+
+		auto hex = toml::value{ 1 };
+		hex.flags(value_flags::format_as_hexadecimal);
+		CHECK(hex.flags() == value_flags::format_as_hexadecimal);
+
+		tbl.insert("hex", hex);
+		CHECK(hex.flags() == value_flags::format_as_hexadecimal);
+		CHECK(tbl["hex"].as_integer()->flags() == value_flags::format_as_hexadecimal);
+
+		tbl.insert("hex2", std::move(hex));
+		CHECK(hex.flags() == value_flags{});
+		CHECK(tbl["hex2"].as_integer()->flags() == value_flags::format_as_hexadecimal);
+	}
 }
 
 TEST_CASE("tables - toml_formatter")
@@ -598,4 +615,58 @@ key8 = [
 		CHECK(to_string(input, toml_formatter::default_flags, format_flags::indentation)
 			  == expected_without_indentation);
 	}
+}
+
+TEST_CASE("tables - for_each")
+{
+	const auto tbl = table{ { "a", 1 }, { "b", 2.0 }, { "c", 3 }, { "d", "four" }, { "e", false } };
+
+	SECTION("type checking")
+	{
+		int count	= 0;
+		int ints	= 0;
+		int floats	= 0;
+		int numbers = 0;
+		int strings = 0;
+		int bools	= 0;
+		tbl.for_each(
+			[&](const auto& v) noexcept
+			{
+				count++;
+				if constexpr (toml::is_integer<decltype(v)>)
+					ints++;
+				if constexpr (toml::is_floating_point<decltype(v)>)
+					floats++;
+				if constexpr (toml::is_number<decltype(v)>)
+					numbers++;
+				if constexpr (toml::is_string<decltype(v)>)
+					strings++;
+				if constexpr (toml::is_boolean<decltype(v)>)
+					bools++;
+			});
+		CHECK(count == 5);
+		CHECK(ints == 2);
+		CHECK(floats == 1);
+		CHECK(numbers == (ints + floats));
+		CHECK(strings == 1);
+		CHECK(bools == 1);
+	}
+
+#if !TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
+	SECTION("early-exit (key, val)")
+	{
+		int count = 0;
+		tbl.for_each([&](const key& /*k*/, const auto& /*v*/) noexcept -> bool { return ++count < 3; });
+		CHECK(count == 3);
+	}
+
+	SECTION("early-exit (val)")
+	{
+		int count = 0;
+		tbl.for_each([&](const auto& /*v*/) noexcept -> bool { return ++count < 3; });
+		CHECK(count == 3);
+	}
+
+#endif
 }

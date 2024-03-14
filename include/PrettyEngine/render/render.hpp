@@ -24,7 +24,6 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
-#include <sstream>
 
 namespace PrettyEngine {
 	#define CHECK_OPENGL_ERROR() std::cout << "OpenGL Error: " << glGetError() << std::endl;
@@ -74,7 +73,7 @@ namespace PrettyEngine {
 			}
 		}
 
-		void RegisterVisualObject(std::string& name, std::shared_ptr<VisualObject>& visualObject) {
+		void RegisterVisualObject(std::string& name, VisualObject* visualObject) {
 			this->CreateLayer(visualObject->renderLayer);
 
 			auto& list = this->visualObjects[visualObject->renderLayer];
@@ -84,7 +83,7 @@ namespace PrettyEngine {
 			list.insert(std::make_pair(name, visualObject));
 		}
 
-		void UnRegisterVisualObject(std::string& name) {
+		bool UnRegisterVisualObject(std::string& name) {
 			auto& list = this->visualObjects;
 
 			for (auto & sublist: list) {
@@ -92,19 +91,21 @@ namespace PrettyEngine {
 					if (element.first == name) {
 						element.second->OnRendererUnRegister((void*)this);
 						sublist.erase(name);
-						return;
+						return true;
 					}
 				}
 			}
+
+			return false;
 		}
 		
-		void SetVisualObjectLayer(std::string name, std::shared_ptr<VisualObject> visualObject) {
+		void SetVisualObjectLayer(std::string name, VisualObject* visualObject) {
 			this->UnRegisterVisualObject(name);
 			this->RegisterVisualObject(name, visualObject);
 		}
 
 		/// Compile and register a shader from source.
-		void AddShader(std::string& name, ShaderType shaderType, const char* shader) {
+		std::string AddShader(const std::string& name, ShaderType shaderType, const char* shader) {
 			if (!this->glShaders.contains(name)) {
 				if (GL_CHECK_ERROR()) {
 					DebugLog(LOG_ERROR, "OpengGL error before compiling: " << name, true);
@@ -132,6 +133,8 @@ namespace PrettyEngine {
 					DebugLog(LOG_ERROR, "OpengGL error after compiling: " << name, true);
 				}
 			}
+
+			return name;
 		}
 
 		GLShaderProgramRefs* AddShaderProgram(
@@ -141,7 +144,7 @@ namespace PrettyEngine {
 			std::vector<std::string> otherShaders = {}
 		);
 
-		void RemoveShaderProgram(std::string& name) {
+		void RemoveShaderProgram(const std::string& name) {
 			glDeleteProgram(this->glShaderPrograms[name].shaderProgram);
 			this->glShaderPrograms.erase(name);
 		}
@@ -223,16 +226,21 @@ namespace PrettyEngine {
 				auto texture = &element.second;
 				if (texture != nullptr && (texture->userCount <= 0 && texture->useGC || clearEverything)) {
 					this->RemoveTexture(texture->name);
-					return this->Clear();
+					return;
 				}
 			}
 
 			for (auto & element: this->glMeshList) {
 				auto mesh = &element.second;
 				if (mesh->userCount <= 0 && mesh->useGC || clearEverything) {
-     				DebugLog(LOG_WARNING, "Unused mesh: " << mesh->name, false);
 					this->RemoveMesh(element.first);
-					this->Clear();
+					return;
+				}
+			}
+
+			for (auto shaderProgram : this->glShaderPrograms) {
+				if (shaderProgram.second.userCount <= 0 && shaderProgram.second.useGC || clearEverything) {
+					this->RemoveShaderProgram(shaderProgram.first);
 					return;
 				}
 			}
@@ -436,7 +444,7 @@ namespace PrettyEngine {
 		std::vector<Camera> cameraList;
 
 		/// Contain all the visual objects
-		std::vector<std::unordered_map<std::string, std::shared_ptr<VisualObject>>> visualObjects;
+		std::vector<std::unordered_map<std::string, VisualObject*>> visualObjects;
 
 		std::vector<Light*> lights;
 

@@ -71,7 +71,7 @@ if(NOT ${extend} STREQUAL "")
 	string(REPLACE "\n" " " extend ${extend})
 endif()
 
-target_link_libraries(game custom components renderFeatures ${extend})
+target_link_libraries(game pretty custom components renderFeatures ${extend})
 target_compile_definitions(game PRIVATE ENGINE_EDITOR=0)
 
 # Editor
