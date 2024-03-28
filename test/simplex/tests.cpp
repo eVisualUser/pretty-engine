@@ -10,15 +10,22 @@ int main() {
 	simplex.PushFront(glm::vec3(0, 3, 0));
 	simplex.PushFront(glm::vec3(0, 4, 0));
 
-	try {
-		if(simplex[0] != glm::vec3(0, 4, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); } else { DebugLog(LOG_INFO, "Success Simplex PshFront 0", false); }
-		if(simplex[1] != glm::vec3(0, 3, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); } else { DebugLog(LOG_INFO, "Success Simplex PshFront 1", false); }
-		if(simplex[2] != glm::vec3(0, 2, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); } else { DebugLog(LOG_INFO, "Success Simplex PshFront 2", false); }
-		if(simplex[3] != glm::vec3(0, 1, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); } else { DebugLog(LOG_INFO, "Success Simplex PshFront 3", false); }
-	} catch(std::string err) {
-		DebugLog(LOG_ERROR, "Out: " << err, false);
-		return 1;
-	}
+	if (simplex.size() != 4) { DebugLog(LOG_ERROR, "Wrong size, get " << 4 << " but got " << simplex.size(), false); return 1; }
+	
+	if(simplex[0] != glm::vec3(0, 4, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); return 1; }
+	if(simplex[1] != glm::vec3(0, 3, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); return 1; }
+	if(simplex[2] != glm::vec3(0, 2, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); return 1; }
+	if(simplex[3] != glm::vec3(0, 1, 0)) { DebugLog(LOG_ERROR, "Failed Simplex PushFront", false); return 1; }
+
+
+	simplex = {glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 2, 0), glm::vec3(0, 3, 0)};
+
+	if (simplex.size() != 4) { DebugLog(LOG_ERROR, "Wrong size, get " << 4 << " but got " << simplex.size(), false); return 1; }
+	
+	if(simplex[0] != glm::vec3(0, 0, 0)) { DebugLog(LOG_ERROR, "Failed Simplex Assign", false); return 1; }
+	if(simplex[1] != glm::vec3(0, 1, 0)) { DebugLog(LOG_ERROR, "Failed Simplex Assign", false); return 1; }
+	if(simplex[2] != glm::vec3(0, 2, 0)) { DebugLog(LOG_ERROR, "Failed Simplex Assign", false); return 1; }
+	if(simplex[3] != glm::vec3(0, 3, 0)) { DebugLog(LOG_ERROR, "Failed Simplex Assign", false); return 1; }
 
 	return 0;
 }
