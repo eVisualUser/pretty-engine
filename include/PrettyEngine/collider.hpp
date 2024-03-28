@@ -2,6 +2,7 @@
 #define H_COLLIDER
 
 // Pretty Engine
+#include "PrettyEngine/utils.hpp"
 #include <PrettyEngine/render/mesh.hpp>
 #include <PrettyEngine/debug/debug.hpp>
 #include <PrettyEngine/transform.hpp>
@@ -20,17 +21,17 @@ namespace PrettyEngine {
 		Collider() = default;
 
 		bool OtherIn(Collider* other) { 
-			return this->GJKCheck((*other), 100);
+			return this->GJKCheck(*other, 10);
 		}
 
 		void SetMesh(Mesh* newMesh) { this->mesh = newMesh;	}
 
 		/// Return the minimum position
-		glm::vec3 GetMin() {
+		glm::vec3 GetMin() const {
 			return (this->position) - this->scale;
 		}
 
-		glm::vec3 GetInverseMin(bool halfScale = false) {
+		glm::vec3 GetInverseMin(const bool& halfScale = false) {
 			auto scale = this->scale;
 
 			if (halfScale) {
@@ -46,63 +47,63 @@ namespace PrettyEngine {
 
 		#pragma region GJK
 
-		glm::vec3 GJKFindFurthestPoint(glm::vec3 direction) const {
-			glm::vec3 maxPoint;
-			float maxDistance = -FLT_MAX;
+		glm::vec3 GJKFindFurthestPoint(const glm::vec3& direction) {
+			if (this->mesh->vertices.empty()) {
+				return glm::vec3(0.0f);
+			}
 
-			for (Vertex vertex : this->mesh->vertices) {
-				glm::vec4 rotatedVertex = this->rotation * glm::vec4(vertex.position, 1.0f);
-				glm::vec3 scaledVertex = glm::vec3(rotatedVertex) * this->scale;
-				glm::vec3 transformedVertex = glm::vec3(scaledVertex) + this->position;
+			glm::vec3 furthestPoint = this->TransformPosition(this->mesh->vertices[0].position);
+			float maxDistance = glm::dot(furthestPoint, direction);
+
+			for (size_t i = 1; i < this->mesh->vertices.size(); ++i) {
+				const auto& vertex = this->mesh->vertices[i];
+				const auto transformedVertex = this->TransformPosition(vertex.position);
 
 				float distance = glm::dot(transformedVertex, direction);
 				if (distance > maxDistance) {
 					maxDistance = distance;
-					maxPoint = transformedVertex;
+					furthestPoint = transformedVertex;
 				}
 			}
 
-			return maxPoint;
+			return furthestPoint;
 		}
 
 		/// Return the vertex on the Minkowski difference
-		glm::vec3 GJKSupport(const Collider &colliderB, glm::vec3 direction) { 
-			return this->GJKFindFurthestPoint(direction) - colliderB.GJKFindFurthestPoint(-direction); 
+		glm::vec3 GJKSupport(Collider &colliderB, glm::vec3 direction) {
+			return this->GJKFindFurthestPoint(direction) - colliderB.GJKFindFurthestPoint(-direction);
 		}
 
-		bool GJKCheck(const Collider &colliderB, int maxIterations) { 
-			glm::vec3 direction = this->position - colliderB.position;
-			direction = glm::normalize(direction);
+		bool GJKCheck(Collider &colliderB, int maxIterations) {
+			glm::vec3 relativeDirection = this->position - colliderB.position;
 
 			// Get default support
-			auto support = this->GJKSupport(colliderB, direction);
+			auto support = this->GJKSupport(colliderB, relativeDirection);
 
 			// Create the simplex
 			auto simplex = Simplex();
-			simplex.PushFront(support);
+			simplex.PushFront(-support);
 
 			// Direction toward the origin
-			glm::vec3 directionTowardOrigin = -direction;
+			glm::vec3 direction = -support;
 
-			for (int iteration = 0; iteration < maxIterations; ++iteration) {
-				support = this->GJKSupport(colliderB, directionTowardOrigin);
+			while (true) {
+				support = this->GJKSupport(colliderB, direction);
 
-				if (glm::dot(support, directionTowardOrigin) <= 0) {
+				if (glm::dot(support, direction) <= 0) {
 					return false; // no collision
 				}
 
 				simplex.PushFront(support);
 
-				if (GJKNextSimplex(simplex, directionTowardOrigin)) {
+				if (GJKNextSimplex(simplex, direction)) {
 					return true;
 				}
 			}
-
-			return true;
 		}
 
 		bool GJKSameDirection(const glm::vec3 &direction, const glm::vec3 &ao) {
-			return dot(direction, ao) > 0; 
+			return glm::dot(direction, ao) > 0;
 		}
 
 		bool GJKLine(Simplex &simplex, glm::vec3 &direction) {
@@ -143,13 +144,13 @@ namespace PrettyEngine {
 			} else {
 				if (GJKSameDirection(cross(ab, abc), ao)) {
 					return GJKLine(simplex = {a, b}, direction);
-				}
-
-				if (GJKSameDirection(abc, ao)) {
-					direction = abc;
 				} else {
-					simplex = {a, c, b};
-					direction = -abc;
+					if (GJKSameDirection(abc, ao)) {
+						direction = abc;
+					} else {
+						simplex = {a, c, b};
+						direction = -abc;
+					}
 				}
 			}
 
@@ -158,32 +159,38 @@ namespace PrettyEngine {
 
 		bool GJKTetrahedron(Simplex &simplex, glm::vec3 &direction) {
 			glm::vec3 a = simplex[0];
-			glm::vec3 b = simplex[1];
-			glm::vec3 c = simplex[2];
-			glm::vec3 d = simplex[3];
+		    glm::vec3 b = simplex[1];
+		    glm::vec3 c = simplex[2];
+		    glm::vec3 d = simplex[3];
 
-			glm::vec3 ab = b - a;
-			glm::vec3 ac = c - a;
-			glm::vec3 ad = d - a;
-			glm::vec3 ao = -a;
+		    glm::vec3 ab = b - a;
+		    glm::vec3 ac = c - a;
+		    glm::vec3 ad = d - a;
 
-			glm::vec3 abc = cross(ab, ac);
-			glm::vec3 acd = cross(ac, ad);
-			glm::vec3 adb = cross(ad, ab);
+		    glm::vec3 abc = glm::cross(ab, ac);
+		    glm::vec3 acd = glm::cross(ac, ad);
+		    glm::vec3 adb = glm::cross(ad, ab);
 
-			if (GJKSameDirection(abc, ao)) {
-				return GJKTriangle(simplex = {a, b, c}, direction);
-			}
+		    glm::vec3 ao = -a;
 
-			if (GJKSameDirection(acd, ao)) {
-				return GJKTriangle(simplex = {a, c, d}, direction);
-			}
+		    // Check if the origin is on the same side of each face as point 'a'
+		    bool isOutsideABC = glm::dot(abc, ao) > 0;
+		    bool isOutsideACD = glm::dot(acd, ao) > 0;
+		    bool isOutsideADB = glm::dot(adb, ao) > 0;
 
-			if (GJKSameDirection(adb, ao)) {
-				return GJKTriangle(simplex = {a, d, b}, direction);
-			}
+		    if (isOutsideABC && isOutsideACD && isOutsideADB) {
+		        // Origin is outside the tetrahedron, we need to find the new direction
+		        if (!GJKSameDirection(abc, ao)) {
+		            return GJKTriangle(simplex = {a, b, c}, direction);
+		        } else if (!GJKSameDirection(acd, ao)) {
+		            return GJKTriangle(simplex = {a, c, d}, direction);
+		        } else if (!GJKSameDirection(adb, ao)) {
+		            return GJKTriangle(simplex = {a, d, b}, direction);
+		        }
+		    }
 
-			return false;
+		    // Origin is inside or on the tetrahedron
+		    return true;
 		}
 
 		bool GJKNextSimplex(Simplex &simplex, glm::vec3 &direction) {
@@ -195,7 +202,6 @@ namespace PrettyEngine {
 			case 4:
 				return GJKTetrahedron(simplex, direction);
 			default:
-				DebugLog(LOG_ERROR, "Physics simplex not supported", true);
 				return false;
 			}
 		}

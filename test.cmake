@@ -1,9 +1,17 @@
 
 include(CTest)
 
+file(GLOB TestDirs "${CMAKE_SOURCE_DIR}/test/**/")
+
 project(test)
 
-add_executable(global_test "${CMAKE_SOURCE_DIR}/test/tests.cpp")
-target_link_libraries(global_test PRIVATE pretty)
+foreach(dir ${TestDirs})
+	file(GLOB TestFiles "${dir}/*.cpp")
 
-add_test(NAME "Global Test" COMMAND global_test)
+	get_filename_component(dirName ${dir} NAME)
+
+	add_executable(${dirName} ${TestFiles})
+	target_link_libraries(${dirName} PRIVATE pretty)
+
+	add_test(NAME "${dirName}" COMMAND ${dirName})
+endforeach()

@@ -68,12 +68,12 @@ namespace PrettyEngine {
 		}
 
 		T* GetValue() {
-			return this->value;
+			return &this->value;
 		}
 
-		Option<T>* operator =(T other) {
+		Option<T>& operator =(T other) {
 			this->value = other;
-			return this;
+			return *this;
 		}
 
 		bool HaveValue() {

@@ -34,8 +34,11 @@ namespace PrettyEngine {
 	};
 
     enum class MeshDrawType {
+    	/// Can be updated if needed but not recomended for each frame (see MeshDrawType::Stream)
         Dynamic = GL_DYNAMIC_DRAW,
+    	/// Cannot be updated each frame
         Static = GL_STATIC_DRAW,
+    	/// Can be updated each frame
         Stream = GL_STREAM_DRAW,
     };
 
@@ -45,7 +48,6 @@ namespace PrettyEngine {
 
 		std::unordered_map<std::string, unsigned int> uniforms;
 
-	public:
 		void CreateUniform(std::string keyName, std::string name) {
 			unsigned int id = glGetUniformLocation(this->shaderProgram, name.c_str());
 			this->uniforms.insert(std::make_pair(keyName, id));

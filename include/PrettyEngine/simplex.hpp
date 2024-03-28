@@ -8,21 +8,22 @@ namespace PrettyEngine {
 	class Simplex {
 	public:
 		Simplex(int initSize = 4) {
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < initSize; i++) {
 				this->_points[i] = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 		}
 
 		Simplex& operator=(std::initializer_list<glm::vec3> list) {
+			this->_size = 0;
+
 			for (auto &point: list) {
 				this->_points[this->_size++] = point;
 			}
-			this->_size = std::min(this->_size + 1, 4);
 			
 			return *this;
 		}
 
-		void PushFront(glm::vec3 point) { 
+		void PushFront(glm::vec3 point) {
 			this->_size++;
 			this->_size = std::min(this->_size + 1, 4);
 

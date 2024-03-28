@@ -35,6 +35,11 @@ using namespace PrettyEngine;
 namespace Custom {
 class Editor : public virtual Entity {
   public:
+    void OnSetup() override {
+        this->_cameraSpeed.DeserializeValue();
+        this->_renderToTexture.DeserializeValue();
+    }
+
     void OnEditorStart() override {
     	this->CreateTextureCamera();
 
@@ -103,7 +108,7 @@ class Editor : public virtual Entity {
 
     void OnUpdate() override {
     #if ENGINE_EDITOR
-        this->_cameraSpeed.UpdateValue();
+        this->_cameraSpeed.DeserializeValue();
     #endif
     }
 
@@ -113,20 +118,30 @@ class Editor : public virtual Entity {
 	    this->engineContent->input.RemoveKeyWatcher(&keyDown);
 	    this->engineContent->input.RemoveKeyWatcher(&keyLeft);
 	    this->engineContent->input.RemoveKeyWatcher(&keyRight);
+
+        this->_cameraSpeed.DeserializeValue();
+        this->_renderToTexture.DeserializeValue();
 #endif
 
     	this->CreateTextureCamera();
 	}
 
 	void CreateTextureCamera() {
-    	this->secondCamera = this->engineContent->renderer.AddCamera();
-    	this->secondCamera->active = true;
-    	this->secondCamera->SetTextureResolution(glm::vec2(1920, 1080));
-    	this->secondCamera->SetRenderToTexture(true);
+        if (this->engineContent->renderer.cameraList.size() <= 1) {
+        	this->secondCamera = this->engineContent->renderer.AddCamera();
+        } else {
+            this->secondCamera = &this->engineContent->renderer.cameraList.back();
+        }
+
+        if (this->secondCamera != nullptr) {
+            this->secondCamera->active = true;
+            this->secondCamera->SetTextureResolution(glm::vec2(1920, 1080));
+            this->secondCamera->SetRenderToTexture(true);
+        }
     }
 
     void OnRender() override {
-    	if (this->secondCamera != nullptr) {
+    	if ((*this->_renderToTexture.Get()) && this->secondCamera != nullptr) {
     		auto render = *this->GetComponentAs<Render>("Render").Resolve([this](Render** render) {
 				this->AddComponent<Render>("Render");
 				return true;
@@ -335,7 +350,8 @@ class Editor : public virtual Entity {
     }
 
   private:
-    PublicProperty<float> _cameraSpeed = PUBLIC_FLOAT(this, "Camera Speed", 10.0f);
+    PublicProperty<float> _cameraSpeed = PUBLIC_FLOAT("Camera Speed", 10.0f);
+    PublicProperty<bool> _renderToTexture = PUBLIC_BOOL("Render To Texture", false);
 
     bool actionBox = false;
     ImVec2 actionBoxStartPos;

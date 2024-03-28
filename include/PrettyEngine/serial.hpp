@@ -1,6 +1,7 @@
 #ifndef H_SERIAL
 #define H_SERIAL
 
+#include <PrettyEngine/PrettyError.hpp>
 #include <PrettyEngine/debug/debug.hpp>
 
 #include <sstream>
@@ -29,6 +30,11 @@ namespace PrettyEngine {
 		std::string type;
 		std::string name;
 		std::string value;
+	};
+
+	class PropertyEventListenner {
+	public:
+		virtual void OnSetupProperties() {};
 	};
 
  	/// Serialized object
@@ -193,6 +199,86 @@ namespace PrettyEngine {
 		std::string serialObjectName;
 		std::string serialObjectUnique;
 		std::vector<SerializedField> serialFields;
+
+		std::vector<PropertyEventListenner*> propertyEventListennerList;
+	};
+
+	template<typename T>
+	class PublicProperty: public PropertyEventListenner {
+	public:
+		PublicProperty(SerialObject* newContainer, const std::string& typeName, const std::string& newName, const T& newValue, std::function<std::string(T)> newSerializeFunction, std::function<T(std::string)> newDeserializeFunction) {
+			this->Initialize(newContainer, typeName, newName, newValue, newSerializeFunction, newDeserializeFunction);
+		}
+
+		~PublicProperty() {
+			this->_container.HaveValue([this](SerialObject* value) {
+				auto propertyEventListennerList = &value->propertyEventListennerList;
+				for(int i = 0; i < propertyEventListennerList->size(); i++) {
+					if ((*propertyEventListennerList)[i] == this) {
+						propertyEventListennerList->erase(propertyEventListennerList->begin() + i);
+						break;
+					}
+				}
+			});
+		}
+
+		void OnSetupProperties() override {
+			this->_container.HaveValue([this](SerialObject* value) {
+				value->AddSerializedField(this->_typeName, this->_name, (this->_serializeFunction)(this->_value));
+			});
+
+			this->DeserializeValue();
+		}
+
+		void Initialize(SerialObject* newContainer, const std::string& typeName, const std::string& newName, const T& newValue, std::function<std::string(T)> newSerializeFunction, std::function<T(std::string)> newDeserializeFunction) {
+			newContainer->propertyEventListennerList.push_back(this);
+
+			this->_name = newName;
+
+			this->_value = newValue;
+
+			this->_serializeFunction = newSerializeFunction;
+			this->_deserializeFunction = newDeserializeFunction;
+
+			this->_container = newContainer;
+
+			this->_typeName = typeName;
+		}
+
+		void DeserializeValue() {
+			this->_container.HaveValue([this](SerialObject* value) {
+				this->_value = this->_deserializeFunction(value->GetSerializedFieldValue(this->_name));
+			});
+		}
+
+		void SerializeValue() {
+			this->_container.HaveValue([this](SerialObject* value) {
+				if (auto serialiedField = value->GetSerializedField(this->_name)) {
+					serialiedField->value = this->_serializeFunction(value->GetSerializedField(this->_name)->value);
+				}
+			});
+		}
+
+		void Save() {
+			this->_container.HaveValue([this](SerialObject* value) {
+				value->GetSerializedField(this->_name)->value = (this->_serializeFunction)(this->_value);
+			});
+		}
+
+		T* Get() {
+			return &this->_value;
+		}
+
+	private:
+		std::function<std::string(const T&)> _serializeFunction;
+		std::function<T(const std::string&)> _deserializeFunction;
+
+		Option<SerialObject*> _container = Option<SerialObject*>(nullptr);
+
+		std::string _name;
+		std::string _typeName;
+
+		T _value;
 	};
 }
 

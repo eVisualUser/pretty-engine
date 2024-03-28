@@ -38,8 +38,7 @@ namespace PrettyEngine {
 			newShaderProgram->userCount++;
 			this->shaderProgram = newShaderProgram;
 		}
-	
-	public:
+
 		GLShaderProgramRefs* shaderProgram;
 		Mesh* mesh;
 		DrawMode drawMode = DrawMode::Triangles;

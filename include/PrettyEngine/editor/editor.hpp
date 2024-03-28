@@ -411,7 +411,7 @@ class Editor {
 		ImGui::End();
 	}
 
-	void ShowCollisionDebugger(EngineContent* engineContent) {
+	void ShowCollisionDebugger(EngineContent* engineContent) const {
 		if (ImGui::Begin("Collision Debugger")) {
 			for(auto & layer: *engineContent->physicalSpace.GetAllLayers()) {
 				if (ImGui::CollapsingHeader(layer.first.c_str())) {
@@ -424,6 +424,17 @@ class Editor {
 									ImGui::Text(" > ");
 									ImGui::SameLine();
 									ImGui::Text("%s", collision.colliderOther->name.c_str());
+									if (ImGui::CollapsingHeader((collision.colliderSource->name + "Mesh").c_str())) {
+										if (collision.colliderSource->mesh != nullptr) {
+											int index = 0;
+
+											for(auto & vertex: collision.colliderSource->mesh->vertices) {
+												auto transformedVertex = collision.colliderSource->TransformPosition(vertex.position);
+												ImGui::InputFloat3((collision.colliderSource->name + "Vertex[" + std::to_string(index) + "]").c_str(), &transformedVertex[0]);
+												index++;
+											}
+										}
+									}
 								}
 							}
 						}
@@ -506,23 +517,23 @@ class Editor {
 	}
 
   private:
-	char textInputworldToLoad[100];
+		char textInputworldToLoad[100];
 
-	std::string worldFileBuffer = "/worlds/new_world.toml";
-	std::string worldNameBuffer = "NewWorld";
+		std::string worldFileBuffer = "/worlds/new_world.toml";
+		std::string worldNameBuffer = "NewWorld";
 
-	std::vector<Entity*> selectedEntities;
+		std::vector<Entity*> selectedEntities;
 
-	std::vector<std::string> existingComponents;
-	std::vector<std::string> existingEntities;
+		std::vector<std::string> existingComponents;
+		std::vector<std::string> existingEntities;
 
-	std::vector<std::shared_ptr<PropertyEditor>> _propertyEditorList;
+		std::vector<std::shared_ptr<PropertyEditor>> _propertyEditorList;
 
-	bool createComponent = false;
-	bool reloadOnPlay = false;
-	bool saveCopyWhenStop = false;
+		bool createComponent = false;
+		bool reloadOnPlay = false;
+		bool saveCopyWhenStop = false;
 
-	std::string worldCopyDir = "../WorldsCopies";
+		std::string worldCopyDir = "../WorldsCopies";
 };
 } // namespace PrettyEngine
 

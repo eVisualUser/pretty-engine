@@ -46,7 +46,7 @@ namespace PrettyEngine {
 
 	void AudioSource::LoadFrequency(float frequency, float duration, float sampleRate) {
 		if (this->openALBuffer != 0) {
-			alSourcei(this->openALSource, AL_BUFFER, NULL);
+			alSourcei(this->openALSource, AL_BUFFER, 0);
 		}
 
 		if (this->openALBuffer == 0) {
@@ -72,7 +72,7 @@ namespace PrettyEngine {
 
 	void AudioSource::LoadWAVAudio(std::string fileName) {
 			if (this->openALBuffer != 0) {
-				alSourcei(this->openALSource, AL_BUFFER, NULL);
+				alSourcei(this->openALSource, AL_BUFFER, 0);
 			}
 
 			if (this->openALBuffer == 0) {
@@ -80,7 +80,7 @@ namespace PrettyEngine {
 			}
 
 			drwav wav;
-			if (!drwav_init_file(&wav, fileName.c_str(), NULL)) {
+			if (!drwav_init_file(&wav, fileName.c_str(), nullptr)) {
     			DebugLog(LOG_ERROR, "Failed to open audio file: " << fileName, true);
     			drwav_uninit(&wav);
 

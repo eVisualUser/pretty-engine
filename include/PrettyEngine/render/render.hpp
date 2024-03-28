@@ -155,7 +155,7 @@ namespace PrettyEngine {
 			MeshDrawType meshDrawType = MeshDrawType::Static
 		);
 
-		void UpdateMesh(Mesh* mesh);
+		void UpdateMesh(Mesh* mesh) const;
 
 		void RemoveMesh(const std::string& name) {
 			auto &mesh = this->glMeshList[name];

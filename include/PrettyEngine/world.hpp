@@ -185,6 +185,7 @@ namespace PrettyEngine {
 												component->serialObjectUnique = component->GetObjectSerializedUnique();
 												component->owner = newEntity.get();
 
+												component->SetupProperties();
 												component->OnSetup();
 
 												newEntity->components.push_back(component);
@@ -197,6 +198,7 @@ namespace PrettyEngine {
 
 							newEntity->serialObjectName = newEntityObject;
 							newEntity->serialObjectUnique = entity.first;
+							newEntity->SetupProperties();
 							newEntity->OnSetup();
 
 							auto transform = (*entity.second.as_table())["transform"];

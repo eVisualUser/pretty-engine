@@ -13,7 +13,6 @@
 #include <PrettyEngine/render/render.hpp>
 #include <PrettyEngine/worldLoad.hpp>
 
-#include <stdexcept>
 #include <toml++/toml.h>
 
 #include <memory>
@@ -24,7 +23,7 @@ namespace PrettyEngine {
 class Engine final: public EventListener {
   public:
  	/// Initialize the engine based on a toml configuration
-	explicit Engine(std::string config) {
+	explicit Engine(const std::string& config) {
 
 		#if ENGINE_EDITOR
 		this->editor = new Editor();

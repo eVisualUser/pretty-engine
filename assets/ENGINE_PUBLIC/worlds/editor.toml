@@ -22,12 +22,12 @@ object = 'Editor'
 
         [entities.Editor.components.Collider.fields]
         Gravity = [ 'glm::vec3', '0.000000;0.000000;0.000000;' ]
-        fixed = [ 'bool', 'false' ]
+        fixed = [ 'bool', 'true' ]
         layer = [ 'std::string', 'Default' ]
         mass = [ 'float', '1.000000' ]
         model = [ 'std::string', 'rect' ]
         name = [ 'std::string', '2e2b9d2e-1615-4d50-80eb-bb139cf77dbc' ]
-        rigidbody = [ 'bool', 'true' ]
+        rigidbody = [ 'bool', 'false' ]
 
     [entities.Editor.components.Render]
     ObjectName = 'Render'
@@ -55,11 +55,12 @@ object = 'Editor'
     ObjectUnique = 'Editor'
 
         [entities.Editor.serial.fields]
-        'Camera Speed' = [ 'f', '10.000000' ]
+        'Camera Speed' = [ 'float', '10.000000' ]
+        'Render To Texture' = [ 'bool', 'false' ]
 
     [entities.Editor.transform]
-    position = [ -0.34460815787315369, -0.48629587888717651, 0.0 ]
-    rotation = [ -0.0, 0.0, 1.0, -4.3711388286737929e-08 ]
+    position = [ -0.40567660331726074, 0.0, 0.0 ]
+    rotation = [ 0.0, -0.0, 0.0, 1.0 ]
     scale = [ 0.5, 0.5, 0.5 ]
 
 [entities.Empty]
@@ -91,7 +92,7 @@ object = 'Empty'
         mass = [ 'float', '1.000000' ]
         model = [ 'std::string', 'rect' ]
         name = [ 'std::string', 'a14230b8-a675-4ac6-9517-5de9aed3df92' ]
-        rigidbody = [ 'bool', 'true' ]
+        rigidbody = [ 'bool', 'false' ]
 
     [entities.Empty.components.Render]
     ObjectName = 'Render'
@@ -122,7 +123,7 @@ object = 'Empty'
     [entities.Empty.transform]
     position = [ 1.0, 0.0, 0.0 ]
     rotation = [ 0.0, -0.0, 0.0, 1.0 ]
-    scale = [ 1.0, 1.0, 0.5 ]
+    scale = [ 1.0, 1.0, 1.0 ]
 
 [meta]
 name = 'Editor'

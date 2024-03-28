@@ -136,8 +136,11 @@ public:
 
 			this->renderModel.RemoveMesh();
 			const auto newMesh = CreateRectMesh();
-			this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh);
-			this->renderModel.SetMesh(this->mesh);
+			if ((this->mesh = this->engineContent->renderer.AddMesh(meshGuid, newMesh))) {
+				this->renderModel.SetMesh(this->mesh);
+			} else {
+				DebugLog(LOG_ERROR, "Failed to Add mesh: " << meshGuid, false);
+			}
 
 			this->engineContent->renderer.RegisterVisualObject(visualObjectGuid, &this->visualObject);
 		}

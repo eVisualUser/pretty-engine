@@ -72,16 +72,16 @@ namespace PrettyEngine {
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        auto buffer = mesh.CreateVertexBuffer();
+        const auto buffer = mesh.CreateVertexBuffer();
 
-        glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), (GLenum)meshDrawType);
+        glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(buffer.size() * sizeof(float)), buffer.data(), static_cast<GLenum>(meshDrawType));
 
         // Element Array Buffer
         unsigned int ebo;
         glGenBuffers(1, &ebo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(), (GLenum)meshDrawType);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(mesh.indices.size() * sizeof(unsigned int)), mesh.indices.data(), static_cast<GLenum>(meshDrawType));
 
         mesh.vao = vao;
         mesh.vbo = vbo;
@@ -90,6 +90,7 @@ namespace PrettyEngine {
 
         this->glMeshList.insert(std::make_pair(name, mesh));
 
+    	// Position
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
 
@@ -106,12 +107,33 @@ namespace PrettyEngine {
         return &this->glMeshList[name];
     }
 
-    void Renderer::UpdateMesh(Mesh* mesh) {
-        glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    void Renderer::UpdateMesh(Mesh* mesh) const {
+    	if (mesh != nullptr) {
+    		glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 
-        auto data = mesh->CreateVertexBuffer();
+    		const auto data = mesh->CreateVertexBuffer();
 
-        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), (GLenum)mesh->drawType);
+    		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(data.size() * sizeof(float)), data.data(), static_cast<GLenum>(mesh->drawType));
+
+    		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+    		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(mesh->indices.size() * sizeof(unsigned int)), mesh->indices.data(), static_cast<GLenum>(mesh->drawType));
+
+    		// Position
+    		glEnableVertexAttribArray(0);
+    		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
+
+    		// Normals
+    		glEnableVertexAttribArray(1);
+    		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, reinterpret_cast<void*>(sizeof(float) * 3));
+
+    		// Texture coordinates
+    		glEnableVertexAttribArray(2);
+    		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, reinterpret_cast<void*>(sizeof(float) * 6));
+
+    		glBindVertexArray(0);
+    	} else {
+    		DebugLog(LOG_ERROR, "Updated mesh with nullptr.", false);
+    	}
     }
 
     GLShaderProgramRefs* Renderer::AddShaderProgram(std::string name, std::string vertexShaderName, std::string fragmentShaderName, std::vector<std::string> otherShaders) {
@@ -261,10 +283,10 @@ namespace PrettyEngine {
 
             glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)channels, width, height, 0, (GLenum)channels, GL_UNSIGNED_BYTE, data);
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)wrap);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)wrap);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)filter);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)filter);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLenum>(wrap));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<GLenum>(wrap));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<GLenum>(filter));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLenum>(filter));
 
             texture.textureID = textureID;
             texture.textureType = textureType;
@@ -336,15 +358,13 @@ namespace PrettyEngine {
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
-    	auto window = glfwCreateWindow(800, 600, PRETTY_ENGINE_DEFAULT_WINDOW_NAME, nullptr, nullptr);
+    	const auto window = glfwCreateWindow(800, 600, PRETTY_ENGINE_DEFAULT_WINDOW_NAME, nullptr, nullptr);
 
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
         glfwMakeContextCurrent(window);
 
     	this->_window = window;
-
-        this->HideWindow();
     }
 
     void Renderer::ShowWindow() const {

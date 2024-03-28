@@ -96,17 +96,14 @@ namespace PrettyEngine {
 
 			if (!collisions->empty() && !collider->fixed) {
 				for(auto & collision: *collisions) {
-					auto delta = collider->position - collision.colliderOther->position;
-
 					glm::vec3 direction = glm::normalize(collider->position - collision.colliderOther->position);
 
-					glm::vec3 supportA = collider->GJKSupport(*collision.colliderOther, direction) / 100.0f;
+					glm::vec3 supportA = collider->GJKSupport(*collision.colliderOther, direction);
+					glm::vec3 supportB = collision.colliderOther->GJKSupport(*collider, direction);
 
-					float penetrationDepth = glm::length(supportA);
+					const float penetrationDepth = glm::length(supportA - supportB) * this->_reactivity * deltaTime;
 
-					glm::vec3 separationVector = glm::normalize(supportA) * penetrationDepth;
-
-					collider->position += separationVector;
+					collider->position +=  direction * penetrationDepth / 2.0f;
 				}
 			}
 
@@ -154,6 +151,8 @@ namespace PrettyEngine {
 		std::unordered_map<std::string, std::vector<Collider*>> _colliders;
 
 		std::unordered_map<Collider*, std::vector<Collision>> _collisions;
+
+		float _reactivity = 10.0f;
 	};
 }
 

@@ -21,8 +21,6 @@ namespace PrettyEngine {
  	/// Contain and manages a mesh.
 	class Mesh: public GCObject {
 	public:
-		Mesh() = default;
-
 		/// Convert to an array buffer
 		std::vector<float> CreateVertexBuffer() {
 			std::vector<float> data;
@@ -51,23 +49,22 @@ namespace PrettyEngine {
 			this->vertices.clear();
 		}
 
-		void Cleanup() {
+		void Cleanup() const {
 		    glDeleteBuffers(1, &vbo);
 		    glDeleteVertexArrays(1, &vao);
 		    glDeleteBuffers(1, &ebo);
 		}
 
-	public:
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		
-		int vertexCount;
+		int vertexCount = 0;
 		
 		MeshDrawType drawType = MeshDrawType::Static;
 
-		unsigned int vao;
-		unsigned int vbo;
-		unsigned int ebo;
+		unsigned int vao = 0;
+		unsigned int vbo = 0;
+		unsigned int ebo = 0;
 
 		std::string name;
 	};
@@ -122,27 +119,37 @@ namespace PrettyEngine {
 		height = 0.5f * height;
 
 		Vertex vA;
-		vA.position = glm::vec3(-width, height, 0.0f),
-		vA.textureCoord = glm::vec2(0.0f, 0.0f);
+		vA.position = glm::vec3(-width, height, 0.0f);
 
 		Vertex vB;
-		vB.position = glm::vec3(width, height, 0.0f),
-		vB.textureCoord = glm::vec2(1.0f, 0.0f);
+		vB.position = glm::vec3(width, height, 0.0f);
 
 		Vertex vC;
-		vC.position = glm::vec3(width, -height, 0.0f),
-		vC.textureCoord = glm::vec2(1.0f, 1.0f);
+		vC.position = glm::vec3(width, -height, 0.0f);
 
 		Vertex vD;
-		vD.position = glm::vec3(-width, -height, 0.0f),
-		vD.textureCoord = glm::vec2(0.0f, 1.0f);
+		vD.position = glm::vec3(-width, -height, 0.0f);
+
+		Vertex vE;
+		vA.position = glm::vec3(-width, height, -1.0f);
+
+		Vertex vF;
+		vB.position = glm::vec3(width, height, -1.0f);
+
+		Vertex vG;
+		vC.position = glm::vec3(width, -height, -1.0f);
+
+		Vertex vH;
+		vD.position = glm::vec3(-width, -height, -1.0f);
 
 		out.vertices.push_back(vA);
 		out.vertices.push_back(vB);
 		out.vertices.push_back(vC);
 		out.vertices.push_back(vD);
-
-		out.vertexCount = 4;
+		out.vertices.push_back(vE);
+		out.vertices.push_back(vF);
+		out.vertices.push_back(vG);
+		out.vertices.push_back(vH);
 
 		return out;
 	}

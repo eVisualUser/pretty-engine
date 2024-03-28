@@ -46,6 +46,7 @@ namespace Custom {
 			this->layer = this->GetSerializedFieldValue("layer");
 
 			this->_mesh = PrettyEngine::CreatePhysicsRectMesh();
+
 			this->_colliderA.SetMesh(&this->_mesh);
 		}
 

@@ -3,7 +3,6 @@
 
 #include <PrettyEngine/serial.hpp>
 
-#include <glm/gtc/constants.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -40,30 +39,26 @@ namespace PrettyEngine {
 		}
 
 		void FromToml(toml::table* table) override {
-			bool isArray = (*table)["position"].is_array();
-			if (isArray) {
-				if ((*table)["position"].is_array()) {
-					auto position = (*table)["position"].as_array();
+			if (const auto position = (*table)["position"].as_array()) {
+				if (const auto x = position->get_as<double>(0))
+					this->position.x = x->value_or(0.0f);
+				if (const auto y = position->get_as<double>(0))
+					this->position.x = y->value_or(0.0f);
+				if (const auto z = position->get_as<double>(0))
+					this->position.x = z->value_or(0.0f);
+			}
 
-					this->position.x = position->get_as<double>(0)->value_or(0.0f);
-					this->position.y = position->get_as<double>(1)->value_or(0.0f);
-					this->position.z = position->get_as<double>(2)->value_or(0.0f);
+			if (const auto rotation = (*table)["rotation"].as_array()) {
+				this->rotation.x = static_cast<float>(rotation->get_as<double>(0)->get());
+				this->rotation.y = static_cast<float>(rotation->get_as<double>(1)->get());
+				this->rotation.z = static_cast<float>(rotation->get_as<double>(2)->get());
+				this->rotation.w = static_cast<float>(rotation->get_as<double>(3)->get());
+			}
 
-					auto rotation = (*table)["rotation"].as_array();
-
-					this->rotation.x = rotation->get_as<double>(0)->value_or(0.0f);
-					this->rotation.y = rotation->get_as<double>(1)->value_or(0.0f);
-					this->rotation.z = rotation->get_as<double>(2)->value_or(0.0f);
-					this->rotation.w = rotation->get_as<double>(3)->value_or(0.0f);
-
-					auto scale = (*table)["scale"].as_array();
-
-					this->scale.x = scale->get_as<double>(0)->value_or(0.0f);
-					this->scale.y = scale->get_as<double>(1)->value_or(0.0f);
-					this->scale.z = scale->get_as<double>(2)->value_or(0.0f);
-
-					auto arraySize = position->size();
-				}
+			if (const auto scale = (*table)["scale"].as_array()) {
+				this->scale.x = static_cast<float>(scale->get_as<double>(0)->get());
+				this->scale.y = static_cast<float>(scale->get_as<double>(1)->get());
+				this->scale.z = static_cast<float>(scale->get_as<double>(2)->get());
 			}
 		}
 
@@ -73,6 +68,16 @@ namespace PrettyEngine {
 			result = glm::translate(result, this->position);
 			result *= glm::mat4_cast(this->rotation);
 			result = glm::scale(result, this->scale);
+
+			return result;
+		}
+
+		glm::mat4 GetTransformMatrixHalfScale() {
+			auto result = glm::identity<glm::mat4>();
+
+			result = glm::translate(result, this->position);
+			result *= glm::mat4_cast(this->rotation);
+			result = glm::scale(result, this->halfScale);
 
 			return result;
 		}
@@ -123,7 +128,18 @@ namespace PrettyEngine {
 			return (this->scale.x + this->scale.y + this->scale.z) / 3;
 		}
 
-	public:
+		void TransformPosition(glm::vec3* value) {
+			auto homogeneousCoord = glm::vec4(*value, 1.0f);
+		  	homogeneousCoord = this->GetTransformMatrix() * homogeneousCoord;
+		  	*value = homogeneousCoord;
+		}
+
+		glm::vec3 TransformPosition(const glm::vec3& value) {
+		  glm::vec3 transformedValue = value;
+		  TransformPosition(&transformedValue);
+		  return transformedValue;
+		}
+
 		glm::vec3 position = glm::zero<glm::vec3>();
 		glm::quat rotation = glm::identity<glm::quat>();
 		glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);

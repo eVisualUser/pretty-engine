@@ -29,6 +29,7 @@ add_library(pretty
 	"source/assetsManager.cpp"
 	"source/command.cpp"
 	"source/audio.cpp"
+	"source/UniqueName.cpp"
 	${code_sources}
 )
 
@@ -84,7 +85,7 @@ file(READ "editor/extend.txt" extend)
 file(READ "editor/source.txt" game_source)
 
 if(NOT ${game_source} STREQUAL "")
-string(REPLACE "\n" " " game_source ${game_source})
+	string(REPLACE "\n" " " game_source ${game_source})
 endif()
 
 add_executable(editor

@@ -43,7 +43,6 @@ foreach(element ${customSources})
 endforeach()
 
 add_library(custom
-	${customFiles}
 	${customSources}
 )
 set_target_properties(custom PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
@@ -92,7 +91,6 @@ foreach(element ${componentCustomSources})
 endforeach()
 
 add_library(components
-	${customFiles}
 	${componentCustomSources}
 )
 target_link_libraries(components PUBLIC pretty)
@@ -141,7 +139,6 @@ foreach(element ${customSourcesRender})
 endforeach()
 
 add_library(renderFeatures
-	${customFiles}
 	${customSourcesRender}
 )
 target_link_libraries(renderFeatures PUBLIC pretty)
@@ -159,3 +156,5 @@ execute_process(
 	OUTPUT_VARIABLE external_go
 	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tools/clearAssets"
 )
+
+message("[INFO] You can run the go script in \"tools/build\" to build the project.")
