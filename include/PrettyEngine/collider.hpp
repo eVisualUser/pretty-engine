@@ -26,25 +26,6 @@ namespace PrettyEngine {
 
 		void SetMesh(Mesh* newMesh) { this->mesh = newMesh;	}
 
-		/// Return the minimum position
-		glm::vec3 GetMin() const {
-			return (this->position) - this->scale;
-		}
-
-		glm::vec3 GetInverseMin(const bool& halfScale = false) {
-			auto scale = this->scale;
-
-			if (halfScale) {
-				scale = this->halfScale;
-			}
-
-			auto result = (this->position) - scale;
-
-			result.x += scale.x * 2;
-
-			return result;
-		}
-
 		#pragma region GJK
 
 		glm::vec3 GJKFindFurthestPoint(const glm::vec3& direction) {
